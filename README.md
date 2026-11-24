@@ -26,6 +26,9 @@ opo-spec-version       the standard repository commit the templates are compared
 just install    # the opo command at the pinned version
 just check      # generate templates, build objects, opo check, golden comparison
 just previews   # SVG plans and 3D views in build/previews/ (not committed)
+just packages   # a .opo package of every template and object in build/packages/
 ```
 
 IFC is published by buildingSMART under CC BY-ND 4.0, so no IFC data is kept in this repository; `just ifc` fetches the pinned UML sources into `.cache/` and extracts the class and property set names into `build/ifc/`.
+
+CI uploads the previews of every pull request as an artifact. Publishing a GitHub release runs `just release-check` (a `stable` object may have no `to_verify` values) and attaches the `.opo` packages to the release.

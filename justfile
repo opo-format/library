@@ -66,3 +66,28 @@ previews: build
         {{opo}} render "$d" --root build -o "build/previews/$n-plan.svg"
         {{opo}} render "$d" --root build --view model -o "build/previews/$n-model.svg"
     done
+
+# Write a .opo package of every built template and object into build/packages/.
+packages: build
+    #!/usr/bin/env bash
+    set -euo pipefail
+    shopt -s nullglob
+    mkdir -p build/packages
+    for d in build/library/templates/*/ build/library/objects/*/; do
+        {{opo}} pack "$d" -o "build/packages/$(basename "$d").opo"
+    done
+
+# A stable object must have no to_verify values (decision 0017). Run before a release.
+release-check: build
+    #!/usr/bin/env bash
+    set -euo pipefail
+    shopt -s nullglob
+    bad=0
+    for f in objects/*/object.yaml; do
+        grep -q '^status: "stable"' "$f" || continue
+        n=$(basename "$(dirname "$f")")
+        out=$({{opo}} check --root build --ifc build/ifc/psets.json "build/library/objects/$n")
+        echo "$out"
+        if grep -q "values to verify" <<<"$out"; then echo "$n is stable but has values to verify"; bad=1; fi
+    done
+    exit $bad
