@@ -4100,3 +4100,232 @@ IfcJunctionBox:
       direction: "[0, 0, -1]"
   materials:
     - "plastic"
+IfcFlowSegment:
+  archetype: "linear"
+  name: "Flow segment (class template)"
+  description: "Generic flow segment (supertype) with no specific IFC class: a circular hollow section along a path with a port at each end. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    profile_kind:
+      default: "circ_hollow"
+    width:
+      default: 0.05
+    depth:
+      default: 0.05
+    wall_thickness:
+      default: 0.003
+    material:
+      default: "steel"
+    load_bearing:
+      default: false
+  ports:
+    - name: "start"
+      system_type: "NOTDEFINED"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "NOTDEFINED"
+      nominal_size: "width"
+      position: "p_start"
+      direction: "for k in 1..3 return -seg_start[k] / len_start"
+    - name: "end"
+      system_type: "NOTDEFINED"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "NOTDEFINED"
+      nominal_size: "width"
+      position: "p_end"
+      direction: "for k in 1..3 return seg_end[k] / len_end"
+IfcCableCarrierSegment:
+  archetype: "linear"
+  name: "Cable carrier segment (class template)"
+  description: "Cable tray, ladder, trunking or conduit along a path: a channel section, open side up, with a cable carrier port at each end. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "CABLETRAYSEGMENT"
+  parameters:
+    profile_kind:
+      default: "channel"
+      options:
+        - "channel"
+        - "rect_hollow"
+        - "circ_hollow"
+    width:
+      default: 0.06
+    depth:
+      default: 0.3
+    wall_thickness:
+      default: 0.0015
+    material:
+      default: "steel"
+    load_bearing:
+      default: false
+    web_thickness:
+      default: 0.0015
+    flange_thickness:
+      default: 0.0015
+    roll:
+      default: 90.0
+    profile_name:
+      description: "E.g. a maker tray designation; channel width × depth stands for side height × tray width."
+  ports:
+    - name: "start"
+      system_type: "ELECTRICAL"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "CABLECARRIER"
+      nominal_size: "width"
+      position: "p_start"
+      direction: "for k in 1..3 return -seg_start[k] / len_start"
+    - name: "end"
+      system_type: "ELECTRICAL"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "CABLECARRIER"
+      nominal_size: "width"
+      position: "p_end"
+      direction: "for k in 1..3 return seg_end[k] / len_end"
+IfcCableSegment:
+  archetype: "linear"
+  name: "Cable segment (class template)"
+  description: "Cable, busbar or fibre run along a path: a solid circular section with a cable port at each end. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "CABLESEGMENT"
+  parameters:
+    profile_kind:
+      default: "circle"
+      options:
+        - "circle"
+        - "rectangle"
+    width:
+      default: 0.02
+    depth:
+      default: 0.02
+    wall_thickness:
+      default: 0.002
+    material:
+      default: "plastic"
+    load_bearing:
+      default: false
+  ports:
+    - name: "start"
+      system_type: "ELECTRICAL"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "CABLE"
+      nominal_size: "width"
+      position: "p_start"
+      direction: "for k in 1..3 return -seg_start[k] / len_start"
+    - name: "end"
+      system_type: "ELECTRICAL"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "CABLE"
+      nominal_size: "width"
+      position: "p_end"
+      direction: "for k in 1..3 return seg_end[k] / len_end"
+  materials:
+    - "plastic"
+IfcConveyorSegment:
+  archetype: "linear"
+  name: "Conveyor segment (class template)"
+  description: "Belt, chute or screw conveyor along a path: a rectangular section with a conveying port at each end. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "BELTCONVEYOR"
+  parameters:
+    profile_kind:
+      default: "rectangle"
+      options:
+        - "rectangle"
+        - "channel"
+        - "circ_hollow"
+    width:
+      default: 0.8
+    depth:
+      default: 0.3
+    wall_thickness:
+      default: 0.003
+    material:
+      default: "steel"
+    load_bearing:
+      default: false
+  ports:
+    - name: "start"
+      system_type: "CONVEYING"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "USERDEFINED"
+      nominal_size: "width"
+      position: "p_start"
+      direction: "for k in 1..3 return -seg_start[k] / len_start"
+    - name: "end"
+      system_type: "CONVEYING"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "USERDEFINED"
+      nominal_size: "width"
+      position: "p_end"
+      direction: "for k in 1..3 return seg_end[k] / len_end"
+IfcDuctSegment:
+  archetype: "linear"
+  name: "Duct segment (class template)"
+  description: "Rigid or flexible duct along a path: a rectangular hollow section in sheet metal with a duct port at each end. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "RIGIDSEGMENT"
+  parameters:
+    profile_kind:
+      default: "rect_hollow"
+      options:
+        - "rect_hollow"
+        - "circ_hollow"
+    width:
+      default: 0.4
+    depth:
+      default: 0.3
+    wall_thickness:
+      default: 0.0008
+    material:
+      default: "sheet_metal"
+    load_bearing:
+      default: false
+  ports:
+    - name: "start"
+      system_type: "VENTILATION"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "DUCT"
+      nominal_size: "width"
+      position: "p_start"
+      direction: "for k in 1..3 return -seg_start[k] / len_start"
+    - name: "end"
+      system_type: "VENTILATION"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "DUCT"
+      nominal_size: "width"
+      position: "p_end"
+      direction: "for k in 1..3 return seg_end[k] / len_end"
+  materials:
+    - "sheet_metal"
+IfcPipeSegment:
+  archetype: "linear"
+  name: "Pipe segment (class template)"
+  description: "Rigid or flexible pipe, gutter or culvert along a path: a circular hollow section with a pipe port at each end. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "RIGIDSEGMENT"
+  parameters:
+    profile_kind:
+      default: "circ_hollow"
+      options:
+        - "circ_hollow"
+        - "channel"
+    width:
+      default: 0.028
+    depth:
+      default: 0.028
+    wall_thickness:
+      default: 0.0012
+    material:
+      default: "copper"
+    load_bearing:
+      default: false
+  ports:
+    - name: "start"
+      system_type: "DOMESTICCOLDWATER"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "PIPE"
+      nominal_size: "width"
+      position: "p_start"
+      direction: "for k in 1..3 return -seg_start[k] / len_start"
+    - name: "end"
+      system_type: "DOMESTICCOLDWATER"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "PIPE"
+      nominal_size: "width"
+      position: "p_end"
+      direction: "for k in 1..3 return seg_end[k] / len_end"
+  materials:
+    - "copper"
