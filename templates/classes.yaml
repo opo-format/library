@@ -5557,3 +5557,177 @@ IfcVirtualElement:
       default: "bottom"
   materials:
     - "void"
+IfcChimney:
+  archetype: "wall"
+  name: "Chimney (class template)"
+  description: "Chimney stack as a layered wall segment around the flue, standing above the roof. The build-up is an illustrative default, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    layers:
+      default:
+        - material: "brick_masonry"
+          thickness: 0.1
+          function: "structure"
+          core: true
+        - material: "mineral_wool"
+          thickness: 0.03
+          function: "insulation"
+        - material: "brick_masonry"
+          thickness: 0.1
+          function: "structure"
+    top_mode:
+      default: "unconnected"
+    unconnected_height:
+      default: 1.5
+    load_bearing:
+      default: false
+    is_external:
+      default: true
+  slots:
+    path:
+      default: [[0.0, 0.0], [0.6, 0.0]]
+IfcCurtainWall:
+  archetype: "wall"
+  name: "Curtain wall (class template)"
+  description: "Curtain wall along a path as a single glazed layer between storeys. The facade grid with mullions, transoms and panels comes with proposal 0001 and the library curtain wall objects (O-16 to O-18). The build-up is an illustrative default, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    layers:
+      default:
+        - material: "glass"
+          thickness: 0.03
+          function: "finish"
+          core: true
+    top_mode:
+      default: "storey"
+    load_bearing:
+      default: false
+    is_external:
+      default: true
+  materials:
+    - "glass"
+IfcWallStandardCase:
+  archetype: "wall"
+  name: "Wall (standard case) (class template)"
+  description: "Wall with a constant build-up along a straight or polyline path. IFC 4.3 deprecates IfcWallStandardCase; new models use IfcWall. The build-up is an illustrative default, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    layers:
+      default:
+        - material: "plaster"
+          thickness: 0.015
+          function: "finish"
+        - material: "concrete_block"
+          thickness: 0.14
+          function: "structure"
+          core: true
+        - material: "plaster"
+          thickness: 0.015
+          function: "finish"
+    top_mode:
+      default: "storey"
+    load_bearing:
+      default: false
+IfcStairFlight:
+  archetype: "flight"
+  name: "Stair flight (class template)"
+  description: "Straight stair flight between two levels: risers from the rise and the maximum riser, going, width, concrete waist or solid. Sizes are illustrative defaults, not norm values."
+  default_type: "STRAIGHT"
+  rules:
+    checks:
+      straight_only:
+        expr: "predefined_type = \"STRAIGHT\" or predefined_type = \"USERDEFINED\" or predefined_type = \"NOTDEFINED\""
+        severity: "warning"
+        message: "This class template draws a straight flight; curved, spiral and winder flights are library objects (C-02 to C-05)."
+  ifc:
+    decomposition: "A flight on its own; an IfcStair aggregates it."
+IfcRamp:
+  archetype: "flight"
+  name: "Ramp (class template)"
+  description: "Straight ramp between two levels: a sloped slab from the rise and the gradient, with its width and thickness. The gradient is an illustrative default, not a norm value; accessibility rule sets set limits."
+  default_type: "STRAIGHT_RUN_RAMP"
+  parameters:
+    rise_mode:
+      default: "value"
+    rise_value:
+      default: 0.5
+    gradient:
+      type: "number"
+      default: 0.06
+      label: "Gradient (rise ÷ run)"
+      group: "Geometry"
+      limits:
+        min: 0.005
+        max: 0.25
+    max_riser:
+      visible: "false"
+    going:
+      visible: "false"
+    waist_thickness:
+      label: "Slab thickness"
+  rules:
+    derived:
+      run: "total_rise / gradient"
+      pitch: "atan2(gradient, 1)"
+      profile_points: "if structure = \"waist\" then [[0, 0], [run, total_rise], [run, total_rise - waist_v], [waist_v / gradient, 0]] else [[0, 0], [run, total_rise], [run, 0]]"
+      x_cut: "min(run, max(0, view.cut_height / gradient))"
+    checks:
+      straight_only:
+        expr: "predefined_type = \"STRAIGHT_RUN_RAMP\" or predefined_type = \"USERDEFINED\" or predefined_type = \"NOTDEFINED\""
+        severity: "warning"
+        message: "This class template draws a straight run; turning and spiral ramps are library objects (C-06)."
+  recipe:
+    treads_below:
+      when: "false"
+    treads_above:
+      when: "false"
+    walk_line:
+      args:
+        points: "[[0, 0], [run, 0]]"
+  ifc:
+    decomposition: "IfcRamp aggregating one IfcRampFlight (STRAIGHT) in the template; landings and turning runs in the library objects."
+IfcRampFlight:
+  archetype: "flight"
+  name: "Ramp flight (class template)"
+  description: "Straight ramp flight: a sloped slab from the rise and the gradient. The gradient is an illustrative default, not a norm value; accessibility rule sets set limits."
+  default_type: "STRAIGHT"
+  parameters:
+    rise_mode:
+      default: "value"
+    rise_value:
+      default: 0.5
+    gradient:
+      type: "number"
+      default: 0.06
+      label: "Gradient (rise ÷ run)"
+      group: "Geometry"
+      limits:
+        min: 0.005
+        max: 0.25
+    max_riser:
+      visible: "false"
+    going:
+      visible: "false"
+    waist_thickness:
+      label: "Slab thickness"
+  rules:
+    derived:
+      run: "total_rise / gradient"
+      pitch: "atan2(gradient, 1)"
+      profile_points: "if structure = \"waist\" then [[0, 0], [run, total_rise], [run, total_rise - waist_v], [waist_v / gradient, 0]] else [[0, 0], [run, total_rise], [run, 0]]"
+      x_cut: "min(run, max(0, view.cut_height / gradient))"
+    checks:
+      straight_only:
+        expr: "predefined_type = \"STRAIGHT\" or predefined_type = \"USERDEFINED\" or predefined_type = \"NOTDEFINED\""
+        severity: "warning"
+        message: "This class template draws a straight run; turning and spiral ramps are library objects (C-06)."
+  recipe:
+    treads_below:
+      when: "false"
+    treads_above:
+      when: "false"
+    walk_line:
+      args:
+        points: "[[0, 0], [run, 0]]"
+  ifc:
+    decomposition: "A flight on its own; an IfcRamp aggregates it."
