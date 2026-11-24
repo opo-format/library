@@ -745,7 +745,7 @@ IfcCoolingTower:
     depth:
       default: 3.0
     height:
-      default: 4.0
+      default: 2.8
     clearance_front:
       default: 1.5
     clearance_side:
@@ -1550,7 +1550,7 @@ IfcAirTerminalBox:
     height:
       default: 0.35
     mount_height:
-      default: 2.8
+      default: 2.6
     clearance_front:
       default: 0.6
     clearance_side:
@@ -1617,7 +1617,7 @@ IfcDamper:
     height:
       default: 0.3
     mount_height:
-      default: 2.8
+      default: 2.65
     clearance_front:
       default: 0.4
     clearance_side:
@@ -2126,7 +2126,7 @@ IfcFan:
     height:
       default: 0.5
     mount_height:
-      default: 2.6
+      default: 2.45
     clearance_front:
       default: 0.6
     clearance_side:
@@ -2464,7 +2464,7 @@ IfcDuctSilencer:
     height:
       default: 0.35
     mount_height:
-      default: 2.8
+      default: 2.6
     clearance_front:
       default: 0.3
     clearance_side:
@@ -2708,3 +2708,1113 @@ IfcDistributionChamberElement:
   materials:
     - "concrete_block"
     - "concrete_block"
+IfcFlowTerminal:
+  archetype: "point"
+  name: "Flow terminal (class template)"
+  description: "Generic flow terminal (supertype) for the end of a distribution system with no specific IFC class: one connection. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.3
+    depth:
+      default: 0.15
+    height:
+      default: 0.3
+    mount_height:
+      default: 1.2
+    clearance_front:
+      default: 0.5
+    clearance_side:
+      default: 0.05
+    symbol_code:
+      default: "FT"
+    pipe_size:
+      type: "length"
+      default: 0.022
+      label: "Pipe connection outside diameter"
+      group: "Connections"
+      limits:
+        min: 0.008
+        max: 0.6
+  rules:
+    derived:
+      connections:
+        expr: "[{from: [-width / 2 + width * 0.5, 0, bottom + height / 2], to: [-width / 2 + width * 0.5, -0.05, bottom + height / 2], d: pipe_size}]"
+        note: "One stub per pipe or duct port."
+  ports:
+    - name: "connection"
+      system_type: "NOTDEFINED"
+      flow_direction: "SINK"
+      port_type: "PIPE"
+      nominal_size: "pipe_size"
+      position: "connections[1].to"
+      direction: "[0, -1, 0]"
+IfcAirTerminal:
+  archetype: "point"
+  name: "Air terminal (class template)"
+  description: "Ceiling diffuser, grille, register or louvre with its duct connection on top. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "DIFFUSER"
+  parameters:
+    mount:
+      default: "ceiling"
+    width:
+      default: 0.6
+    depth:
+      default: 0.6
+    height:
+      default: 0.05
+    mount_height:
+      default: 2.65
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "AT"
+    casing_material:
+      default: "aluminium"
+    connection_material:
+      default: "sheet_metal"
+    duct_size:
+      type: "length"
+      default: 0.25
+      label: "Duct connection diameter"
+      group: "Connections"
+      limits:
+        min: 0.08
+        max: 2.0
+  rules:
+    derived:
+      connections:
+        expr: "[{from: [-width / 2 + width * 0.5, depth / 2, top], to: [-width / 2 + width * 0.5, depth / 2, top + 0.05], d: duct_size}]"
+        note: "One stub per pipe or duct port."
+  ports:
+    - name: "air"
+      system_type: "AIRCONDITIONING"
+      flow_direction: "SINK"
+      port_type: "DUCT"
+      nominal_size: "duct_size"
+      position: "connections[1].to"
+      direction: "[0, 0, 1]"
+  materials:
+    - "aluminium"
+IfcAudioVisualAppliance:
+  archetype: "point"
+  name: "Audio-visual appliance (class template)"
+  description: "Display, projector, speaker or camera: a wall-mounted body with power and signal. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "DISPLAY"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 1.2
+    depth:
+      default: 0.08
+    height:
+      default: 0.7
+    mount_height:
+      default: 1.2
+    clearance_front:
+      default: 1.5
+    clearance_side:
+      default: 0.05
+    symbol_code:
+      default: "AV"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "power"
+      system_type: "ELECTRICAL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.25, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+    - name: "signal"
+      system_type: "AUDIOVISUAL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.75, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+IfcCommunicationsAppliance:
+  archetype: "point"
+  name: "Communications appliance (class template)"
+  description: "Computer, network equipment, modem or printer: a body with power and data. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "COMPUTER"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 0.2
+    depth:
+      default: 0.45
+    height:
+      default: 0.45
+    clearance_front:
+      default: 0.6
+    clearance_side:
+      default: 0.05
+    symbol_code:
+      default: "COM"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "power"
+      system_type: "ELECTRICAL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.25, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+    - name: "data"
+      system_type: "DATA"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.75, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+IfcElectricAppliance:
+  archetype: "point"
+  name: "Electric appliance (class template)"
+  description: "Household or commercial appliance such as a fridge, dishwasher or cooker: a floor-standing body with its power supply. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "REFRIGERATOR"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 0.6
+    depth:
+      default: 0.65
+    height:
+      default: 1.85
+    clearance_front:
+      default: 0.9
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "FR"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "power"
+      system_type: "ELECTRICAL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.5, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+IfcFireSuppressionTerminal:
+  archetype: "point"
+  name: "Fire suppression terminal (class template)"
+  description: "Sprinkler head, hose reel or hydrant: a terminal with its water connection. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "SPRINKLER"
+  parameters:
+    mount:
+      default: "ceiling"
+    width:
+      default: 0.05
+    depth:
+      default: 0.05
+    height:
+      default: 0.06
+    mount_height:
+      default: 2.64
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "SPR"
+    casing_material:
+      default: "copper"
+    pipe_size:
+      type: "length"
+      default: 0.022
+      label: "Pipe connection outside diameter"
+      group: "Connections"
+      limits:
+        min: 0.008
+        max: 0.6
+  rules:
+    derived:
+      connections:
+        expr: "[{from: [-width / 2 + width * 0.5, depth / 2, top], to: [-width / 2 + width * 0.5, depth / 2, top + 0.05], d: pipe_size}]"
+        note: "One stub per pipe or duct port."
+  ports:
+    - name: "water"
+      system_type: "FIREPROTECTION"
+      flow_direction: "SINK"
+      port_type: "PIPE"
+      nominal_size: "pipe_size"
+      position: "connections[1].to"
+      direction: "[0, 0, 1]"
+IfcLamp:
+  archetype: "point"
+  name: "Lamp (class template)"
+  description: "Lamp (light source) in a fitting: a small body with its power supply. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "LED"
+  parameters:
+    mount:
+      default: "ceiling"
+    width:
+      default: 0.06
+    depth:
+      default: 0.06
+    height:
+      default: 0.1
+    mount_height:
+      default: 2.6
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "L"
+    casing_material:
+      default: "glass"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "power"
+      system_type: "LIGHTING"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.5, depth / 2, top]"
+      direction: "[0, 0, 1]"
+  materials:
+    - "glass"
+IfcLightFixture:
+  archetype: "point"
+  name: "Light fixture (class template)"
+  description: "Luminaire: a ceiling panel by default, with its power supply. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "POINTSOURCE"
+  parameters:
+    mount:
+      default: "ceiling"
+    width:
+      default: 0.6
+    depth:
+      default: 0.6
+    height:
+      default: 0.08
+    mount_height:
+      default: 2.62
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "LF"
+    casing_material:
+      default: "aluminium"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "power"
+      system_type: "LIGHTING"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.5, depth / 2, top]"
+      direction: "[0, 0, 1]"
+  materials:
+    - "aluminium"
+IfcLiquidTerminal:
+  archetype: "point"
+  name: "Liquid terminal (class template)"
+  description: "Hose reel or loading arm: a wall-mounted terminal with its liquid connection. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "HOSEREEL"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.6
+    depth:
+      default: 0.25
+    height:
+      default: 0.6
+    mount_height:
+      default: 1.0
+    clearance_front:
+      default: 1.0
+    clearance_side:
+      default: 0.1
+    symbol_code:
+      default: "LT"
+    water_size:
+      type: "length"
+      default: 0.022
+      label: "Water connection outside diameter"
+      group: "Connections"
+      limits:
+        min: 0.008
+        max: 0.3
+  rules:
+    derived:
+      connections:
+        expr: "[{from: [-width / 2 + width * 0.5, 0, bottom + height / 2], to: [-width / 2 + width * 0.5, -0.05, bottom + height / 2], d: water_size}]"
+        note: "One stub per pipe or duct port."
+  ports:
+    - name: "liquid"
+      system_type: "WATERSUPPLY"
+      flow_direction: "SINK"
+      port_type: "PIPE"
+      nominal_size: "water_size"
+      position: "connections[1].to"
+      direction: "[0, -1, 0]"
+IfcMedicalDevice:
+  archetype: "point"
+  name: "Medical device (class template)"
+  description: "Medical gas or vacuum station: a wall panel with its gas connection. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "AIRSTATION"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.3
+    depth:
+      default: 0.1
+    height:
+      default: 0.4
+    mount_height:
+      default: 1.4
+    clearance_front:
+      default: 0.8
+    clearance_side:
+      default: 0.1
+    symbol_code:
+      default: "MED"
+    air_size:
+      type: "length"
+      default: 0.015
+      label: "Compressed air connection outside diameter"
+      group: "Connections"
+      limits:
+        min: 0.006
+        max: 0.1
+  rules:
+    derived:
+      connections:
+        expr: "[{from: [-width / 2 + width * 0.5, 0, bottom + height / 2], to: [-width / 2 + width * 0.5, -0.05, bottom + height / 2], d: air_size}]"
+        note: "One stub per pipe or duct port."
+  ports:
+    - name: "medical_air"
+      system_type: "COMPRESSEDAIR"
+      flow_direction: "SINK"
+      port_type: "PIPE"
+      nominal_size: "air_size"
+      position: "connections[1].to"
+      direction: "[0, -1, 0]"
+IfcMobileTelecommunicationsAppliance:
+  archetype: "point"
+  name: "Mobile telecommunications appliance (class template)"
+  description: "Wireless access point, remote radio unit or base station: a body with power and data. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "ACCESSPOINT"
+  parameters:
+    mount:
+      default: "ceiling"
+    width:
+      default: 0.2
+    depth:
+      default: 0.2
+    height:
+      default: 0.04
+    mount_height:
+      default: 2.66
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "AP"
+    casing_material:
+      default: "plastic"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "data"
+      system_type: "MOBILENETWORK"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.5, depth / 2, top]"
+      direction: "[0, 0, 1]"
+  materials:
+    - "plastic"
+IfcOutlet:
+  archetype: "point"
+  name: "Outlet (class template)"
+  description: "Power, data, telephone or audio-visual outlet: a wall plate on a box. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "POWEROUTLET"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.086
+    depth:
+      default: 0.035
+    height:
+      default: 0.086
+    mount_height:
+      default: 0.3
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "SO"
+    casing_material:
+      default: "plastic"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "supply"
+      system_type: "ELECTRICAL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.5, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+  materials:
+    - "plastic"
+IfcSanitaryTerminal:
+  archetype: "point"
+  name: "Sanitary terminal (class template)"
+  description: "Washbasin, WC, bath, shower, sink or urinal: a wall-hung basin by default, with cold and hot water and a waste. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "WASHHANDBASIN"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.55
+    depth:
+      default: 0.45
+    height:
+      default: 0.18
+    mount_height:
+      default: 0.68
+    clearance_front:
+      default: 0.6
+    clearance_side:
+      default: 0.1
+    symbol_code:
+      default: "WHB"
+    casing_material:
+      default: "vitreous_china"
+    connection_material:
+      default: "copper"
+    water_size:
+      type: "length"
+      default: 0.022
+      label: "Water connection outside diameter"
+      group: "Connections"
+      limits:
+        min: 0.008
+        max: 0.3
+    waste_size:
+      type: "length"
+      default: 0.04
+      label: "Waste connection outside diameter"
+      group: "Connections"
+      limits:
+        min: 0.02
+        max: 0.2
+  rules:
+    derived:
+      connections:
+        expr: "[{from: [-width / 2 + width * 0.25, 0, bottom + height / 2], to: [-width / 2 + width * 0.25, -0.05, bottom + height / 2], d: water_size}, {from: [-width / 2 + width * 0.75, 0, bottom + height / 2], to: [-width / 2 + width * 0.75, -0.05, bottom + height / 2], d: water_size}, {from: [-width / 2 + width * 0.5, depth / 2, bottom], to: [-width / 2 + width * 0.5, depth / 2, bottom - 0.05], d: waste_size}]"
+        note: "One stub per pipe or duct port."
+  ports:
+    - name: "cold_water"
+      system_type: "DOMESTICCOLDWATER"
+      flow_direction: "SINK"
+      port_type: "PIPE"
+      nominal_size: "water_size"
+      position: "connections[1].to"
+      direction: "[0, -1, 0]"
+    - name: "hot_water"
+      system_type: "DOMESTICHOTWATER"
+      flow_direction: "SINK"
+      port_type: "PIPE"
+      nominal_size: "water_size"
+      position: "connections[2].to"
+      direction: "[0, -1, 0]"
+    - name: "waste"
+      system_type: "WASTEWATER"
+      flow_direction: "SOURCE"
+      port_type: "PIPE"
+      nominal_size: "waste_size"
+      position: "connections[3].to"
+      direction: "[0, 0, -1]"
+  materials:
+    - "vitreous_china"
+IfcSignal:
+  archetype: "point"
+  name: "Signal (class template)"
+  description: "Visual or audible signal device: a small wall body with its supply. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "VISUAL"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.1
+    depth:
+      default: 0.05
+    height:
+      default: 0.1
+    mount_height:
+      default: 2.2
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "SIG"
+    casing_material:
+      default: "plastic"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "supply"
+      system_type: "SIGNAL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.5, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+  materials:
+    - "plastic"
+IfcSpaceHeater:
+  archetype: "point"
+  name: "Space heater (class template)"
+  description: "Radiator or convector below a window, with flow and return at the bottom. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "RADIATOR"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 1.0
+    depth:
+      default: 0.1
+    height:
+      default: 0.6
+    mount_height:
+      default: 0.15
+    clearance_front:
+      default: 0.1
+    clearance_side:
+      default: 0.05
+    symbol_code:
+      default: "RAD"
+    hw_size:
+      type: "length"
+      default: 0.028
+      label: "Heating water connection outside diameter"
+      group: "Connections"
+      limits:
+        min: 0.012
+        max: 0.3
+  rules:
+    derived:
+      connections:
+        expr: "[{from: [-width / 2 + width * 0.25, depth / 2, bottom], to: [-width / 2 + width * 0.25, depth / 2, bottom - 0.05], d: hw_size}, {from: [-width / 2 + width * 0.75, depth / 2, bottom], to: [-width / 2 + width * 0.75, depth / 2, bottom - 0.05], d: hw_size}]"
+        note: "One stub per pipe or duct port."
+  ports:
+    - name: "flow"
+      system_type: "HEATING"
+      flow_direction: "SINK"
+      port_type: "PIPE"
+      nominal_size: "hw_size"
+      position: "connections[1].to"
+      direction: "[0, 0, -1]"
+    - name: "return"
+      system_type: "HEATING"
+      flow_direction: "SOURCE"
+      port_type: "PIPE"
+      nominal_size: "hw_size"
+      position: "connections[2].to"
+      direction: "[0, 0, -1]"
+IfcStackTerminal:
+  archetype: "point"
+  name: "Stack terminal (class template)"
+  description: "Cowl, birdcage or rainwater hopper at the top or head of a stack, with the stack connection below. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "COWL"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 0.3
+    depth:
+      default: 0.3
+    height:
+      default: 0.4
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "STK"
+    soil_size:
+      type: "length"
+      default: 0.11
+      label: "Soil connection outside diameter"
+      group: "Connections"
+      limits:
+        min: 0.05
+        max: 0.2
+  rules:
+    derived:
+      connections:
+        expr: "[{from: [-width / 2 + width * 0.5, depth / 2, bottom], to: [-width / 2 + width * 0.5, depth / 2, bottom - 0.05], d: soil_size}]"
+        note: "One stub per pipe or duct port."
+  ports:
+    - name: "stack"
+      system_type: "VENT"
+      flow_direction: "SINK"
+      port_type: "PIPE"
+      nominal_size: "soil_size"
+      position: "connections[1].to"
+      direction: "[0, 0, -1]"
+IfcWasteTerminal:
+  archetype: "point"
+  name: "Waste terminal (class template)"
+  description: "Floor trap, gully, roof drain or waste trap, with its outlet below. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "FLOORTRAP"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 0.15
+    depth:
+      default: 0.15
+    height:
+      default: 0.1
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "FT"
+    casing_material:
+      default: "stainless_steel"
+    connection_material:
+      default: "stainless_steel"
+    waste_size:
+      type: "length"
+      default: 0.04
+      label: "Waste connection outside diameter"
+      group: "Connections"
+      limits:
+        min: 0.02
+        max: 0.2
+  rules:
+    derived:
+      connections:
+        expr: "[{from: [-width / 2 + width * 0.5, depth / 2, bottom], to: [-width / 2 + width * 0.5, depth / 2, bottom - 0.05], d: waste_size}]"
+        note: "One stub per pipe or duct port."
+  ports:
+    - name: "outlet"
+      system_type: "WASTEWATER"
+      flow_direction: "SOURCE"
+      port_type: "PIPE"
+      nominal_size: "waste_size"
+      position: "connections[1].to"
+      direction: "[0, 0, -1]"
+  materials:
+    - "stainless_steel"
+    - "stainless_steel"
+IfcDistributionControlElement:
+  archetype: "point"
+  name: "Distribution control element (class template)"
+  description: "Generic control element (supertype) with no specific IFC class: a small body with a control connection. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.1
+    depth:
+      default: 0.05
+    height:
+      default: 0.1
+    mount_height:
+      default: 1.5
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "CTL"
+    casing_material:
+      default: "plastic"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "control"
+      system_type: "CONTROL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.5, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+  materials:
+    - "plastic"
+IfcActuator:
+  archetype: "point"
+  name: "Actuator (class template)"
+  description: "Electric, pneumatic or hydraulic actuator on a valve or damper, with power and control. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "ELECTRICACTUATOR"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.1
+    depth:
+      default: 0.1
+    height:
+      default: 0.15
+    mount_height:
+      default: 2.0
+    clearance_front:
+      default: 0.2
+    clearance_side:
+      default: 0.05
+    symbol_code:
+      default: "ACT"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "power"
+      system_type: "ELECTRICAL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.25, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+    - name: "control"
+      system_type: "CONTROL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.75, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+IfcAlarm:
+  archetype: "point"
+  name: "Alarm (class template)"
+  description: "Bell, siren, light or manual call point on a wall, with its signal connection. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "BELL"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.15
+    depth:
+      default: 0.08
+    height:
+      default: 0.15
+    mount_height:
+      default: 2.3
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "AL"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "signal"
+      system_type: "FIREPROTECTION"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.5, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+IfcController:
+  archetype: "point"
+  name: "Controller (class template)"
+  description: "Programmable or two-position controller in an enclosure, with power and control connections. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "PROGRAMMABLE"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.3
+    depth:
+      default: 0.12
+    height:
+      default: 0.3
+    mount_height:
+      default: 1.5
+    clearance_front:
+      default: 0.8
+    clearance_side:
+      default: 0.05
+    symbol_code:
+      default: "CTR"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "power"
+      system_type: "ELECTRICAL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.25, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+    - name: "control"
+      system_type: "CONTROL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.75, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+IfcFlowInstrument:
+  archetype: "point"
+  name: "Flow instrument (class template)"
+  description: "Gauge or meter on a pipe or panel, such as a pressure gauge or thermometer, with its sensing connection. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "PRESSUREGAUGE"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.1
+    depth:
+      default: 0.05
+    height:
+      default: 0.1
+    mount_height:
+      default: 1.2
+    clearance_front:
+      default: 0.3
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "PI"
+    casing_material:
+      default: "stainless_steel"
+    air_size:
+      type: "length"
+      default: 0.015
+      label: "Compressed air connection outside diameter"
+      group: "Connections"
+      limits:
+        min: 0.006
+        max: 0.1
+  rules:
+    derived:
+      connections:
+        expr: "[{from: [-width / 2 + width * 0.5, depth / 2, bottom], to: [-width / 2 + width * 0.5, depth / 2, bottom - 0.05], d: air_size}]"
+        note: "One stub per pipe or duct port."
+  ports:
+    - name: "sensing"
+      system_type: "NOTDEFINED"
+      flow_direction: "SINK"
+      port_type: "PIPE"
+      nominal_size: "air_size"
+      position: "connections[1].to"
+      direction: "[0, 0, -1]"
+  materials:
+    - "stainless_steel"
+IfcProtectiveDeviceTrippingUnit:
+  archetype: "point"
+  name: "Protective device tripping unit (class template)"
+  description: "Tripping unit of a circuit breaker or RCD: a DIN-rail module with its control connection. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "ELECTRONIC"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.036
+    depth:
+      default: 0.07
+    height:
+      default: 0.09
+    mount_height:
+      default: 1.5
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "TU"
+    casing_material:
+      default: "plastic"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "control"
+      system_type: "CONTROL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.5, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+  materials:
+    - "plastic"
+IfcSensor:
+  archetype: "point"
+  name: "Sensor (class template)"
+  description: "Smoke, heat, temperature, movement or other sensor: a ceiling detector by default, with its signal connection. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "SMOKESENSOR"
+  parameters:
+    mount:
+      default: "ceiling"
+    width:
+      default: 0.1
+    depth:
+      default: 0.1
+    height:
+      default: 0.05
+    mount_height:
+      default: 2.65
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "SD"
+    casing_material:
+      default: "plastic"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "signal"
+      system_type: "FIREPROTECTION"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.5, depth / 2, top]"
+      direction: "[0, 0, 1]"
+  materials:
+    - "plastic"
+IfcUnitaryControlElement:
+  archetype: "point"
+  name: "Unitary control element (class template)"
+  description: "Thermostat, humidistat, control or alarm panel on a wall, with its control connection. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "THERMOSTAT"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.09
+    depth:
+      default: 0.03
+    height:
+      default: 0.09
+    mount_height:
+      default: 1.5
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "TS"
+    casing_material:
+      default: "plastic"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "control"
+      system_type: "CONTROL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.5, 0, bottom + height / 2]"
+      direction: "[0, -1, 0]"
+  materials:
+    - "plastic"
