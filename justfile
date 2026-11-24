@@ -3,12 +3,29 @@
 
 opo := env_var_or_default("OPO", "opo")
 
+# IFC is published under CC BY-ND 4.0, so no IFC data is committed here: the UML sources of
+# buildingSMART/IFC4.x-development at the commit in ifc-version are fetched into .cache/ and
+# read by `opo ifc` at build time.
+ifc:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    rev=$(cat ifc-version)
+    src=.cache/ifc/$rev
+    if [ ! -d "$src/schemas" ]; then
+        rm -rf "$src" && mkdir -p "$src"
+        git -C "$src" init -q
+        git -C "$src" fetch -q --depth 1 --filter=blob:none https://github.com/buildingSMART/IFC4.x-development "$rev"
+        git -C "$src" checkout -q FETCH_HEAD -- schemas
+    fi
+    {{opo}} ifc "$src/schemas" -o build/ifc
+
 # Generate the class templates and build every object into build/.
 build:
     #!/usr/bin/env bash
     set -euo pipefail
     rm -rf build
-    if [ -f templates/classes.yaml ]; then {{opo}} generate --library . -o build; fi
+    just opo={{opo}} ifc
+    if [ -f templates/classes.yaml ]; then {{opo}} generate --library . --ifc build/ifc -o build; fi
     for d in objects/*/; do
         if [ -f "$d/object.yaml" ]; then {{opo}} build "$d" --library . -o build; fi
     done
@@ -19,8 +36,8 @@ check: build
     set -euo pipefail
     shopt -s nullglob
     dirs=(build/library/templates/*/ build/library/objects/*/)
-    if [ ${#dirs[@]} -gt 0 ]; then {{opo}} check --root build --ifc ifc/psets.json "${dirs[@]}"; fi
-    just golden
+    if [ ${#dirs[@]} -gt 0 ]; then {{opo}} check --root build --ifc build/ifc/psets.json "${dirs[@]}"; fi
+    just opo={{opo}} golden
 
 # Until phase 5: the generated templates equal those committed in the standard repository
 # (checked out at the commit in opo-spec-version into ./opo-spec).

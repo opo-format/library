@@ -1,0 +1,336 @@
+# Archetype `wall` (spec/objects/archetypes.md).
+# Class template sources (proposal 0002 §4). `opo generate` builds the templates from these files,
+# the per-class table (classes.yaml) and the IFC data in ifc/. Licence: CC0-1.0.
+archetype: "wall"
+description: "Path, height and layers: walls (and curtain walls with a grid, proposal 0001)."
+parameters:
+  layers:
+    type: "layers"
+    default:
+      - material: "plaster"
+        thickness: 0.015
+        function: "finish"
+      - material: "concrete_block"
+        thickness: 0.2
+        function: "structure"
+        core: true
+      - material: "plaster"
+        thickness: 0.015
+        function: "finish"
+    label: "Layers (left to right)"
+    group: "Construction"
+    description: "Layer build-up: list of {material, thickness, function, core}. Each material carries its cut hatch (opo::materials, opo::hatches), so the type keeps its look when shared."
+    limits:
+      thickness:
+        min: 0.001
+        max: 2.0
+  location_line:
+    type: "choice"
+    default: "wall_centre"
+    label: "Location line"
+    group: "Construction"
+    options:
+      - "wall_centre"
+      - "core_centre"
+      - "finish_left"
+      - "finish_right"
+      - "core_left"
+      - "core_right"
+    description: "Which line of the build-up sits on the path."
+  top_mode:
+    type: "choice"
+    default: "storey"
+    label: "Top constraint"
+    group: "Height"
+    options:
+      - "storey"
+      - "unconnected"
+    option_labels:
+      storey: "Up to the next storey (+ top offset)"
+      unconnected: "Unconnected height"
+  unconnected_height:
+    type: "length"
+    default: 2.7
+    label: "Unconnected height"
+    group: "Height"
+    visible: "top_mode = \"unconnected\""
+    limits:
+      min: 0.05
+      max: 50
+  base_offset:
+    type: "length"
+    default: 0.0
+    label: "Base offset"
+    group: "Height"
+    limits:
+      min: -10
+      max: 10
+  top_offset:
+    type: "length"
+    default: 0.0
+    label: "Top offset"
+    group: "Height"
+    visible: "top_mode = \"storey\""
+    limits:
+      min: -10
+      max: 10
+  load_bearing:
+    type: "boolean"
+    default: false
+    label: "Load bearing"
+    group: "Data"
+  is_external:
+    type: "boolean"
+    default: false
+    label: "External"
+    group: "Data"
+slots:
+  path:
+    type: "polyline"
+    plane: "xy"
+    default: [[0.0, 0.0], [5.0, 0.0]]
+    rules:
+      open: true
+      min_segment_length: 0.01
+    description: "Wall path in plan. Layers are listed from the left of the direction of travel to the right."
+rules:
+  derived:
+    total_thickness: "sum(layers.thickness)"
+    layer_start:
+      expr: "for i in 1..count(layers) return sum(sublist(layers.thickness, 1, i)) - layers[i].thickness"
+      note: "Distance of each layer's left face from the wall's left face."
+    core_index:
+      expr: "if count(index_of(layers.core, true)) > 0 then index_of(layers.core, true)[1] else ceiling(count(layers) / 2)"
+      note: "First layer marked core, else the middle layer."
+    core_start: "layer_start[core_index]"
+    core_end: "core_start + layers[core_index].thickness"
+    left_face:
+      expr: "if location_line = \"wall_centre\" then total_thickness / 2 else if location_line = \"core_centre\" then (core_start + core_end) / 2 else if location_line = \"finish_left\" then 0 else if location_line = \"finish_right\" then total_thickness else if location_line = \"core_left\" then core_start else core_end"
+      note: "Offset of the left face from the path (positive = left)."
+    height: "if top_mode = \"storey\" then level.height + top_offset - base_offset else unconnected_height"
+    bottom: "base_offset"
+    top: "base_offset + height"
+    path_length: "sum(for i in 1..count(path) - 1 return sqrt((path[i + 1][1] - path[i][1]) ** 2 + (path[i + 1][2] - path[i][2]) ** 2))"
+  checks:
+    has_layers:
+      expr: "count(layers) >= 1"
+      severity: "error"
+      message: "A wall needs at least one layer."
+    layer_thickness:
+      expr: "min(layers.thickness) > 0"
+      severity: "error"
+      message: "Every layer needs a thickness above zero."
+    height_positive:
+      expr: "height > 0"
+      severity: "error"
+      message: "The wall top is below its base."
+  rulesets: {}
+recipe:
+  layer_bands:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "layers"
+      as: "layer"
+      index: "i"
+      do: "band(path, left_face - layer_start[i], left_face - layer_start[i] - layer.thickness)"
+  layer_solids:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "layer_bands"
+      as: "b"
+      index: "i"
+      do: "extrude(b, bottom, top)"
+    note: "Each item keeps its layer (each.material) from layer_bands."
+  outline:
+    op: "band"
+    plane: "xy"
+    args:
+      path: "path"
+      left: "left_face"
+      right: "left_face - total_thickness"
+  body:
+    op: "extrude"
+    plane: "xy"
+    args:
+      profile: "outline"
+      from: "bottom"
+      to: "top"
+  axis:
+    op: "polyline"
+    plane: "xy"
+    args:
+      points: "path"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "layers[core_index].material"
+  model.medium:
+    context: "model"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "layer_solids"
+        material: "each.material"
+        part: "Layer"
+  model.high:
+    context: "model"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "layer_solids"
+        material: "each.material"
+        part: "Layer"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "outline"
+        class: "cut"
+        hatch: "layers[core_index].material"
+        role: "outline"
+    note: "Whole wall in one outline, hatched with the core material."
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "layer_bands"
+        class: "cut"
+        hatch: "each.material"
+        role: "layer"
+      - geometry: "outline"
+        class: "cut"
+        role: "outline"
+    note: "Each layer hatched with its material's cut hatch; layer lines thin, outline heavy (weights from the drawing style)."
+  plan.high:
+    context: "plan"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "derived"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    derive:
+      from: "model.high"
+      method: "cut"
+    note: "Cut from the layer solids; hatches from each layer's material."
+  elevation:
+    context: "elevation"
+    lod: "all"
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "ELEVATION_VIEW"
+    derive:
+      from: "model.{lod}"
+      method: "project"
+    surface: "each layer's material surface pattern on visible faces (e.g. brick coursing)"
+  section:
+    context: "section"
+    lod: "all"
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "SECTION_VIEW"
+    derive:
+      from: "model.{lod}"
+      method: "cut"
+  axis:
+    context: "axis"
+    lod: "all"
+    source: "authored"
+    ifc:
+      context: "Axis"
+      targetView: "GRAPH_VIEW"
+    items:
+      - geometry: "axis"
+        class: "annotation"
+host:
+  is_host: true
+  accepts:
+    - "IfcDoor"
+    - "IfcWindow"
+    - "IfcOpeningElement"
+    - "IfcVoidingFeature"
+    - "IfcProjectionElement"
+    - "IfcShadingDevice"
+  provides:
+    thickness: "total_thickness"
+    y_max: "left_face"
+    y_min: "left_face - total_thickness"
+    bottom: "bottom"
+    top: "top"
+  joins:
+    by: "material"
+    rule: "Where walls meet, layers of the same material join without a line; core joins core, finishes wrap. Done by the application."
+  level: "Placed on a storey; z = 0 is the storey elevation."
+handles:
+  - slot: "path"
+    kind: "points"
+    view:
+      - "plan"
+  - parameter: "unconnected_height"
+    view:
+      - "elevation"
+      - "model"
+    at: "[path[1][1], path[1][2], top]"
+    axis: "z"
+    visible: "top_mode = \"unconnected\""
+materials:
+  - "brick_masonry"
+  - "concrete_block"
+  - "mineral_wool"
+  - "plaster"
+  - "plasterboard"
+  - "reinforced_concrete"
+  - "render"
+  - "rigid_insulation"
+ifc:
+  properties:
+    Pset_WallCommon.LoadBearing: "load_bearing"
+    Pset_WallCommon.IsExternal: "is_external"
+  quantities:
+    Length: "path_length"
+    Width: "total_thickness"
+    Height: "height"
+  material_layer_set:
+    layers: "layers"
+    LayerSetDirection: "\"AXIS2\""
+    DirectionSense: "\"NEGATIVE\""
+    OffsetFromReferenceLine: "left_face"
+    note: "First layer = left of the path; IfcMaterialLayer.Material from each layer's material."

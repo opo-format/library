@@ -1,0 +1,230 @@
+# Per-class table: one entry per IFC class, refining its archetype.
+# Class template sources (proposal 0002 §4). `opo generate` builds the templates from these files,
+# the per-class table (classes.yaml) and the IFC data in ifc/. Licence: CC0-1.0.
+IfcMember:
+  archetype: "linear"
+  name: "Member (class template)"
+  description: "Member with a profile swept along a path: parametric profile (rectangle, I, circle, hollow sections, channel, angle), justification, roll and end extensions."
+  default_type: "MEMBER"
+IfcWall:
+  archetype: "wall"
+  name: "Wall (class template)"
+  description: "Layered wall along a path: build-up of materials with hatches, location line, base and top constraints. Hosts doors, windows and openings."
+  default_type: "STANDARD"
+  layers:
+    types-examples:
+      kind: "types"
+      system:
+        name: "Example wall types (illustrative build-ups, not norm values)"
+      variants:
+        - name: "Concrete 200"
+          values:
+            layers:
+              - material: "reinforced_concrete"
+                thickness: 0.2
+                function: "structure"
+                core: true
+            load_bearing: true
+        - name: "Masonry 175, plastered both sides"
+          values:
+            layers:
+              - material: "plaster"
+                thickness: 0.015
+                function: "finish"
+              - material: "brick_masonry"
+                thickness: 0.175
+                function: "structure"
+                core: true
+              - material: "plaster"
+                thickness: 0.015
+                function: "finish"
+        - name: "Partition, metal stud 75, 2 × 12.5 board each side"
+          values:
+            layers:
+              - material: "plasterboard"
+                thickness: 0.0125
+                function: "finish"
+              - material: "plasterboard"
+                thickness: 0.0125
+                function: "finish"
+              - material: "mineral_wool"
+                thickness: 0.075
+                function: "insulation"
+                core: true
+              - material: "plasterboard"
+                thickness: 0.0125
+                function: "finish"
+              - material: "plasterboard"
+                thickness: 0.0125
+                function: "finish"
+          note: "Studs are not modelled; the stud zone is drawn as its insulation."
+        - name: "External, concrete 200 + 120 insulation and render"
+          values:
+            layers:
+              - material: "render"
+                thickness: 0.01
+                function: "finish"
+              - material: "rigid_insulation"
+                thickness: 0.12
+                function: "insulation"
+              - material: "reinforced_concrete"
+                thickness: 0.2
+                function: "structure"
+                core: true
+              - material: "plaster"
+                thickness: 0.015
+                function: "finish"
+            is_external: true
+            load_bearing: true
+            location_line: "core_centre"
+        - name: "External cavity wall, brick / insulation / block"
+          values:
+            layers:
+              - material: "brick_masonry"
+                thickness: 0.1025
+                function: "finish"
+              - material: "mineral_wool"
+                thickness: 0.1
+                function: "insulation"
+              - material: "concrete_block"
+                thickness: 0.1
+                function: "structure"
+                core: true
+              - material: "plaster"
+                thickness: 0.013
+                function: "finish"
+            is_external: true
+            load_bearing: true
+IfcSlab:
+  archetype: "area"
+  name: "Slab (class template)"
+  description: "Layered slab from a boundary with holes: build-up from the top down with materials and hatches, reference face, offset from the storey."
+  default_type: "FLOOR"
+  layers:
+    types-examples:
+      kind: "types"
+      system:
+        name: "Example slab types (illustrative build-ups, not norm values)"
+      variants:
+        - name: "Concrete 200"
+          values:
+            layers:
+              - material: "reinforced_concrete"
+                thickness: 0.2
+                function: "structure"
+                core: true
+        - name: "Floor, tiles on screed, insulation, concrete 250"
+          values:
+            layers:
+              - material: "ceramic_tile"
+                thickness: 0.01
+                function: "finish"
+              - material: "cement_screed"
+                thickness: 0.065
+                function: "finish"
+              - material: "rigid_insulation"
+                thickness: 0.03
+                function: "insulation"
+              - material: "reinforced_concrete"
+                thickness: 0.25
+                function: "structure"
+                core: true
+              - material: "plaster"
+                thickness: 0.01
+                function: "finish"
+        - name: "Timber floor, boards 22 on structure 200"
+          values:
+            layers:
+              - material: "timber"
+                thickness: 0.022
+                function: "finish"
+              - material: "timber"
+                thickness: 0.2
+                function: "structure"
+                core: true
+              - material: "plasterboard"
+                thickness: 0.0125
+                function: "finish"
+          note: "Joists are not modelled; the joist zone is one timber layer."
+IfcBeam:
+  archetype: "linear"
+  name: "Beam (class template)"
+  description: "Member with a profile swept along a path: parametric profile (rectangle, I, circle, hollow sections, channel, angle), justification, roll and end extensions."
+  default_type: "BEAM"
+  parameters:
+    profile_kind:
+      default: "rectangle"
+    width:
+      default: 0.25
+    depth:
+      default: 0.5
+    wall_thickness:
+      default: 0.006
+    justification_v:
+      default: "top"
+    material:
+      default: "reinforced_concrete"
+  slots:
+    path:
+      default: [[0.0, 0.0, 0.0], [5.0, 0.0, 0.0]]
+  materials:
+    - "reinforced_concrete"
+    - "timber"
+  ifc:
+    properties:
+      Pset_BeamCommon.LoadBearing: "load_bearing"
+  layers:
+    profiles-examples:
+      kind: "types"
+      system:
+        name: "Example profiles (values per row: see note)"
+      variants:
+        - name: "IPE 270"
+          values:
+            profile_kind: "i_section"
+            profile_name: "IPE 270"
+            width: 0.135
+            depth: 0.27
+            web_thickness: 0.0066
+            flange_thickness: 0.0102
+            material: "steel"
+          note: "EN 10365:2017 table values (h 270, b 135, s 6.6, t 10.2 mm); root fillet not modelled. Full EN 10365 / AISC catalogue: to collect."
+        - name: "Concrete 250 × 500"
+          values:
+            profile_kind: "rectangle"
+            width: 0.25
+            depth: 0.5
+            material: "reinforced_concrete"
+          note: "Generic size, not a norm."
+        - name: "Glulam 140 × 400"
+          values:
+            profile_kind: "rectangle"
+            width: 0.14
+            depth: 0.4
+            material: "timber"
+          note: "Generic size; EN 14080 sizes to collect."
+IfcBoiler:
+  archetype: "point"
+  name: "Boiler (class template)"
+  description: "Boiler as a cased body with its pipe and flue connections, wall-hung or floor-standing, with a service clearance zone."
+  default_type: "WATER"
+IfcPipeFitting:
+  archetype: "fitting"
+  name: "Pipe fitting (class template)"
+  description: "Pipe fitting whose form follows its predefined type: bend, junction (tee), transition (reducer), connector, cap, entry, exit. Sizes follow the connected pipes."
+  default_type: "BEND"
+IfcOpeningElement:
+  archetype: "hosted"
+  name: "Opening (class template)"
+  description: "Opening or recess in a wall or slab, from a width × height rectangle or an edited outline; cuts its host."
+  default_type: "OPENING"
+IfcStair:
+  archetype: "flight"
+  name: "Stair (class template)"
+  description: "Straight-run stair between two storeys: riser count from the rise and the maximum riser, going, width, concrete waist or solid, plan symbol with cut line and walking line."
+  default_type: "STRAIGHT_RUN_STAIR"
+IfcElementAssembly:
+  archetype: "assembly"
+  name: "Element assembly (class template)"
+  description: "Assembly that nests other OPO objects. The template builds a flat truss (Warren or Pratt) from nested IfcMember class templates."
+  default_type: "TRUSS"

@@ -1,0 +1,261 @@
+# Archetype `area` (spec/objects/archetypes.md).
+# Class template sources (proposal 0002 §4). `opo generate` builds the templates from these files,
+# the per-class table (classes.yaml) and the IFC data in ifc/. Licence: CC0-1.0.
+archetype: "area"
+description: "Boundary with thickness or layers: slabs, roofs, coverings, plates."
+parameters:
+  layers:
+    type: "layers"
+    default:
+      - material: "cement_screed"
+        thickness: 0.06
+        function: "finish"
+      - material: "rigid_insulation"
+        thickness: 0.03
+        function: "insulation"
+      - material: "reinforced_concrete"
+        thickness: 0.2
+        function: "structure"
+        core: true
+    label: "Layers (top to bottom)"
+    group: "Construction"
+    description: "Layer build-up: list of {material, thickness, function, core}. Each material carries its cut hatch (opo::materials, opo::hatches), so the type keeps its look when shared."
+    limits:
+      thickness:
+        min: 0.001
+        max: 3.0
+  reference:
+    type: "choice"
+    default: "top"
+    label: "Reference face at the offset"
+    group: "Construction"
+    options:
+      - "top"
+      - "core_top"
+      - "bottom"
+  elevation_offset:
+    type: "length"
+    default: 0.0
+    label: "Offset from storey"
+    group: "Construction"
+    limits:
+      min: -20
+      max: 20
+  load_bearing:
+    type: "boolean"
+    default: true
+    label: "Load bearing"
+    group: "Data"
+  is_external:
+    type: "boolean"
+    default: false
+    label: "External"
+    group: "Data"
+slots:
+  boundary:
+    type: "polygon"
+    plane: "xy"
+    default: [[0.0, 0.0], [6.0, 0.0], [6.0, 4.0], [0.0, 4.0]]
+    rules:
+      closed: true
+      non_self_intersecting: true
+  holes:
+    type: "polygon_list"
+    plane: "xy"
+    default: []
+    rules:
+      inside: "boundary"
+rules:
+  derived:
+    total_thickness: "sum(layers.thickness)"
+    layer_start:
+      expr: "for i in 1..count(layers) return sum(sublist(layers.thickness, 1, i)) - layers[i].thickness"
+      note: "Depth of each layer's top face below the slab top."
+    core_index: "if count(index_of(layers.core, true)) > 0 then index_of(layers.core, true)[1] else ceiling(count(layers) / 2)"
+    top_z: "if reference = \"top\" then elevation_offset else if reference = \"core_top\" then elevation_offset + layer_start[core_index] else elevation_offset + total_thickness"
+    bottom_z: "top_z - total_thickness"
+    gross_area: "abs(sum(for i in 1..count(boundary) return boundary[i][1] * boundary[modulo(i, count(boundary)) + 1][2] - boundary[modulo(i, count(boundary)) + 1][1] * boundary[i][2])) / 2"
+    holes_area: "sum(append(for h in holes return abs(sum(for i in 1..count(h) return h[i][1] * h[modulo(i, count(h)) + 1][2] - h[modulo(i, count(h)) + 1][1] * h[i][2])) / 2, 0))"
+    net_area: "gross_area - holes_area"
+    closed_boundary: "append(boundary, boundary[1])"
+    perimeter: "sum(for i in 1..count(closed_boundary) - 1 return sqrt((closed_boundary[i + 1][1] - closed_boundary[i][1]) ** 2 + (closed_boundary[i + 1][2] - closed_boundary[i][2]) ** 2))"
+  checks:
+    has_layers:
+      expr: "count(layers) >= 1"
+      severity: "error"
+      message: "A slab needs at least one layer."
+    layer_thickness:
+      expr: "min(layers.thickness) > 0"
+      severity: "error"
+      message: "Every layer needs a thickness above zero."
+    boundary_points:
+      expr: "count(boundary) >= 3"
+      severity: "error"
+      message: "The boundary needs at least three points."
+  rulesets: {}
+recipe:
+  region:
+    op: "difference"
+    plane: "xy"
+    args:
+      a: "polygon(boundary)"
+      b: "for h in holes return polygon(h)"
+  layer_solids:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "layers"
+      as: "layer"
+      index: "i"
+      do: "extrude(region, top_z - layer_start[i] - layer.thickness, top_z - layer_start[i])"
+  body:
+    op: "extrude"
+    plane: "xy"
+    args:
+      profile: "region"
+      from: "bottom_z"
+      to: "top_z"
+  edges:
+    op: "boundary_curves"
+    plane: "xy"
+    args:
+      region: "region"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "layers[core_index].material"
+  model.medium:
+    context: "model"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "layer_solids"
+        material: "each.material"
+        part: "Layer"
+  model.high:
+    context: "model"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "layer_solids"
+        material: "each.material"
+        part: "Layer"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "edges"
+        class: "projected"
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "edges"
+        class: "projected"
+    note: "A floor slab lies below the plan cut: its edges and holes are drawn as projected lines. Cut slabs (e.g. in a section or a split-level plan) take the derived cut with layer hatches."
+  plan.high:
+    context: "plan"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "edges"
+        class: "projected"
+  section:
+    context: "section"
+    lod: "all"
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "SECTION_VIEW"
+    derive:
+      from: "model.{lod}"
+      method: "cut"
+    note: "Each cut layer hatched with its material's cut hatch."
+host:
+  is_host: true
+  accepts:
+    - "IfcOpeningElement"
+    - "IfcVoidingFeature"
+    - "IfcStair"
+    - "IfcRamp"
+  provides:
+    thickness: "total_thickness"
+    top: "top_z"
+    bottom: "bottom_z"
+  joins:
+    by: "material"
+    rule: "Layers of the same material join with walls and other slabs without a line."
+  level: "Placed on a storey; z = 0 is the storey elevation."
+handles:
+  - slot: "boundary"
+    kind: "points"
+    view:
+      - "plan"
+  - slot: "holes"
+    kind: "points"
+    view:
+      - "plan"
+materials:
+  - "cement_screed"
+  - "ceramic_tile"
+  - "plaster"
+  - "plasterboard"
+  - "reinforced_concrete"
+  - "rigid_insulation"
+  - "timber"
+ifc:
+  properties:
+    Pset_SlabCommon.LoadBearing: "load_bearing"
+    Pset_SlabCommon.IsExternal: "is_external"
+  quantities:
+    Width: "total_thickness"
+    Depth: "total_thickness"
+    Perimeter: "perimeter"
+    GrossArea: "gross_area"
+    NetArea: "net_area"
+    GrossVolume: "gross_area * total_thickness"
+    NetVolume: "net_area * total_thickness"
+  material_layer_set:
+    layers: "layers"
+    LayerSetDirection: "\"AXIS3\""
+    DirectionSense: "\"NEGATIVE\""
+    OffsetFromReferenceLine: "top_z"
+    note: "First layer = top."

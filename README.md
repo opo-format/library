@@ -13,10 +13,10 @@ Licence: objects are CC0-1.0 (public domain dedication) unless a file says other
 ```
 objects/<id>/          object.yaml, layers/*.yaml (proposal 0002)
 templates/             archetypes/*.yaml and classes.yaml: the class templates
-ifc/                   IFC 4.3 ADD2 data extracted for the generator
 styles/                materials.yaml and hatches.yaml, embedded into objects at build
 references.yaml        every cited source
 opo-version            the opo-rs commit the library is built with
+ifc-version            the buildingSMART/IFC4.x-development commit whose UML sources `opo ifc` reads at build
 opo-spec-version       the standard repository commit the templates are compared with (until phase 5)
 ```
 
@@ -27,3 +27,5 @@ just install    # the opo command at the pinned version
 just check      # generate templates, build objects, opo check, golden comparison
 just previews   # SVG plans and 3D views in build/previews/ (not committed)
 ```
+
+IFC is published by buildingSMART under CC BY-ND 4.0, so no IFC data is kept in this repository; `just ifc` fetches the pinned UML sources into `.cache/` and extracts the class and property set names into `build/ifc/`.

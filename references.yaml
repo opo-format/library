@@ -1,0 +1,28 @@
+bim-all-doors-dormakaba:
+  title: "bim-all-doors (dormakaba)"
+  kind: "parametric_basis"
+  licence: "CC0-1.0"
+  url: "https://github.com/dormakaba/bim-all-doors"
+  version: "commit 9a174ae (11 Jun 2026), v1.90"
+bs-4787-uk-metric-and-uk-imperial-door-sizes:
+  title: "BS 4787 (UK metric) and UK imperial door sizes"
+  kind: "other"
+generic-metric-openings-no-eu-door-size-norm-exists:
+  title: "Generic metric openings (no EU door size norm exists)"
+  kind: "other"
+ifc-4.3-pset-doorliningproperties-pset-doorpanelproperties:
+  title: "IFC 4.3 Pset_DoorLiningProperties, Pset_DoorPanelProperties"
+  kind: "ifc"
+  licence: "buildingSMART"
+  url: "https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Pset_DoorLiningProperties.htm"
+iso-21542-2021-eu-en-17210-functional-requirements-ada-2010:
+  title: "ISO 21542:2021 (EU: EN 17210 functional requirements), ADA 2010 Standards §404"
+  kind: "regulation"
+osarch-door-window-generator-discussion-door-frame-set:
+  title: "OSArch door/window generator discussion (Door Frame Set)"
+  kind: "other"
+  licence: "CC-BY-4.0"
+  url: "https://community.osarch.org/discussion/comment/24127/"
+us-industry-standard-door-sizes:
+  title: "US industry standard door sizes"
+  kind: "other"

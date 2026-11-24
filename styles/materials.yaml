@@ -1,0 +1,116 @@
+brick_masonry:
+  label: "Brick masonry"
+  category: "masonry"
+  colour: "#b5653f"
+  cut:
+    hatch: "masonry"
+  surface:
+    hatch: "brick_stretcher_elevation"
+  ifc_name: "Brick masonry"
+cement_screed:
+  label: "Cement screed"
+  category: "finish"
+  colour: "#c8c4bb"
+  cut:
+    hatch: "screed"
+  ifc_name: "Cement screed"
+ceramic_tile:
+  label: "Ceramic tile"
+  category: "finish"
+  colour: "#e8e4dc"
+  cut:
+    hatch: "solid_light"
+  ifc_name: "Ceramic tile"
+concrete_block:
+  label: "Concrete block masonry"
+  category: "masonry"
+  colour: "#9e9b94"
+  cut:
+    hatch: "block"
+  ifc_name: "Concrete block masonry"
+copper:
+  label: "Copper"
+  category: "metal"
+  colour: "#b87333"
+  cut:
+    hatch: "solid_dark"
+  ifc_name: "Copper"
+mineral_wool:
+  label: "Mineral wool insulation"
+  category: "insulation"
+  colour: "#e9d27a"
+  cut:
+    hatch: "insulation_soft"
+  ifc_name: "Mineral wool insulation"
+painted_timber:
+  label: "Timber, painted"
+  category: "timber"
+  colour: "#f1efe9"
+  cut:
+    hatch: "timber"
+  ifc_name: "Timber, painted"
+plaster:
+  label: "Gypsum plaster"
+  category: "finish"
+  colour: "#efece5"
+  cut:
+    hatch: "plaster"
+  ifc_name: "Gypsum plaster"
+plasterboard:
+  label: "Plasterboard"
+  category: "finish"
+  colour: "#f2f2f2"
+  cut:
+    hatch: "solid_light"
+  ifc_name: "Plasterboard"
+reinforced_concrete:
+  label: "Reinforced concrete"
+  category: "concrete"
+  colour: "#a9a69c"
+  cut:
+    hatch: "reinforced_concrete"
+  density: 2500
+  ifc_name: "Reinforced concrete"
+render:
+  label: "External render"
+  category: "finish"
+  colour: "#e6e0d2"
+  cut:
+    hatch: "plaster"
+  ifc_name: "External render"
+rigid_insulation:
+  label: "Rigid insulation board"
+  category: "insulation"
+  colour: "#e3e3e3"
+  cut:
+    hatch: "insulation_rigid"
+  ifc_name: "Rigid insulation board"
+sheet_metal:
+  label: "Sheet metal, coated"
+  category: "metal"
+  colour: "#d9dbde"
+  cut:
+    hatch: "solid_dark"
+  ifc_name: "Sheet metal, coated"
+stainless_steel:
+  label: "Stainless steel"
+  category: "steel"
+  colour: "#b8bcc2"
+  cut:
+    hatch: "solid_dark"
+  ifc_name: "Stainless steel"
+steel:
+  label: "Steel"
+  category: "steel"
+  colour: "#7a8088"
+  cut:
+    hatch: "solid_dark"
+  density: 7850
+  ifc_name: "Steel"
+timber:
+  label: "Timber"
+  category: "timber"
+  colour: "#c49a6c"
+  cut:
+    hatch: "timber"
+  ifc_name: "Timber"
