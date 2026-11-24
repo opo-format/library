@@ -18,25 +18,61 @@ system:
     handle_height: 1.0
     backset: 0.044
     key_rose: false
-    leaf_thickness: 0.035
+    leaf_thickness:
+      value: 0.035
+      source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+      status: "typical"
+      note: "Common thickness of UK imperial internal flush leaves."
 variants:
   - name: "UK 6'6\" × 2'0\" (1981 × 610) leaf"
     node: "6a4303c0-fb02-585c-b47f-2fac2756a618"
     values:
-      nominal_width: 0.6096
-      nominal_height: 1.9812
+      nominal_width:
+        value: 0.6096
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "typical"
+        note: "UK imperial leaf sizes are trade practice, not BS 4787."
+      nominal_height:
+        value: 1.9812
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "typical"
+        note: "UK imperial leaf sizes are trade practice, not BS 4787."
   - name: "UK 6'6\" × 2'3\" (1981 × 686) leaf"
     node: "ba967941-58fd-5a56-9ba3-ff972f83bf13"
     values:
-      nominal_width: 0.6858
-      nominal_height: 1.9812
+      nominal_width:
+        value: 0.6858
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "typical"
+        note: "UK imperial leaf sizes are trade practice, not BS 4787."
+      nominal_height:
+        value: 1.9812
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "typical"
+        note: "UK imperial leaf sizes are trade practice, not BS 4787."
   - name: "UK 6'6\" × 2'6\" (1981 × 762) leaf"
     node: "c77f147f-2bc7-5e35-ad77-17c2afe57229"
     values:
-      nominal_width: 0.762
-      nominal_height: 1.9812
+      nominal_width:
+        value: 0.762
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "typical"
+        note: "UK imperial leaf sizes are trade practice, not BS 4787."
+      nominal_height:
+        value: 1.9812
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "typical"
+        note: "UK imperial leaf sizes are trade practice, not BS 4787."
   - name: "UK 6'6\" × 2'9\" (1981 × 838) leaf"
     node: "e5a188ab-3542-53f9-a6a6-28617ab847b5"
     values:
-      nominal_width: 0.8382
-      nominal_height: 1.9812
+      nominal_width:
+        value: 0.8382
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "typical"
+        note: "UK imperial leaf sizes are trade practice, not BS 4787."
+      nominal_height:
+        value: 1.9812
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "typical"
+        note: "UK imperial leaf sizes are trade practice, not BS 4787."

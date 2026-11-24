@@ -15,7 +15,11 @@ system:
     fit_gap: 0.003175
     fit_gap_top: 0.028575
     floor_gap: 0.0127
-    leaf_thickness: 0.034925
+    leaf_thickness:
+      value: 0.034925
+      source: "us-industry-standard-door-sizes"
+      status: "typical"
+      note: "Common US interior flush leaf thickness (1-3/8 in)."
     handle_height: 0.9144
     backset: 0.060325
     key_rose: false
@@ -23,25 +27,65 @@ variants:
   - name: "US 2'0\" × 6'8\" leaf"
     node: "cfdc80ab-e3d2-5848-8974-61695301266c"
     values:
-      nominal_width: 0.6096
-      nominal_height: 2.032
+      nominal_width:
+        value: 0.6096
+        source: "us-industry-standard-door-sizes"
+        status: "typical"
+        note: "Common US prehung leaf width; no norm. Confirm against a maker catalogue."
+      nominal_height:
+        value: 2.032
+        source: "us-industry-standard-door-sizes"
+        status: "typical"
+        note: "Common US prehung leaf height; no norm. Confirm against a maker catalogue."
   - name: "US 2'4\" × 6'8\" leaf"
     node: "15022351-2901-5fb9-ab04-7ee454d1e79b"
     values:
-      nominal_width: 0.7112
-      nominal_height: 2.032
+      nominal_width:
+        value: 0.7112
+        source: "us-industry-standard-door-sizes"
+        status: "typical"
+        note: "Common US prehung leaf width; no norm. Confirm against a maker catalogue."
+      nominal_height:
+        value: 2.032
+        source: "us-industry-standard-door-sizes"
+        status: "typical"
+        note: "Common US prehung leaf height; no norm. Confirm against a maker catalogue."
   - name: "US 2'6\" × 6'8\" leaf"
     node: "858872af-b146-5bf4-b3b8-b9dd40b96b36"
     values:
-      nominal_width: 0.762
-      nominal_height: 2.032
+      nominal_width:
+        value: 0.762
+        source: "us-industry-standard-door-sizes"
+        status: "typical"
+        note: "Common US prehung leaf width; no norm. Confirm against a maker catalogue."
+      nominal_height:
+        value: 2.032
+        source: "us-industry-standard-door-sizes"
+        status: "typical"
+        note: "Common US prehung leaf height; no norm. Confirm against a maker catalogue."
   - name: "US 2'8\" × 6'8\" leaf"
     node: "d08a23de-5176-551d-b6f1-7be819221868"
     values:
-      nominal_width: 0.8128
-      nominal_height: 2.032
+      nominal_width:
+        value: 0.8128
+        source: "us-industry-standard-door-sizes"
+        status: "typical"
+        note: "Common US prehung leaf width; no norm. Confirm against a maker catalogue."
+      nominal_height:
+        value: 2.032
+        source: "us-industry-standard-door-sizes"
+        status: "typical"
+        note: "Common US prehung leaf height; no norm. Confirm against a maker catalogue."
   - name: "US 3'0\" × 6'8\" leaf"
     node: "5b1ca2b1-5ccc-5247-a9f2-e42c7ad4edfb"
     values:
-      nominal_width: 0.9144
-      nominal_height: 2.032
+      nominal_width:
+        value: 0.9144
+        source: "us-industry-standard-door-sizes"
+        status: "typical"
+        note: "Common US prehung leaf width; no norm. Confirm against a maker catalogue."
+      nominal_height:
+        value: 2.032
+        source: "us-industry-standard-door-sizes"
+        status: "typical"
+        note: "Common US prehung leaf height; no norm. Confirm against a maker catalogue."

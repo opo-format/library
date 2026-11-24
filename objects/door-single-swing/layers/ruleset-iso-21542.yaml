@@ -4,8 +4,20 @@ label: "ISO 21542:2021"
 uri: "https://opo-format.org/rulesets/accessibility/iso-21542-2021@0.1"
 source: "ISO 21542:2021 door criteria: clear opening width >= 800 mm (850 mm recommended), handle height 800-1000 mm. EN 17210 (EU) states the functional requirement."
 values:
-  min_clear_width: "mm(800)"
+  min_clear_width:
+    value: "mm(800)"
+    source: "iso-21542-2021-eu-en-17210-functional-requirements-ada-2010"
+    status: "to_verify"
+    note: "ISO 21542:2021 minimum clear opening width of doors; check the clause and whether 800 mm is the minimum."
   measure: "\"usable_clear_width\""
-  handle_min: "mm(800)"
-  handle_max: "mm(1000)"
+  handle_min:
+    value: "mm(800)"
+    source: "iso-21542-2021-eu-en-17210-functional-requirements-ada-2010"
+    status: "to_verify"
+    note: "ISO 21542:2021 lower limit of door handle height; check the clause."
+  handle_max:
+    value: "mm(1000)"
+    source: "iso-21542-2021-eu-en-17210-functional-requirements-ada-2010"
+    status: "to_verify"
+    note: "ISO 21542:2021 upper limit of door handle height; check the clause."
 node: "1a6c4f3a-1758-5f38-8b06-f4eaa5b91e2b"

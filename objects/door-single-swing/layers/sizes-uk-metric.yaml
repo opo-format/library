@@ -18,30 +18,74 @@ system:
     handle_height: 1.0
     backset: 0.044
     key_rose: false
-    leaf_thickness: 0.04
+    leaf_thickness:
+      value: 0.04
+      source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+      status: "to_verify"
+      note: "Leaf thickness from BS 4787-1; check against the current edition."
 variants:
   - name: "UK 2040 × 526 leaf"
     node: "c1724800-98a3-5691-be48-00f616140523"
     values:
-      nominal_width: 0.526
-      nominal_height: 2.04
+      nominal_width:
+        value: 0.526
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "to_verify"
+        note: "Leaf width from BS 4787-1; check against the table of leaf sizes in the current edition."
+      nominal_height:
+        value: 2.04
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "to_verify"
+        note: "Leaf height from BS 4787-1; check against the current edition."
   - name: "UK 2040 × 626 leaf"
     node: "2659c919-5c7e-55b9-a344-52a55471867e"
     values:
-      nominal_width: 0.626
-      nominal_height: 2.04
+      nominal_width:
+        value: 0.626
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "to_verify"
+        note: "Leaf width from BS 4787-1; check against the table of leaf sizes in the current edition."
+      nominal_height:
+        value: 2.04
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "to_verify"
+        note: "Leaf height from BS 4787-1; check against the current edition."
   - name: "UK 2040 × 726 leaf"
     node: "039a2b4e-7158-5d80-9501-ebab5aa6ee41"
     values:
-      nominal_width: 0.726
-      nominal_height: 2.04
+      nominal_width:
+        value: 0.726
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "to_verify"
+        note: "Leaf width from BS 4787-1; check against the table of leaf sizes in the current edition."
+      nominal_height:
+        value: 2.04
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "to_verify"
+        note: "Leaf height from BS 4787-1; check against the current edition."
   - name: "UK 2040 × 826 leaf"
     node: "a58a7a3e-ab11-56f6-beb6-724f2b1bba6c"
     values:
-      nominal_width: 0.826
-      nominal_height: 2.04
+      nominal_width:
+        value: 0.826
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "to_verify"
+        note: "Leaf width from BS 4787-1; check against the table of leaf sizes in the current edition."
+      nominal_height:
+        value: 2.04
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "to_verify"
+        note: "Leaf height from BS 4787-1; check against the current edition."
   - name: "UK 2040 × 926 leaf"
     node: "3188bd94-0a11-5dbb-851d-261570fc56de"
     values:
-      nominal_width: 0.926
-      nominal_height: 2.04
+      nominal_width:
+        value: 0.926
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "to_verify"
+        note: "Leaf width from BS 4787-1; check against the table of leaf sizes in the current edition."
+      nominal_height:
+        value: 2.04
+        source: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+        status: "to_verify"
+        note: "Leaf height from BS 4787-1; check against the current edition."
