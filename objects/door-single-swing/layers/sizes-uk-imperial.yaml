@@ -1,0 +1,42 @@
+kind: "sizes"
+system:
+  name: "UK imperial doors (lining, flush leaf 35 mm)"
+  node: "443a1d49-3216-5175-af70-21a6943f1be7"
+  values:
+    nominal_reference: "leaf"
+    frame_type: "lining"
+    leaf_type: "flush"
+    lining_thickness: 0.032
+    casing_width: 0.069
+    casing_depth: 0.015
+    stop_width: 0.012
+    stop_depth: 0.038
+    fit_gap: 0.005
+    fit_gap_top: 0.005
+    leaf_gap: 0.003
+    floor_gap: 0.008
+    handle_height: 1.0
+    backset: 0.044
+    key_rose: false
+    leaf_thickness: 0.035
+variants:
+  - name: "UK 6'6\" × 2'0\" (1981 × 610) leaf"
+    node: "6a4303c0-fb02-585c-b47f-2fac2756a618"
+    values:
+      nominal_width: 0.6096
+      nominal_height: 1.9812
+  - name: "UK 6'6\" × 2'3\" (1981 × 686) leaf"
+    node: "ba967941-58fd-5a56-9ba3-ff972f83bf13"
+    values:
+      nominal_width: 0.6858
+      nominal_height: 1.9812
+  - name: "UK 6'6\" × 2'6\" (1981 × 762) leaf"
+    node: "c77f147f-2bc7-5e35-ad77-17c2afe57229"
+    values:
+      nominal_width: 0.762
+      nominal_height: 1.9812
+  - name: "UK 6'6\" × 2'9\" (1981 × 838) leaf"
+    node: "e5a188ab-3542-53f9-a6a6-28617ab847b5"
+    values:
+      nominal_width: 0.8382
+      nominal_height: 1.9812
