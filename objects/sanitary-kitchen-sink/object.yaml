@@ -1,0 +1,15 @@
+id: "sanitary-kitchen-sink"
+name: "Kitchen sink"
+status: "planned"
+priority: "P2"
+catalogue_id: "F-07"
+ifc:
+  class: "IfcSanitaryTerminal"
+  predefinedType: "SINK"
+sheet:
+  scope: "Inset, undermount or integrated sink, 1–2 bowls + optional drainer, tap position; cut-out declared to the host worktop (F-11) as a void."
+  ifc: "IfcSanitaryTerminal · SINK"
+  based_on: "— · EN 1116 (sink base widths) · US sink base widths."
+  inputs: "Host worktop (F-11)."
+  parameters: "`mount` inset | undermount | integrated · `bowls` 1 | 1.5 | 2 · `drainer` none | left | right · `width`, `depth`, `bowl_depth` · `tap_hole` position."
+  sizes: "EU: to suit base unit widths 450–900 mm *(typical, to verify)* · US: for sink bases 30\"–36\" (single 30\", double 33\"–36\")."

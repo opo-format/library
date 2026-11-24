@@ -1,0 +1,17 @@
+id: "transport-moving-walkway"
+name: "Moving walkway"
+status: "planned"
+priority: "P3"
+catalogue_id: "T-03"
+ifc:
+  class: "IfcTransportElement"
+  predefinedType: "MOVINGWALKWAY"
+sheet:
+  scope: "Horizontal or inclined moving walk: pallet band, balustrades, handrails, landing plates, pit. Same structure as T-02."
+  ifc: "IfcTransportElement · MOVINGWALKWAY"
+  based_on: "— · EN 115-1 · ASME A17.1."
+  inputs: "Start and end points (same level or two levels)."
+  parameters: "`inclination` 0–12° (derived from the two points) · `pallet_width` 0.8 | 1.0 m (EN 115-1) · `length` (derived) · `balustrade` glass | panel · `balustrade_height` (default 0.9 m, typical) · `speed` (data)."
+  rules: "Inclination ≤ 12° (EN 115-1; error) · free zones at the ends as T-02."
+  sizes: "Pallet widths 0.8 and 1.0 m."
+  lod: "As T-02."

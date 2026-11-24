@@ -1,0 +1,18 @@
+id: "structure-beam"
+name: "Beam"
+status: "planned"
+priority: "P2"
+catalogue_id: "K-02"
+ifc:
+  class: "IfcBeam"
+sheet:
+  scope: "Straight member between two points, at a level with a top-of-steel or soffit offset; optional camber and end cuts (square, mitred, coped at high LOD). Lintels over openings can be hosted by a door or window and take their length from the opening plus bearings."
+  not_in_scope:
+    - "connections beyond simple end plates"
+  ifc: "IfcBeam · BEAM (JOIST, LINTEL, SPANDREL where they fit)"
+  based_on: "— · IFC profile definitions · profile library."
+  inputs: "Start and end points (or two columns / grid lines) · level · or host opening (lintel)."
+  parameters: "`profile` · `justification` (top, centre, bottom; left, centre, right) · `offset` · `bearing` (lintels, default 0.15 m / 6\") · `end_cut` square | mitre | cope · `material`."
+  rules: "Lintel length = opening width + 2 × bearing (derived) · beam within the floor zone (soffit above ceiling void, warning when a K-04 ceiling is lower)."
+  sizes: "Profile library."
+  lod: "Plan: dashed outline (above cut plane) · section: cut profile hatched."

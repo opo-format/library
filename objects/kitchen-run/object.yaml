@@ -1,0 +1,14 @@
+id: "kitchen-run"
+name: "Kitchen run"
+status: "planned"
+priority: "P2"
+catalogue_id: "F-12"
+ifc:
+  class: "IfcFurniture"
+sheet:
+  scope: "A kitchen along a wall path: lays out base, wall and tall units, fills the remainder with fillers, generates plinth, worktop (F-11), cornice/light pelmet optional, places sink, hob, oven, fridge from a sequence. Straight, L, U, galley, island."
+  ifc: "IfcFurniture (aggregate) with nested F-07…F-11, F-13"
+  inputs: "Slot `path` (polyline along walls) · optional island outline."
+  parameters: "`sequence` (list of unit types and widths, e.g. `[tall_fridge 600, base_drawer 400, sink_base 800, dishwasher 600, hob_base 600, …]`) · `worktop_height` (EN 1116: 850 / 900 / 950 mm; US 36\") · `filler_min` · `wall_units` (bool) · `corner` blind | l_shaped."
+  rules: "Sequence fits the path (fillers ≥ min, error if over-length) · appliance widths match housings · dishwasher next to sink (warning, ergonomics) · `kitchen` rule set values."
+  lod: "Children's LODs."

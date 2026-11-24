@@ -1,0 +1,16 @@
+id: "covering-profile-trim"
+name: "Profile trim (skirting, coping, moulding)"
+status: "planned"
+priority: "P3"
+catalogue_id: "K-07"
+ifc:
+  class: "IfcCovering"
+sheet:
+  scope: "A 2D profile swept along a path: skirtings along room boundaries (breaking at door openings), copings on parapets, cornices and mouldings. Profile from presets or a drawn 2D input."
+  ifc: "IfcCovering · SKIRTINGBOARD / COPING / MOLDING"
+  based_on: "— · IFC."
+  inputs: "Path (room boundary, wall top, or drawn polyline) · profile (preset or drawn)."
+  parameters: "`role` skirting | coping | moulding · `profile` · `height`, `depth` (preset profiles) · `break_at_openings` (bool, default true for skirting) · `overhang` (coping, default 0.05 m / 2\")."
+  rules: "Coping overhang ≥ min each side (warning, project value)."
+  sizes: "Profile presets *(to collect)*."
+  lod: "Low: hidden · medium: outline · high: profile."

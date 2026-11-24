@@ -1,0 +1,15 @@
+id: "furniture-bed"
+name: "Bed"
+status: "planned"
+priority: "P3"
+catalogue_id: "E-04"
+ifc:
+  class: "IfcFurniture"
+  predefinedType: "BED"
+sheet:
+  scope: "Bed frame sized from the mattress, headboard, optional footboard, base (legs / divan / storage), mattress, pillows and folded duvet in plan at medium."
+  ifc: "IfcFurniture · BED"
+  parameters: "`mattress_size` (catalogue entry) · `frame_margin` (frame beyond mattress) · `mattress_height`, `bed_height` · `headboard` (height, thickness) · `footboard` (bool) · `base` legs | divan | platform."
+  rules: "Access zone beside the bed (annotation; wheelchair space from `accessibility`, ISO 21542 *(to verify)*)."
+  sizes: "(mattress W × L) - EU: 90 × 200, 140 × 200, 160 × 200, 180 × 200, 200 × 200 cm - UK: single 90 × 190, small double 120 × 190, double 135 × 190, king 150 × 200, super king 180 × 200 cm - US: twin 38\" × 75\", twin XL 38\" × 80\", full 54\" × 75\", queen 60\" × 80\", king 76\" × 80\", California king 72\" × 84\""
+  lod: "Plan: low outline · medium + pillows, duvet fold line · high from 3D."

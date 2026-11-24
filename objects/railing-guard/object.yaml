@@ -1,0 +1,15 @@
+id: "railing-guard"
+name: "Railing / guard"
+status: "planned"
+priority: "P1"
+catalogue_id: "C-07"
+ifc:
+  class: "IfcRailing"
+sheet:
+  scope: "Guard along a path: on a stair (follows the pitch line), a landing, a balcony edge or a void. Infill types: balusters, horizontal rails, glass panel, mesh/sheet; posts; top rail; optional handrail on posts. Nested by stairs and ramps."
+  ifc: "IfcRailing · GUARDRAIL / BALUSTRADE · `Pset_RailingCommon` (Height, Diameter, IsExternal)"
+  based_on: "Bonsai railing generator (reference: FRAMELESS_PANEL and other types) · IFC · `guards`, `handrails`."
+  inputs: "Slot `path` (polyline / curve in plan; on stairs the host stair supplies the 3D pitch path) · host: slab edge, stair flight, ramp."
+  parameters: "`height` (default from rule set: 42\" IBC / 36\" IRC; EU no EN/ISO value, default 1.0 m (project value)) · `infill` balusters | rails | glass | mesh · `baluster_spacing` (max clear gap from rule set: 4\" US, 0.1 m UK where required; EU project value, default 0.1 m) · `post_spacing` (default 1.2 m / 4') · profiles: top rail, posts, balusters (preset sections) · `mount` top | side (fascia) · `glass_thickness`, `clamp_type`."
+  rules: "Height ≥ rule set (on stairs measured from the pitch line) · clear gap ≤ rule set (computed from spacing and baluster width) · if top rail is the handrail: height within handrail range."
+  lod: "3D: low panel · medium posts, top rail, balusters/panel · high + fixings, end returns. Plan: line + posts (medium). Elevation: infill pattern."

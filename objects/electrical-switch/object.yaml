@@ -1,0 +1,16 @@
+id: "electrical-switch"
+name: "Switch"
+status: "planned"
+priority: "P3"
+catalogue_id: "M-04"
+ifc:
+  class: "IfcSwitchingDevice"
+sheet:
+  scope: "Light switch, dimmer, push button, keypad: plate, gangs, height, placement on the lock side of a door."
+  ifc: "IfcSwitchingDevice · TOGGLESWITCH / DIMMERSWITCH / MOMENTARYSWITCH / KEYPAD"
+  based_on: "— · IFC."
+  inputs: "Host wall · optional host door (places it on the handle side at a set distance from the frame)."
+  parameters: "`kind` (IFC type) · `gangs` · `plate` (as M-03) · `height` (default 1.0 m; ISO 21542 range 0.8–1.1 m; US 48\" max reach) · `distance_from_frame` (default 0.15 m / 6\")."
+  rules: "`accessibility` reach range as M-03 · clear of the door swing on the hinge side (check)."
+  sizes: "As M-03."
+  lod: "As M-03."

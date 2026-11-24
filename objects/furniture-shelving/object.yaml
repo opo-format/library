@@ -1,0 +1,13 @@
+id: "furniture-shelving"
+name: "Shelving / bookcase"
+status: "planned"
+priority: "P3"
+catalogue_id: "E-06"
+ifc:
+  class: "IfcFurniture"
+  predefinedType: "SHELF"
+sheet:
+  scope: "Freestanding or wall-fixed open shelving: bays, shelves (fixed or evenly spaced), sides, back panel optional, plinth; wall-mounted shelf rails as a variant."
+  ifc: "IfcFurniture · SHELF"
+  parameters: "`bays`, `bay_width` · `height`, `depth` · `shelves` per bay · `back_panel` (bool) · `material_thickness`."
+  lod: "Plan: outline + bay divisions (medium) · elevation: shelves."

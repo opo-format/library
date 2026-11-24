@@ -1,0 +1,13 @@
+id: "sanitary-urinal"
+name: "Urinal"
+status: "planned"
+priority: "P3"
+catalogue_id: "F-03"
+ifc:
+  class: "IfcSanitaryTerminal"
+  predefinedType: "URINAL"
+sheet:
+  scope: "Wall-hung urinal (bowl), optional privacy screen, flush valve / sensor box."
+  ifc: "IfcSanitaryTerminal · URINAL"
+  based_on: "— · EN 80 (wall-hung urinals, connecting dimensions) · `accessibility` (ADA rim ≤ 17\")."
+  parameters: "`rim_height` (default 0.6 m adult, 0.43 m / 17\" accessible) · `projection` · `screen` (bool, depth)."

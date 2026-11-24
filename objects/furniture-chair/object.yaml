@@ -1,0 +1,14 @@
+id: "furniture-chair"
+name: "Chair / stool"
+status: "planned"
+priority: "P3"
+catalogue_id: "E-02"
+ifc:
+  class: "IfcFurniture"
+  predefinedType: "CHAIR"
+sheet:
+  scope: "Dining/side chair, armchair (dining), stool (counter/bar); four legs or sled; optional arms."
+  ifc: "IfcFurniture · CHAIR"
+  parameters: "`type` chair | armchair | stool · `seat_height` (dining 0.43–0.48 m / 17\"–19\"; counter stool 0.61–0.66 m / 24\"–26\"; bar stool 0.71–0.76 m / 28\"–30\") · `seat_width`, `seat_depth` · `back_height` · `arms` (bool)."
+  rules: "Arm height clears the table apron when pushed in (warning, with E-01)."
+  lod: "Plan: low square · medium seat + back line · high from 3D."

@@ -1,0 +1,15 @@
+id: "window-sliding"
+name: "Sliding window"
+status: "planned"
+priority: "P2"
+catalogue_id: "O-10"
+ifc:
+  class: "IfcWindow"
+  predefinedType: "WINDOW"
+sheet:
+  scope: "Horizontal sliders, 2 or 4 panes (FreeCAD presets), one or more fixed. Tracks in frame."
+  ifc: "IfcWindow · WINDOW · DOUBLE_PANEL_VERTICAL / TRIPLE_PANEL_VERTICAL · panel OperationType SLIDINGHORIZONTAL / FIXEDCASEMENT"
+  based_on: "FreeCAD \"Sliding 2-pane\" / \"Sliding 4-pane\" presets (reference) · IFC · US sizes."
+  parameters: "as O-08 plus `panes` 2 | 3 | 4 · `moving` pattern (e.g. XO, OX, XOX, OXXO) · `open_fraction`."
+  sizes: "US: widths 36\", 48\", 60\", 72\", 84\" × heights 24\", 36\", 48\", 60\" (rough openings; unit ½\" smaller) · EU: as O-08."
+  lod: "Elevation: arrows on moving panes; plan: overlapping sash lines in two tracks."

@@ -1,0 +1,16 @@
+id: "site-sign"
+name: "Sign"
+status: "planned"
+priority: "P3"
+catalogue_id: "G-03"
+ifc:
+  class: "IfcSign"
+sheet:
+  scope: "Wall, ceiling-hung or post-mounted sign panel: size, mounting height, text and a sign code as data. Safety signs reference their ISO 7010 code (e.g. E001) as data; the pictogram itself is not shipped in the library, so the app supplies its own graphic."
+  ifc: "IfcSign · PICTORAL / MARKER"
+  based_on: "— · ISO 7010 (safety sign codes, as data) · ISO 21542 (signage height and contrast, via `accessibility`) *(values to verify)*."
+  inputs: "Host wall, ceiling or a point (post)."
+  parameters: "`mount` wall | hanging | projecting | post · `width`, `height` · `mount_height` · `text` · `code` (data)."
+  rules: "Hanging signs: headroom below ≥ project value (warning)."
+  sizes: "—"
+  lod: "Plan: line (wall) or outline · elevation: panel with text."

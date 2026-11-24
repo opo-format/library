@@ -1,0 +1,15 @@
+id: "storage-built-in-wardrobe"
+name: "Built-in wardrobe"
+status: "planned"
+priority: "P3"
+catalogue_id: "F-14"
+ifc:
+  class: "IfcFurniture"
+  predefinedType: "USERDEFINED"
+  objectType: "WARDROBE"
+sheet:
+  scope: "Floor-to-ceiling built-in storage along a wall: carcase modules, hinged or sliding doors, internal rail/shelf zones (simple), scribe fillers."
+  ifc: "IfcFurniture · USERDEFINED (WARDROBE)"
+  inputs: "Slot `path` (wall line) · room height from host."
+  parameters: "`depth` (0.6 m / 24\") · `module_width` · `doors` hinged | sliding · `height` (to ceiling − scribe) · `interior` preset."
+  sizes: "Depths 0.6 m / 24\"; module widths 0.5, 0.75, 1.0 m / 18\", 24\", 36\" *(typical, to verify)*."

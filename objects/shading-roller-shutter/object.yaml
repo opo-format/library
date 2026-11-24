@@ -1,0 +1,19 @@
+id: "shading-roller-shutter"
+name: "Roller shutter"
+status: "planned"
+priority: "P2"
+catalogue_id: "S-04"
+ifc:
+  class: "IfcShadingDevice"
+  predefinedType: "SHUTTER"
+sheet:
+  scope: "Roller shutter with a coil box (surface, top-mounted on the window frame, or built into the lintel), guide rails, slats (aluminium, PVC, steel), optional ventilation gaps. Shown fully or partly lowered."
+  not_in_scope:
+    - "drive mechanics"
+  ifc: "IfcShadingDevice · SHUTTER"
+  based_on: "— · EN 13659 (roller shutters, including snow load resistance) · EN 12216."
+  inputs: "Host window or door."
+  parameters: "`box_type` surface | frame_top | lintel · `box_size` (derived from height and slat height *(maker table, to collect)*) · `slat_height` (common 37–55 mm) · `slat_thickness` · `guide_rail` width × depth · `lowered` (0–1) · `wind_class` (data)."
+  rules: "Shared rules + frame-top box fits within the window head (check against the hosted window)."
+  sizes: "Maker ranges *(to collect)*."
+  lod: "Medium: box, rails, curtain as a surface · high: slat lines and box section."

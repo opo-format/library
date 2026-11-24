@@ -1,0 +1,20 @@
+id: "shading-fins"
+name: "Façade fins"
+status: "planned"
+priority: "P2"
+catalogue_id: "S-02"
+ifc:
+  class: "IfcShadingDevice"
+  predefinedType: "USERDEFINED"
+  objectType: "FIN"
+sheet:
+  scope: "Vertical or horizontal fins projecting from a façade or curtain wall at each grid line or at a set rhythm: deep single blades, often running full height on high-rise towers. Straight, tapered or twisted along their length (angle at bottom and top)."
+  not_in_scope:
+    - "fins that are structural glass (those belong to O-18)"
+  ifc: "IfcShadingDevice · USERDEFINED (`ObjectType` FIN)"
+  based_on: "— · IFC as above."
+  inputs: "Host curtain wall (attaches to chosen grid lines) or façade surface + a list of positions."
+  parameters: "`orientation` vertical | horizontal · `depth` (default 0.4 m / 16\") · `thickness` (default 0.05 m / 2\") · `angle_start`, `angle_end` (twist along the fin; equal = straight) · `taper` (depth at the far end) · `positions` every grid line | every n-th | list · `fixing_spacing`."
+  rules: "Shared rules + fins clear of opening vents in the host curtain wall (check)."
+  sizes: "None."
+  lod: "Low: line in plan, rectangle in elevation · medium: fin solid · high: fixing brackets."

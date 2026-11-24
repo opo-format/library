@@ -1,0 +1,13 @@
+id: "appliance-kitchen-laundry"
+name: "Kitchen / laundry appliance"
+status: "planned"
+priority: "P2"
+catalogue_id: "F-13"
+ifc:
+  class: "IfcElectricAppliance"
+sheet:
+  scope: "One object, many kinds: freestanding, built-under or built-in appliance as a clean box with front details (door, controls, hob zones), clearance/door-swing zone. Product bindings provide real models."
+  ifc: "IfcElectricAppliance · REFRIGERATOR, FRIDGE_FREEZER, FREEZER, DISHWASHER, ELECTRICCOOKER, MICROWAVE, WASHINGMACHINE, TUMBLEDRYER (verify enum); cooker hood USERDEFINED"
+  parameters: "`kind` (enum above) · `installation` freestanding | built_under | built_in · `width`, `height`, `depth` (defaults per kind and market) · `door_swing` left | right | drop_down."
+  sizes: "EU: 0.45 / 0.6 m wide built-under (height to EN 1116 recess 820–920 mm); fridge columns 0.6 m · US: dishwasher 24\" × 34\" × 25\"; ranges 30\" (36\"/48\" pro); fridges 30\"–36\" wide."
+  lod: "Plan: outline + kind symbol (hob rings, \"DW\", \"W\"…) annotation."

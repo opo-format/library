@@ -1,0 +1,20 @@
+id: "fire-sprinkler-head"
+name: "Sprinkler head"
+status: "planned"
+priority: "P3"
+catalogue_id: "M-05"
+ifc:
+  class: "IfcFireSuppressionTerminal"
+  predefinedType: "SPRINKLER"
+sheet:
+  scope: "Pendent, upright, sidewall or concealed sprinkler head with its coverage area shown as an annotation."
+  not_in_scope:
+    - "hydraulic design"
+    - "spacing design"
+  ifc: "IfcFireSuppressionTerminal · SPRINKLER"
+  based_on: "— · EN 12845 (fixed firefighting systems, sprinkler design) · NFPA 13 (US) *(spacing and coverage values to collect; shown as data, not checked)*."
+  inputs: "Host ceiling (K-04) or slab soffit."
+  parameters: "`kind` pendent | upright | sidewall | concealed · `coverage_radius` (data, annotation) · `k_factor` (data) · `temperature_rating` (data)."
+  rules: "Heads clear of light fixtures and air terminals by a project distance (warning)."
+  sizes: "—"
+  lod: "RCP symbol + optional coverage circle."

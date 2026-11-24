@@ -1,0 +1,19 @@
+id: "shading-venetian-blind"
+name: "External venetian blind"
+status: "planned"
+priority: "P2"
+catalogue_id: "S-03"
+ifc:
+  class: "IfcShadingDevice"
+  predefinedType: "JALOUSIE"
+sheet:
+  scope: "Retractable slat blind outside a window: headbox (exposed, concealed in the lintel, or in an insulated box), slats (flat, curved C or Z profile), guide rails or guide wires, bottom rail. Slat tilt angle and lowered height shown."
+  not_in_scope:
+    - "drive and tilt mechanics"
+  ifc: "IfcShadingDevice · JALOUSIE"
+  based_on: "— · EN 13659 · EN 12216 (terms)."
+  inputs: "Host window or door (default), or a drawn rectangle."
+  parameters: "`slat_profile` flat | C | Z · `slat_width` (default 0.08 m; common 60, 80, 90 mm) · `guide` rails | wires · `box` exposed | concealed | none · `box_height` (stack height derived from blind height and slat width *(formula from maker data, to collect)*) · `lowered` (0–1) · `slat_angle` (0–90°) · `wind_class` (data, EN 13659)."
+  rules: "Shared rules + lintel depth ≥ stack height when `box` = concealed (check)."
+  sizes: "Maker min/max widths and heights per slat type *(to collect from public maker data)*."
+  lod: "Medium: box, rails, slats as a surface with lines at the slat pitch · high: individual slats at the set angle."

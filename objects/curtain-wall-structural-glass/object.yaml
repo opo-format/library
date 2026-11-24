@@ -1,0 +1,15 @@
+id: "curtain-wall-structural-glass"
+name: "Structural glass façade (glass fins, point-fixed)"
+status: "planned"
+priority: "P2"
+catalogue_id: "O-18"
+ifc:
+  class: "IfcCurtainWall"
+sheet:
+  scope: "Frameless, Apple-store-style glass walls: large laminated glass panes with **butt joints** (silicone), stabilised by **glass fins** (perpendicular glass beams) and/or a cable net or steel structure, fixed by **point fittings** (spider brackets, countersunk or clamp bolts), **linear clamps** or **structural bonding**. Floor and head channels (shoes), fin-to-pane connections, corner butt-glazing. Very tall single panes and laminated fin splices."
+  ifc: "IfcCurtainWall · USERDEFINED (STRUCTURAL_GLASS) · glass panels IfcPlate CURTAIN_PANEL · fins IfcMember USERDEFINED (GLASS_FIN) · Fixings in IFC: spider fittings, clamps and slab brackets as `IfcDiscreteAccessory` (BRACKET for slab anchors and spiders, SHOE for floor and head channels; clamps USERDEFINED `ObjectType` CLAMP), bolts as `IfcMechanicalFastener` · BOLT / ANCHORBOLT."
+  parameters: "grid U (pane widths) and V (pane heights, may be a single pane floor-to-ceiling) · `pane_build_up` (laminated layers, e.g. 3 × 12 mm + interlayers; IGU optional) · `fin_depth`, `fin_thickness` (laminated plies), `fin_side` inside | outside · `fin_splice` (heights over max pane length: spliced fins with steel plates) · `fitting_type`, `fitting_spacing` (edge distance of point fixings) · `butt_joint_width` · `base_shoe` / `head_channel` (depth, recess into floor/ceiling)."
+  rules: "Shared rules + pane size within maker maximums *(data, warning)* · point fixing edge distances ≥ min *(values to add)* · fin depth vs. height rule of thumb (warning only; structural glass design under CEN/TS 19100 / ASTM E1300 is the engineer's job)."
+  lod: "medium: panes, fins, simple fitting blocks · high: spider arms and bolt heads, shoe channels, splice plates · plan: pane lines + fins (cut, hatched as glass) + fittings symbols."
+  open_questions:
+    - "Whether cable-net façades become their own object."

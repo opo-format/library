@@ -1,0 +1,15 @@
+id: "kitchen-wall-unit"
+name: "Kitchen wall unit"
+status: "planned"
+priority: "P2"
+catalogue_id: "F-09"
+ifc:
+  class: "IfcFurniture"
+  predefinedType: "USERDEFINED"
+  objectType: "KITCHEN_WALL_UNIT"
+sheet:
+  scope: "Wall-hung unit above the worktop: doors, lift-up flaps, open shelves, extractor housing."
+  ifc: "IfcFurniture · USERDEFINED (KITCHEN_WALL_UNIT)"
+  parameters: "`width` · `height` · `depth` (0.32–0.35 m EU / 12\" US) · `mount_height` (bottom above worktop: ≥ 450 mm EU, 18\" US) · `fronts` · `handle`."
+  sizes: "EU widths as F-08; heights by maker (0.36–0.96 m) *(to collect)* · US widths 9\"–48\" in 3\" steps; heights 30\", 36\", 42\"; depth 12\" (24\" over fridges)."
+  lod: "Plan: overhead class (dashed) outline · elevation: fronts."

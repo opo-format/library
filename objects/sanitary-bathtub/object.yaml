@@ -1,0 +1,16 @@
+id: "sanitary-bathtub"
+name: "Bathtub"
+status: "planned"
+priority: "P2"
+catalogue_id: "F-06"
+ifc:
+  class: "IfcSanitaryTerminal"
+  predefinedType: "BATH"
+sheet:
+  scope: "Built-in (alcove, drop-in, corner) and freestanding baths; bath panel (front/end), overflow and waste, tap position, optional shower screen."
+  ifc: "IfcSanitaryTerminal · BATH"
+  based_on: "— · market sizes."
+  inputs: "Host walls (alcove / corner)."
+  parameters: "`type` alcove | drop_in | corner | freestanding · `length`, `width`, `rim_height` · `shape` rectangle | double_ended | oval · `panel` front | front_end | none · `tap_position` end | side | wall."
+  sizes: "EU/UK lengths 1500, 1600, 1700, 1800 mm × widths 700, 750, 800 mm (1700 × 700 most common) · US alcove 60\" × 30\" / 32\" (most common), compact 54\", large 66\"–72\"; corner 60\" × 60\"."
+  lod: "Plan: outer outline + inner bowl outline (medium) · high from 3D."

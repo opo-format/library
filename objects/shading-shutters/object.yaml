@@ -1,0 +1,19 @@
+id: "shading-shutters"
+name: "Hinged / sliding shutters"
+status: "planned"
+priority: "P3"
+catalogue_id: "S-05"
+ifc:
+  class: "IfcShadingDevice"
+  predefinedType: "SHUTTER"
+sheet:
+  scope: "Wing shutters (one or two leaves hinged at the reveal or the face), folding (concertina) shutters and sliding panel shutters on a top track. Panel infill: solid, louvred (fixed slats) or perforated."
+  not_in_scope:
+    - "ironmongery detail beyond hinges and track"
+  ifc: "IfcShadingDevice · SHUTTER"
+  based_on: "— · EN 13659 (wing, concertina and sliding panel shutters) · EN 12216."
+  inputs: "Host window or door."
+  parameters: "`kind` hinged | folding | sliding · `leaves` 1 | 2 | n · `infill` solid | louvred | perforated · `leaf_thickness` · `open_angle` (hinged) or `slide_position` · `track` (sliding: top track length, parking position beside the opening)."
+  rules: "Shared rules + open leaves clear of adjacent openings and façade elements (warning) · sliding: parking space beside the opening ≥ leaf width (check)."
+  sizes: "None (host-driven)."
+  lod: "Plan: leaf lines with swing arcs (hinged) or track and parked panels (sliding)."

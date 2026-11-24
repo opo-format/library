@@ -1,0 +1,16 @@
+id: "furniture-desk"
+name: "Desk / workstation"
+status: "planned"
+priority: "P3"
+catalogue_id: "E-05"
+ifc:
+  class: "IfcFurniture"
+  predefinedType: "DESK"
+sheet:
+  scope: "Fixed or height-adjustable desk (EN 527 types A–D), straight or L, optional modesty panel, pedestal, monitor arm zone; workstation clusters via nesting."
+  ifc: "IfcFurniture · DESK"
+  based_on: "— · EN 527-1 (office desk dimensions, desk types by adjustability) · US practice."
+  parameters: "`type` fixed | selectable | adjustable (EN 527 C / B / A) · `width`, `depth` · `height` (fixed default 0.74 m / 29\"–30\"; adjustable range) · `shape` straight | l_left | l_right · `legs` four | panel | c_frame | t_frame · `modesty_panel` (bool) · `pedestal` none | mobile | fixed."
+  rules: "Legroom and height range per EN 527-1 Table 1 *(values to add — standard is not freely available)*."
+  sizes: "Widths 1.2, 1.4, 1.6, 1.8 m; depths 0.7, 0.8 m · US 48\", 60\", 72\" × 24\", 30\" *(typical, to verify)*."
+  lod: "Plan: outline + legs (hidden) + chair (optional E-02)."

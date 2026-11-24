@@ -1,0 +1,14 @@
+id: "kitchen-tall-unit"
+name: "Kitchen tall unit"
+status: "planned"
+priority: "P2"
+catalogue_id: "F-10"
+ifc:
+  class: "IfcFurniture"
+  predefinedType: "USERDEFINED"
+  objectType: "KITCHEN_TALL_UNIT"
+sheet:
+  scope: "Floor-to-top unit: larder, broom, appliance housing (built-in oven, fridge), split fronts."
+  ifc: "IfcFurniture · USERDEFINED (KITCHEN_TALL_UNIT)"
+  parameters: "`width` · `height` · `depth` · `fronts` (split heights) · `housing` none | oven | oven_microwave | fridge | fridge_freezer."
+  sizes: "EU: heights align with wall unit tops (maker) · US: heights 84\", 90\", 96\"; widths 18\", 24\", 30\", 33\", 36\"; depth 24\" (12\" pantry)."

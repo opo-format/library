@@ -1,0 +1,15 @@
+id: "window-top-bottom-hung"
+name: "Top / bottom hung window"
+status: "planned"
+priority: "P3"
+catalogue_id: "O-12"
+ifc:
+  class: "IfcWindow"
+  predefinedType: "WINDOW"
+sheet:
+  scope: "Single sash hinged at top or bottom, or horizontally pivoting; stay arms at high LOD."
+  ifc: "IfcWindow · WINDOW · panel OperationType TOPHUNG (awning) / BOTTOMHUNG (hopper) / PIVOTHORIZONTAL"
+  based_on: "FreeCAD \"Awning\" preset (reference) · IFC."
+  parameters: "as O-08 plus `hinge` top | bottom | pivot · `open_angle` (drawing; restrictor default)."
+  sizes: "US awning: widths 24\"–46\", heights 20\"–92\" (makers' ranges) · EU: as O-08."
+  lod: "Elevation triangle apex at the hinge edge."

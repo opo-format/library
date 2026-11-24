@@ -1,0 +1,20 @@
+id: "kitchen-base-unit"
+name: "Kitchen base unit"
+status: "planned"
+priority: "P2"
+catalogue_id: "F-08"
+ifc:
+  class: "IfcFurniture"
+  predefinedType: "USERDEFINED"
+  objectType: "KITCHEN_BASE_UNIT"
+sheet:
+  scope: "Floor unit under the worktop: carcase, plinth, fronts (doors, drawers, combinations), internal shelf, handles; special types: sink base, hob/oven housing, corner (blind / L), drawer stack."
+  not_in_scope:
+    - "internal fittings beyond shelves and drawer boxes (data only)"
+  ifc: "IfcFurniture · USERDEFINED (ObjectType KITCHEN_BASE_UNIT) · classification Uniclass/OmniClass to add"
+  based_on: "— · EN 1116 · US industry sizes (`kitchen`)."
+  inputs: "None (placed along a run; F-12 places and sizes them)."
+  parameters: "`width` · `height` (carcase; derived from worktop height − worktop thickness − plinth) · `depth` (0.56 m EU / 24\" US) · `plinth_height` (0.1–0.15 m EU / 4½\" US) · `plinth_setback` · `fronts` (layout preset: 1 door, 2 doors, 1 drawer + 1 door, 3 drawers, 4 drawers…) · `front_style` slab | shaker · `handle` bar | knob | recessed | none · `carcase_thickness` (0.018 m / ¾\")."
+  rules: "Height chain gives the EN 1116 worktop height (850/900/950) or US 36\" · built-under recess for appliances ≥ EN 1116 minimum."
+  sizes: "EU widths 0.15, 0.2, 0.3, 0.4, 0.45, 0.5, 0.6, 0.8, 0.9, 1.0, 1.2 m *(maker steps; appliance housings 0.4 / 0.5 / 0.6 / 0.9 m from EN 1116)* · US widths 9\"–48\" in 3\" steps, height 34½\", depth 24\"."
+  lod: "3D: low box · medium carcase, plinth, fronts with joints, handles · high + front style, drawer joints. Plan: low/medium outline + front line (front dashed where under worktop) · elevation: fronts and handles."

@@ -1,0 +1,19 @@
+id: "site-tree"
+name: "Tree / planting"
+status: "planned"
+priority: "P2"
+catalogue_id: "G-01"
+ifc:
+  class: "IfcGeographicElement"
+  predefinedType: "VEGETATION"
+sheet:
+  scope: "Tree, shrub or planting area: trunk, crown as a simple solid (sphere, ellipsoid, cone, column), crown and trunk diameters, height; for areas a boundary with planting height. Species as data. Plan symbol with crown outline."
+  not_in_scope:
+    - "realistic foliage (apps may swap a visual model)"
+  ifc: "IfcGeographicElement · VEGETATION · Priority: every site plan needs it."
+  based_on: "— · IFC."
+  inputs: "Point (tree) or boundary (planting area) on the terrain."
+  parameters: "`kind` tree | shrub | area · `crown_shape` round | oval | conical | columnar · `height` (default 8 m / 26') · `crown_diameter` (default 5 m / 16') · `trunk_diameter` · `crown_base` (clear trunk height) · `species` (data) · `existing` (bool: existing / new / to be removed, drawn with different line classes)."
+  rules: "Crown clear of buildings by a project distance (warning) · root protection zone as an annotation (radius from trunk diameter, project factor)."
+  sizes: "Presets by size class (small / medium / large tree; typical)."
+  lod: "Plan: circle (low), crown outline with trunk (medium), textured symbol (high) · elevation: crown and trunk solid."

@@ -1,0 +1,16 @@
+id: "structure-member"
+name: "Member (brace, post, purlin, rafter, stud)"
+status: "planned"
+priority: "P3"
+catalogue_id: "K-03"
+ifc:
+  class: "IfcMember"
+sheet:
+  scope: "Any other linear member: bracing, posts, purlins, rafters, studs, truss chords. Same geometry as K-02 with a free orientation (point to point in 3D)."
+  ifc: "IfcMember · BRACE / POST / PURLIN / RAFTER / STUD / STRUT / CHORD"
+  based_on: "— · IFC 4.3 `IfcMemberTypeEnum`."
+  inputs: "Start and end points in 3D."
+  parameters: "`role` (IFC predefined type above) · `profile` · `rotation` about its axis · `end_cut`."
+  rules: "—"
+  sizes: "Profile library."
+  lod: "As K-02."

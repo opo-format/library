@@ -1,0 +1,18 @@
+id: "electrical-socket-outlet"
+name: "Socket outlet"
+status: "planned"
+priority: "P3"
+catalogue_id: "M-03"
+ifc:
+  class: "IfcOutlet"
+sheet:
+  scope: "Wall or floor outlet: plate size, number of gangs, mounting height; socket type as data (Schuko, BS 1363, NEMA 5-15, data RJ45)."
+  not_in_scope:
+    - "circuits"
+  ifc: "IfcOutlet · POWEROUTLET / DATAOUTLET / COMMUNICATIONSOUTLET / AUDIOVISUALOUTLET"
+  based_on: "— · IEC 60884 (plugs and socket-outlets) and national socket types as data only *(geometry is a generic plate; the socket face is not drawn)*."
+  inputs: "Host wall or floor."
+  parameters: "`kind` (IFC type) · `gangs` 1–4 · `plate` (default 86 × 86 mm; US 2¾\" × 4½\" single gang) · `height` (default 0.3 m / 15\"; above worktops 1.05 m / 44\") · `socket_standard` (data)."
+  rules: "`accessibility`: controls and outlets within the reach range (ISO 21542 controls 800–1100 mm; ADA reach range) where the rule set is on (warning)."
+  sizes: "Plate sizes per market (typical)."
+  lod: "Plan symbol · elevation plate outline."

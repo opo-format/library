@@ -1,0 +1,19 @@
+id: "window-roof"
+name: "Roof window"
+status: "planned"
+priority: "P2"
+catalogue_id: "O-14"
+ifc:
+  class: "IfcWindow"
+  predefinedType: "SKYLIGHT"
+sheet:
+  scope: "Window in a pitched roof: frame, sash (centre-pivot or top-hung), glazing, flashing outline, interior lining (splay) at medium/high. Host: roof slab (IfcRoof / IfcSlab ROOF); oriented along the roof slope."
+  ifc: "IfcWindow · SKYLIGHT · panel OperationType PIVOTHORIZONTAL / TOPHUNG"
+  based_on: "— · market standard sizes shared across several makers."
+  inputs: "Host roof slab (pitch read from host); flashing type by roof covering."
+  parameters: "`width`, `height` (outer frame, along slope) · `operation` centre_pivot | top_hung · `flashing` none | profiled | flat · `lining_splay` (interior reveal angles) · `handle` top | bottom."
+  rules: "Host pitch within window's allowed range (e.g. 15°–90°, maker data) · escape: top-hung sizes can satisfy `escape_windows` (computed)."
+  sizes: "EU (de facto, several makers): 55 × 78, 55 × 98, 66 × 98, 66 × 118, 78 × 98, 78 × 118, 78 × 140, 78 × 160, 94 × 118, 94 × 140, 114 × 118, 114 × 140, 134 × 98, 134 × 140 cm · US skylight sizes (curb/deck-mounted, inches) to collect."
+  lod: "Plan: outline projected on plan with roof slope (overhead class when above cut plane)."
+  open_questions:
+    - "Maker size codes are trademarks; catalogue uses dimensions only."

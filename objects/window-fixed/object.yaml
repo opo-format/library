@@ -1,0 +1,14 @@
+id: "window-fixed"
+name: "Fixed window"
+status: "planned"
+priority: "P2"
+catalogue_id: "O-11"
+ifc:
+  class: "IfcWindow"
+  predefinedType: "WINDOW"
+sheet:
+  scope: "Fixed glazing in a frame (direct glazed or in a fixed sash), optional grid of fixed panes. Also used as the glazed panel inside O-06."
+  ifc: "IfcWindow · WINDOW · SINGLE_PANEL (or grid) · FIXEDCASEMENT"
+  based_on: "FreeCAD \"Fixed\" preset (reference) · IFC."
+  parameters: "as O-08 without operations; `direct_glazed` (bool)."
+  sizes: "US picture windows: widths 24\"–96\", heights 12\"–60\"; common 36\" × 24\", 48\" × 36\", 48\" × 60\", 60\" × 36\", 72\" × 48\", 96\" × 60\" · EU: as O-08."

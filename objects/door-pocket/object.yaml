@@ -1,0 +1,19 @@
+id: "door-pocket"
+name: "Pocket door"
+status: "planned"
+priority: "P2"
+catalogue_id: "O-04"
+ifc:
+  class: "IfcDoor"
+  predefinedType: "DOOR"
+sheet:
+  scope: "Sliding leaf disappearing into a pocket frame inside the wall. Declares an enlarged host void (opening + pocket) and a pocket cassette (thin wall zone) in plan."
+  not_in_scope:
+    - "the wall build-up around the cassette (host's job)"
+  ifc: "IfcDoor · DOOR · OperationType SLIDING_TO_LEFT / SLIDING_TO_RIGHT / DOUBLE_DOOR_SLIDING"
+  based_on: "O-03 · IFC as above."
+  inputs: "Host wall; checks host thickness ≥ pocket cassette thickness."
+  parameters: "`leaves` 1 | 2 · `cassette_thickness` (default 0.1 m / 4\") · `pocket_length` (= leaf width + allowance, derived) · `flush_pull` (bool)."
+  rules: "Host thickness ≥ cassette thickness + 2 × lining (error) · free wall length ≥ pocket length (error)."
+  sizes: "As O-03 (leaf sizes per market)."
+  lod: "Plan medium/high shows the pocket as hidden line extent of the leaf; void in host covers opening + pocket (pocket void is a recess, not a through opening)."

@@ -1,0 +1,18 @@
+id: "heating-radiator"
+name: "Radiator / convector"
+status: "planned"
+priority: "P3"
+catalogue_id: "M-01"
+ifc:
+  class: "IfcSpaceHeater"
+sheet:
+  scope: "Panel radiator, column radiator, towel rail, trench (floor) convector: body, brackets, valve and lockshield positions, connection side. Shown under windows as the typical case."
+  not_in_scope:
+    - "heat output calculation (output as data)"
+  ifc: "IfcSpaceHeater · RADIATOR / CONVECTOR"
+  based_on: "— · EN 442 (radiators and convectors: test and rating) · market panel types."
+  inputs: "Host wall (or floor for trench convectors) · optional host window (centres under it)."
+  parameters: "`kind` panel | column | towel_rail | trench · `panel_type` 10 | 11 | 20 | 21 | 22 | 33 (panel/convector count, market designation) · `height` (typical 0.3–0.9 m) · `length` (typical 0.4–3.0 m in 0.1 m steps) · `wall_distance` · `floor_clearance` (default 0.1 m / 4\") · `connection` side | bottom (left/right) · `output` (data, W at EN 442 conditions)."
+  rules: "Fits under the hosted window sill (warning) · clear of door swings (check against doors in the same wall)."
+  sizes: "Panel types × heights × lengths (typical market range, not a norm)."
+  lod: "Plan: outline (medium), panels (high) · elevation: panel face with brackets."

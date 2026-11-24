@@ -1,0 +1,19 @@
+id: "transport-escalator"
+name: "Escalator"
+status: "planned"
+priority: "P2"
+catalogue_id: "T-02"
+ifc:
+  class: "IfcTransportElement"
+  predefinedType: "ESCALATOR"
+sheet:
+  scope: "One escalator between two levels: truss (with supports at top and bottom), steps, balustrades (glass or panel) with moving handrails, comb plates and landing plates, floor openings and the clearance zones at each end. Direction up/down as data and symbol."
+  not_in_scope:
+    - "drive station internals"
+  ifc: "IfcTransportElement · ESCALATOR"
+  based_on: "— · EN 115-1 · ASME A17.1."
+  inputs: "Lower level, upper level, insertion point at the lower landing + direction."
+  parameters: "`inclination` 30° | 35° | 27.3° (default 30°) · `step_width` 0.6 | 0.8 | 1.0 m · `rise` (derived from the levels) · `horizontal_steps` at each end (default 2 *(EN 115-1 minimum per speed, to verify)*) · `balustrade` glass | panel · `balustrade_height` (default 0.9 m, typical) · `speed` (data, m/s) · `truss_depth` (maker data; default *(to collect)*) · `direction` up | down | reversible."
+  rules: "Inclination: ≤ 30°, or ≤ 35° only when rise ≤ 6 m and speed ≤ 0.5 m/s (EN 115-1; error otherwise) · free zone at each end ≥ min *(EN 115-1 value to verify)* (annotation and check against walls) · headroom above the steps ≥ min *(to verify)* · slab opening derived from the truss and clearances."
+  sizes: "Step width × inclination combinations (0.6 / 0.8 / 1.0 m × 27.3° / 30° / 35°) as variants."
+  lod: "Plan: outline with direction arrow and step lines (low: outline + arrow) · section: truss, steps, balustrade, handrail · high: comb plates, handrail profile."
