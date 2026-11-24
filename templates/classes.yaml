@@ -5731,3 +5731,548 @@ IfcRampFlight:
         points: "[[0, 0], [run, 0]]"
   ifc:
     decomposition: "A flight on its own; an IfcRamp aggregates it."
+IfcDoor:
+  archetype: "hosted"
+  name: "Door (class template)"
+  description: "Door in a wall opening: frame, one leaf hinged left or right, the void it cuts, and the plan symbol with the leaf open at 90° and its swing. Detailed doors are library objects (O-01 to O-07). Sizes are illustrative defaults, not maker or norm values."
+  default_type: "DOOR"
+  parameters:
+    width:
+      default: 0.9
+    height:
+      default: 2.1
+    sill_height:
+      default: 0.0
+    frame_width:
+      type: "length"
+      default: 0.05
+      label: "Frame width"
+      group: "Frame"
+      limits:
+        min: 0.02
+        max: 0.3
+    frame_depth:
+      type: "length"
+      default: 0.1
+      label: "Frame depth"
+      group: "Frame"
+      limits:
+        min: 0.03
+        max: 0.5
+    leaf_thickness:
+      type: "length"
+      default: 0.04
+      label: "Leaf thickness"
+      group: "Leaf"
+      limits:
+        min: 0.01
+        max: 0.15
+    hinge_side:
+      type: "choice"
+      default: "left"
+      label: "Hinges"
+      group: "Leaf"
+      options:
+        - "left"
+        - "right"
+    frame_material:
+      type: "material"
+      default: "painted_timber"
+      label: "Frame"
+      group: "Materials"
+      options: "materials"
+    leaf_material:
+      type: "material"
+      default: "painted_timber"
+      label: "Leaf"
+      group: "Materials"
+      options: "materials"
+  rules:
+    derived:
+      leaf_width: "width - 2 * frame_width"
+      hinge_x: "if hinge_side = \"left\" then -width / 2 + frame_width else width / 2 - frame_width"
+      top: "sill_height + height"
+    checks:
+      rectangle_only:
+        expr: "outline_mode = \"rectangle\""
+        severity: "warning"
+        message: "The template draws frame and leaf for a rectangle only; shaped doors are library objects."
+      leaf_positive:
+        expr: "leaf_width > 0"
+        severity: "error"
+        message: "The frame is wider than the opening."
+  recipe:
+    frame:
+      op: "union"
+      args:
+        items: "[box([-width / 2, -frame_depth / 2, sill_height], [-width / 2 + frame_width, frame_depth / 2, top]), box([width / 2 - frame_width, -frame_depth / 2, sill_height], [width / 2, frame_depth / 2, top]), box([-width / 2, -frame_depth / 2, top - frame_width], [width / 2, frame_depth / 2, top])]"
+    leaf:
+      op: "box"
+      args:
+        min: "[-width / 2 + frame_width, -leaf_thickness / 2, sill_height]"
+        max: "[width / 2 - frame_width, leaf_thickness / 2, top - frame_width]"
+    plan_frame:
+      op: "union"
+      plane: "xy"
+      args:
+        items: "[rectangle([-width / 2, -frame_depth / 2], [-width / 2 + frame_width, frame_depth / 2]), rectangle([width / 2 - frame_width, -frame_depth / 2], [width / 2, frame_depth / 2])]"
+    plan_leaf:
+      op: "rectangle"
+      plane: "xy"
+      args:
+        min: "if hinge_side = \"left\" then [hinge_x, frame_depth / 2] else [hinge_x - leaf_thickness, frame_depth / 2]"
+        max: "if hinge_side = \"left\" then [hinge_x + leaf_thickness, frame_depth / 2 + leaf_width] else [hinge_x, frame_depth / 2 + leaf_width]"
+    plan_swing:
+      op: "arc"
+      plane: "xy"
+      args:
+        center: "[hinge_x, frame_depth / 2]"
+        radius: "leaf_width"
+        start_angle: "if hinge_side = \"left\" then 0 else 90"
+        end_angle: "if hinge_side = \"left\" then 90 else 180"
+  representations:
+    model.low:
+      items:
+        - geometry: "void"
+          role: "void"
+        - geometry: "leaf"
+          material: "leaf_material"
+    model.medium:
+      items:
+        - geometry: "void"
+          role: "void"
+        - geometry: "frame"
+          material: "frame_material"
+          part: "Frame"
+        - geometry: "leaf"
+          material: "leaf_material"
+          part: "Leaf"
+    model.high:
+      items:
+        - geometry: "void"
+          role: "void"
+        - geometry: "frame"
+          material: "frame_material"
+          part: "Frame"
+        - geometry: "leaf"
+          material: "leaf_material"
+          part: "Leaf"
+    plan.low:
+      items:
+        - geometry: "plan_frame"
+          class: "cut"
+        - geometry: "plan_leaf"
+          class: "projected"
+        - geometry: "plan_swing"
+          class: "projected"
+    plan.medium:
+      items:
+        - geometry: "plan_frame"
+          class: "cut"
+        - geometry: "plan_leaf"
+          class: "projected"
+        - geometry: "plan_swing"
+          class: "projected"
+    plan.high:
+      items:
+        - geometry: "plan_frame"
+          class: "cut"
+        - geometry: "plan_leaf"
+          class: "projected"
+        - geometry: "plan_swing"
+          class: "projected"
+    elevation:
+      items:
+        - geometry: "elev_outline"
+          class: "projected"
+  materials:
+    - "painted_timber"
+IfcWindow:
+  archetype: "hosted"
+  name: "Window (class template)"
+  description: "Window in a wall opening: frame, glazing, the void it cuts, and the plan cut through frame and glass. Detailed windows are library objects (O-08 to O-14). Sizes are illustrative defaults, not maker or norm values."
+  default_type: "WINDOW"
+  parameters:
+    width:
+      default: 1.2
+    height:
+      default: 1.2
+    sill_height:
+      default: 0.9
+    frame_width:
+      type: "length"
+      default: 0.07
+      label: "Frame width"
+      group: "Frame"
+      limits:
+        min: 0.02
+        max: 0.3
+    frame_depth:
+      type: "length"
+      default: 0.07
+      label: "Frame depth"
+      group: "Frame"
+      limits:
+        min: 0.03
+        max: 0.4
+    glass_thickness:
+      type: "length"
+      default: 0.024
+      label: "Glazing unit thickness"
+      group: "Glazing"
+      limits:
+        min: 0.004
+        max: 0.08
+    frame_material:
+      type: "material"
+      default: "painted_timber"
+      label: "Frame"
+      group: "Materials"
+      options: "materials"
+  rules:
+    derived:
+      top: "sill_height + height"
+    checks:
+      rectangle_only:
+        expr: "outline_mode = \"rectangle\""
+        severity: "warning"
+        message: "The template draws frame and glass for a rectangle only; shaped windows are library objects."
+      glass_positive:
+        expr: "width > 2 * frame_width and height > 2 * frame_width"
+        severity: "error"
+        message: "The frame is wider than the opening."
+  recipe:
+    frame:
+      op: "union"
+      args:
+        items: "[box([-width / 2, -frame_depth / 2, sill_height], [-width / 2 + frame_width, frame_depth / 2, top]), box([width / 2 - frame_width, -frame_depth / 2, sill_height], [width / 2, frame_depth / 2, top]), box([-width / 2, -frame_depth / 2, top - frame_width], [width / 2, frame_depth / 2, top]), box([-width / 2, -frame_depth / 2, sill_height], [width / 2, frame_depth / 2, sill_height + frame_width])]"
+    glass:
+      op: "box"
+      args:
+        min: "[-width / 2 + frame_width, -glass_thickness / 2, sill_height + frame_width]"
+        max: "[width / 2 - frame_width, glass_thickness / 2, top - frame_width]"
+    plan_frame:
+      op: "union"
+      plane: "xy"
+      args:
+        items: "[rectangle([-width / 2, -frame_depth / 2], [-width / 2 + frame_width, frame_depth / 2]), rectangle([width / 2 - frame_width, -frame_depth / 2], [width / 2, frame_depth / 2])]"
+    plan_glass:
+      op: "rectangle"
+      plane: "xy"
+      args:
+        min: "[-width / 2 + frame_width, -glass_thickness / 2]"
+        max: "[width / 2 - frame_width, glass_thickness / 2]"
+    plan_sill:
+      op: "line"
+      plane: "xy"
+      args:
+        start: "[-width / 2, host.y_max]"
+        end: "[width / 2, host.y_max]"
+  representations:
+    model.low:
+      items:
+        - geometry: "void"
+          role: "void"
+        - geometry: "glass"
+          material: "\"glass\""
+    model.medium:
+      items:
+        - geometry: "void"
+          role: "void"
+        - geometry: "frame"
+          material: "frame_material"
+          part: "Frame"
+        - geometry: "glass"
+          material: "\"glass\""
+          part: "Glazing"
+    model.high:
+      items:
+        - geometry: "void"
+          role: "void"
+        - geometry: "frame"
+          material: "frame_material"
+          part: "Frame"
+        - geometry: "glass"
+          material: "\"glass\""
+          part: "Glazing"
+    plan.low:
+      items:
+        - geometry: "plan_frame"
+          class: "cut"
+        - geometry: "plan_glass"
+          class: "cut"
+        - geometry: "plan_sill"
+          class: "projected"
+    plan.medium:
+      items:
+        - geometry: "plan_frame"
+          class: "cut"
+        - geometry: "plan_glass"
+          class: "cut"
+        - geometry: "plan_sill"
+          class: "projected"
+    plan.high:
+      items:
+        - geometry: "plan_frame"
+          class: "cut"
+        - geometry: "plan_glass"
+          class: "cut"
+        - geometry: "plan_sill"
+          class: "projected"
+    elevation:
+      items:
+        - geometry: "elev_outline"
+          class: "projected"
+  materials:
+    - "painted_timber"
+    - "glass"
+IfcShadingDevice:
+  archetype: "hosted"
+  name: "Shading device (class template)"
+  description: "Shutter, jalousie or awning in front of an opening, on the outside face of its host: a panel of the opening size. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "SHUTTER"
+  parameters:
+    width:
+      default: 1.2
+    height:
+      default: 1.2
+    sill_height:
+      default: 0.9
+    body_thickness:
+      type: "length"
+      default: 0.03
+      label: "Thickness"
+      group: "Size"
+      limits:
+        min: 0.0005
+        max: 1.0
+    body_material:
+      type: "material"
+      default: "aluminium"
+      label: "Material"
+      group: "Materials"
+      options: "materials"
+  recipe:
+    body:
+      op: "extrude"
+      plane: "xz"
+      args:
+        profile: "profile"
+        from: "host.y_max"
+        to: "host.y_max + body_thickness"
+    plan_body:
+      op: "rectangle"
+      plane: "xy"
+      args:
+        min: "[min(for p in profile_points return p[1]), host.y_max]"
+        max: "[max(for p in profile_points return p[1]), host.y_max + body_thickness]"
+  representations:
+    model.low:
+      items:
+        - geometry: "body"
+          material: "body_material"
+    model.medium:
+      items:
+        - geometry: "body"
+          material: "body_material"
+    model.high:
+      items:
+        - geometry: "body"
+          material: "body_material"
+    plan.low:
+      items:
+        - geometry: "plan_body"
+          class: "projected"
+    plan.medium:
+      items:
+        - geometry: "plan_body"
+          class: "projected"
+    plan.high:
+      items:
+        - geometry: "plan_body"
+          class: "projected"
+    elevation:
+      items:
+        - geometry: "elev_outline"
+          class: "projected"
+  host:
+    void: null
+    note: "Sits on the front face of its host and does not cut it."
+  materials:
+    - "aluminium"
+IfcProjectionElement:
+  archetype: "hosted"
+  name: "Projection element (class template)"
+  description: "Blister or deviator that adds material to the face of its host: a block of the given outline and thickness. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "BLISTER"
+  parameters:
+    width:
+      default: 0.4
+    height:
+      default: 0.4
+    sill_height:
+      default: 1.0
+    body_thickness:
+      type: "length"
+      default: 0.1
+      label: "Thickness"
+      group: "Size"
+      limits:
+        min: 0.0005
+        max: 1.0
+    body_material:
+      type: "material"
+      default: "reinforced_concrete"
+      label: "Material"
+      group: "Materials"
+      options: "materials"
+  recipe:
+    body:
+      op: "extrude"
+      plane: "xz"
+      args:
+        profile: "profile"
+        from: "host.y_max"
+        to: "host.y_max + body_thickness"
+    plan_body:
+      op: "rectangle"
+      plane: "xy"
+      args:
+        min: "[min(for p in profile_points return p[1]), host.y_max]"
+        max: "[max(for p in profile_points return p[1]), host.y_max + body_thickness]"
+  representations:
+    model.low:
+      items:
+        - geometry: "body"
+          material: "body_material"
+    model.medium:
+      items:
+        - geometry: "body"
+          material: "body_material"
+    model.high:
+      items:
+        - geometry: "body"
+          material: "body_material"
+    plan.low:
+      items:
+        - geometry: "plan_body"
+          class: "projected"
+    plan.medium:
+      items:
+        - geometry: "plan_body"
+          class: "projected"
+    plan.high:
+      items:
+        - geometry: "plan_body"
+          class: "projected"
+    elevation:
+      items:
+        - geometry: "elev_outline"
+          class: "projected"
+  host:
+    void: null
+    note: "Sits on the front face of its host and does not cut it."
+  materials:
+    - "reinforced_concrete"
+IfcSurfaceFeature:
+  archetype: "hosted"
+  name: "Surface feature (class template)"
+  description: "Marking, tag, rumble strip or other surface treatment on the face of its host: a thin layer of the given outline. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "MARK"
+  parameters:
+    width:
+      default: 0.5
+    height:
+      default: 0.3
+    sill_height:
+      default: 1.0
+    body_thickness:
+      type: "length"
+      default: 0.002
+      label: "Thickness"
+      group: "Size"
+      limits:
+        min: 0.0005
+        max: 1.0
+    body_material:
+      type: "material"
+      default: "plastic"
+      label: "Material"
+      group: "Materials"
+      options: "materials"
+  recipe:
+    body:
+      op: "extrude"
+      plane: "xz"
+      args:
+        profile: "profile"
+        from: "host.y_max"
+        to: "host.y_max + body_thickness"
+    plan_body:
+      op: "rectangle"
+      plane: "xy"
+      args:
+        min: "[min(for p in profile_points return p[1]), host.y_max]"
+        max: "[max(for p in profile_points return p[1]), host.y_max + body_thickness]"
+  representations:
+    model.low:
+      items:
+        - geometry: "body"
+          material: "body_material"
+    model.medium:
+      items:
+        - geometry: "body"
+          material: "body_material"
+    model.high:
+      items:
+        - geometry: "body"
+          material: "body_material"
+    plan.low:
+      items:
+        - geometry: "plan_body"
+          class: "annotation"
+    plan.medium:
+      items:
+        - geometry: "plan_body"
+          class: "annotation"
+    plan.high:
+      items:
+        - geometry: "plan_body"
+          class: "annotation"
+    elevation:
+      items:
+        - geometry: "elev_outline"
+          class: "projected"
+  host:
+    void: null
+    note: "Sits on the front face of its host and does not cut it."
+  materials:
+    - "plastic"
+IfcEarthworksCut:
+  archetype: "hosted"
+  name: "Earthworks cut (class template)"
+  description: "Excavation, trench or cut in the ground or a fill: the void it removes, from a rectangle or an outline in plan. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "EXCAVATION"
+  parameters:
+    width:
+      default: 2.0
+    height:
+      default: 1.5
+    sill_height:
+      default: 0.0
+    host_kind:
+      default: "slab"
+IfcVoidingFeature:
+  archetype: "hosted"
+  name: "Voiding feature (class template)"
+  description: "Hole, notch, cut-out or chamfer that removes material from an element: the void it cuts. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "HOLE"
+  parameters:
+    width:
+      default: 0.05
+    height:
+      default: 0.05
+    sill_height:
+      default: 0.5
+    host_kind:
+      default: "wall"
