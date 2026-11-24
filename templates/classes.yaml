@@ -4924,3 +4924,360 @@ IfcDistributionFlowElement:
       nominal_size: "pipe_size"
       position: "connections[2].to"
       direction: "[1, 0, 0]"
+IfcColumn:
+  archetype: "linear"
+  name: "Column (class template)"
+  description: "Column with a profile along its vertical axis from the base: concrete rectangle by default, or a steel section. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "COLUMN"
+  parameters:
+    profile_kind:
+      default: "rectangle"
+      options:
+        - "rectangle"
+        - "circle"
+        - "i_section"
+        - "rect_hollow"
+        - "circ_hollow"
+    width:
+      default: 0.3
+    depth:
+      default: 0.3
+    wall_thickness:
+      default: 0.008
+    material:
+      default: "reinforced_concrete"
+    load_bearing:
+      default: true
+  recipe:
+    plan_section:
+      op: "union"
+      plane: "xy"
+      args:
+        items: "[if profile_kind = \"circle\" or profile_kind = \"circ_hollow\" then circle([0, 0], width / 2) else rectangle([-width / 2, -depth / 2], [width / 2, depth / 2])]"
+      note: "Plan symbol of a vertical member at its axis: the circle or the bounding rectangle of the profile."
+  representations:
+    plan.low:
+      items:
+        - geometry: "plan_section"
+          class: "cut"
+    plan.medium:
+      items:
+        - geometry: "plan_section"
+          class: "cut"
+      note: "Vertical member: drawn as its section at the axis."
+  slots:
+    path:
+      default: [[0.0, 0.0, 0.0], [0.0, 0.0, 3.0]]
+  materials:
+    - "reinforced_concrete"
+IfcDeepFoundation:
+  archetype: "linear"
+  name: "Deep foundation (class template)"
+  description: "Generic deep foundation (supertype) with no specific IFC class: a circular concrete shaft down from the cut-off level. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    profile_kind:
+      default: "circle"
+      options:
+        - "circle"
+        - "rectangle"
+    width:
+      default: 0.6
+    depth:
+      default: 0.6
+    wall_thickness:
+      default: 0.01
+    material:
+      default: "reinforced_concrete"
+    load_bearing:
+      default: true
+  recipe:
+    plan_section:
+      op: "union"
+      plane: "xy"
+      args:
+        items: "[if profile_kind = \"circle\" or profile_kind = \"circ_hollow\" then circle([0, 0], width / 2) else rectangle([-width / 2, -depth / 2], [width / 2, depth / 2])]"
+      note: "Plan symbol of a vertical member at its axis: the circle or the bounding rectangle of the profile."
+  representations:
+    plan.low:
+      items:
+        - geometry: "plan_section"
+          class: "hidden"
+    plan.medium:
+      items:
+        - geometry: "plan_section"
+          class: "hidden"
+      note: "Vertical member: drawn as its section at the axis."
+  slots:
+    path:
+      default: [[0.0, 0.0, 0.0], [0.0, 0.0, -10.0]]
+  materials:
+    - "reinforced_concrete"
+IfcCaissonFoundation:
+  archetype: "linear"
+  name: "Caisson foundation (class template)"
+  description: "Caisson or well foundation: a large circular shaft down from the cut-off level. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "CAISSON"
+  parameters:
+    profile_kind:
+      default: "circle"
+      options:
+        - "circle"
+        - "circ_hollow"
+        - "rectangle"
+    width:
+      default: 1.2
+    depth:
+      default: 1.2
+    wall_thickness:
+      default: 0.01
+    material:
+      default: "reinforced_concrete"
+    load_bearing:
+      default: true
+  recipe:
+    plan_section:
+      op: "union"
+      plane: "xy"
+      args:
+        items: "[if profile_kind = \"circle\" or profile_kind = \"circ_hollow\" then circle([0, 0], width / 2) else rectangle([-width / 2, -depth / 2], [width / 2, depth / 2])]"
+      note: "Plan symbol of a vertical member at its axis: the circle or the bounding rectangle of the profile."
+  representations:
+    plan.low:
+      items:
+        - geometry: "plan_section"
+          class: "hidden"
+    plan.medium:
+      items:
+        - geometry: "plan_section"
+          class: "hidden"
+      note: "Vertical member: drawn as its section at the axis."
+  slots:
+    path:
+      default: [[0.0, 0.0, 0.0], [0.0, 0.0, -15.0]]
+  materials:
+    - "reinforced_concrete"
+IfcPile:
+  archetype: "linear"
+  name: "Pile (class template)"
+  description: "Bored or driven pile down from the cut-off level: a circular concrete shaft by default, or a steel section. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "BORED"
+  parameters:
+    profile_kind:
+      default: "circle"
+      options:
+        - "circle"
+        - "rectangle"
+        - "circ_hollow"
+        - "i_section"
+    width:
+      default: 0.6
+    depth:
+      default: 0.6
+    wall_thickness:
+      default: 0.012
+    material:
+      default: "reinforced_concrete"
+    load_bearing:
+      default: true
+  recipe:
+    plan_section:
+      op: "union"
+      plane: "xy"
+      args:
+        items: "[if profile_kind = \"circle\" or profile_kind = \"circ_hollow\" then circle([0, 0], width / 2) else rectangle([-width / 2, -depth / 2], [width / 2, depth / 2])]"
+      note: "Plan symbol of a vertical member at its axis: the circle or the bounding rectangle of the profile."
+  representations:
+    plan.low:
+      items:
+        - geometry: "plan_section"
+          class: "hidden"
+    plan.medium:
+      items:
+        - geometry: "plan_section"
+          class: "hidden"
+      note: "Vertical member: drawn as its section at the axis."
+  slots:
+    path:
+      default: [[0.0, 0.0, 0.0], [0.0, 0.0, -12.0]]
+  materials:
+    - "reinforced_concrete"
+IfcKerb:
+  archetype: "linear"
+  name: "Kerb (class template)"
+  description: "Kerb along an edge of a road or path: a rectangular section on its bedding. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    profile_kind:
+      default: "rectangle"
+      options:
+        - "rectangle"
+    width:
+      default: 0.15
+    depth:
+      default: 0.3
+    wall_thickness:
+      default: 0.01
+    material:
+      default: "reinforced_concrete"
+    load_bearing:
+      default: false
+    justification_v:
+      default: "bottom"
+  slots:
+    path:
+      default: [[0.0, 0.0, 0.0], [3.0, 0.0, 0.0]]
+  materials:
+    - "reinforced_concrete"
+IfcRail:
+  archetype: "linear"
+  name: "Rail (class template)"
+  description: "Running rail, check rail or guard rail along a track: an I section standing for the rail profile. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "RAIL"
+  parameters:
+    profile_kind:
+      default: "i_section"
+      options:
+        - "i_section"
+        - "rectangle"
+    width:
+      default: 0.15
+    depth:
+      default: 0.172
+    wall_thickness:
+      default: 0.0165
+    material:
+      default: "steel"
+    load_bearing:
+      default: true
+    justification_v:
+      default: "bottom"
+    web_thickness:
+      default: 0.0165
+    flange_thickness:
+      default: 0.03
+  slots:
+    path:
+      default: [[0.0, 0.0, 0.0], [3.0, 0.0, 0.0]]
+IfcRailing:
+  archetype: "linear"
+  name: "Railing (class template)"
+  description: "Guard rail, balustrade or handrail along a path at its height: the top rail as a circular hollow section. Posts and infill are drawn by the library railing objects. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "GUARDRAIL"
+  parameters:
+    profile_kind:
+      default: "circ_hollow"
+      options:
+        - "circ_hollow"
+        - "rectangle"
+        - "rect_hollow"
+    width:
+      default: 0.042
+    depth:
+      default: 0.042
+    wall_thickness:
+      default: 0.003
+    material:
+      default: "steel"
+    load_bearing:
+      default: false
+  slots:
+    path:
+      default: [[0.0, 0.0, 1.0], [3.0, 0.0, 1.0]]
+IfcTrackElement:
+  archetype: "linear"
+  name: "Track element (class template)"
+  description: "Sleeper, vehicle stop or other track element along its axis: a concrete sleeper by default. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "SLEEPER"
+  parameters:
+    profile_kind:
+      default: "rectangle"
+      options:
+        - "rectangle"
+        - "i_section"
+    width:
+      default: 0.25
+    depth:
+      default: 0.2
+    wall_thickness:
+      default: 0.01
+    material:
+      default: "reinforced_concrete"
+    load_bearing:
+      default: true
+    justification_v:
+      default: "bottom"
+  slots:
+    path:
+      default: [[0.0, 0.0, 0.0], [2.6, 0.0, 0.0]]
+  materials:
+    - "reinforced_concrete"
+IfcReinforcingBar:
+  archetype: "linear"
+  name: "Reinforcing bar (class template)"
+  description: "Reinforcing bar along a path: a solid circular section of the bar diameter. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "MAIN"
+  parameters:
+    profile_kind:
+      default: "circle"
+      options:
+        - "circle"
+    width:
+      default: 0.016
+    depth:
+      default: 0.016
+    wall_thickness:
+      default: 0.002
+    material:
+      default: "steel"
+    load_bearing:
+      default: true
+  slots:
+    path:
+      default: [[0.0, 0.0, 0.0], [3.0, 0.0, 0.0]]
+IfcTendon:
+  archetype: "linear"
+  name: "Tendon (class template)"
+  description: "Prestressing strand, wire or bar along a path: a solid circular section. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "STRAND"
+  parameters:
+    profile_kind:
+      default: "circle"
+      options:
+        - "circle"
+    width:
+      default: 0.0157
+    depth:
+      default: 0.0157
+    wall_thickness:
+      default: 0.002
+    material:
+      default: "steel"
+    load_bearing:
+      default: true
+  slots:
+    path:
+      default: [[0.0, 0.0, 0.0], [10.0, 0.0, 0.0]]
+IfcTendonConduit:
+  archetype: "linear"
+  name: "Tendon conduit (class template)"
+  description: "Duct or grouting duct around a tendon along its path: a thin circular hollow section. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "DUCT"
+  parameters:
+    profile_kind:
+      default: "circ_hollow"
+      options:
+        - "circ_hollow"
+    width:
+      default: 0.06
+    depth:
+      default: 0.06
+    wall_thickness:
+      default: 0.0005
+    material:
+      default: "steel"
+    load_bearing:
+      default: false
+  slots:
+    path:
+      default: [[0.0, 0.0, 0.0], [10.0, 0.0, 0.0]]
