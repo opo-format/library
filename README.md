@@ -35,4 +35,4 @@ CI uploads the previews of every pull request as an artifact. Publishing a GitHu
 
 ## Catalogue
 
-Every object has a folder under `objects/`, including the ones not yet built: a `planned` object is a catalogue entry with its specification sheet in `object.yaml` (priority, catalogue number, IFC class, scope and the planned inputs, parameters, rules, size catalogues and levels of detail). `just check` writes the catalogue to `build/catalogue.md` (generated, not committed).
+Every object has a folder under `objects/`, including the ones not yet built: a `planned` object is a catalogue entry with its specification sheet in `object.yaml` (priority, catalogue number, IFC class, scope and the planned inputs, parameters, rules, size catalogues and levels of detail). `just check` writes the catalogue to `build/catalogue.md` and the IFC coverage table (every IFC element class with its archetype, template and library objects) to `build/coverage.md`; both are generated, not committed.

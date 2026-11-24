@@ -47,6 +47,13 @@ jobs:
           name: previews
           path: build/previews/
           retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tables
+          path: |
+            build/catalogue.md
+            build/coverage.md
+          retention-days: 30
 
   reuse:
     name: "Licences (REUSE)"
