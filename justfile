@@ -30,12 +30,14 @@ build:
         if [ -f "$d/object.yaml" ]; then {{opo}} build "$d" --library . -o build; fi
     done
 
-# Build, then check every built template and object and the catalogue entries.
+# Build, then check every built template and object, the catalogue entries and the
+# per-class table (catalogue and coverage tables in build/, not committed).
 check: build
     #!/usr/bin/env bash
     set -euo pipefail
     shopt -s nullglob
     {{opo}} catalogue --library . -o build/catalogue.md
+    {{opo}} coverage --library . --ifc build/ifc -o build/coverage.md
     dirs=(build/library/templates/*/ build/library/objects/*/)
     if [ ${#dirs[@]} -gt 0 ]; then {{opo}} check --root build --ifc build/ifc/psets.json "${dirs[@]}"; fi
     just opo={{opo}} golden
