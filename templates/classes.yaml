@@ -279,6 +279,30 @@ IfcPipeFitting:
   name: "Pipe fitting (class template)"
   description: "Pipe fitting whose form follows its predefined type: bend, junction (tee), transition (reducer), connector, cap, entry, exit. Sizes follow the connected pipes."
   default_type: "BEND"
+  ports:
+    - name: "port_1"
+      system_type: "NOTDEFINED"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "PIPE"
+      nominal_size: "outer_diameter"
+      position: "[0, 0, 0]"
+      direction: "[-1, 0, 0]"
+    - name: "port_2"
+      system_type: "NOTDEFINED"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "PIPE"
+      nominal_size: "if is_transition then outer_diameter_2 else outer_diameter"
+      when: "not(is_cap) and predefined_type != \"ENTRY\" and predefined_type != \"EXIT\""
+      position: "if is_bend then bend_end else [length, 0, 0]"
+      direction: "if is_bend then [cos(bend_angle), sin(bend_angle), 0] else [1, 0, 0]"
+    - name: "branch"
+      system_type: "NOTDEFINED"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "PIPE"
+      nominal_size: "branch_diameter"
+      when: "is_junction"
+      position: "[run_length / 2, run_length / 2, 0]"
+      direction: "[0, 1, 0]"
 IfcOpeningElement:
   archetype: "hosted"
   name: "Opening (class template)"
@@ -3816,5 +3840,263 @@ IfcUnitaryControlElement:
       nominal_size: "cable_size"
       position: "[-width / 2 + width * 0.5, 0, bottom + height / 2]"
       direction: "[0, -1, 0]"
+  materials:
+    - "plastic"
+IfcFlowFitting:
+  archetype: "fitting"
+  name: "Flow fitting (class template)"
+  description: "Generic flow fitting (supertype) joining distribution segments with no specific IFC class: bend, junction, transition or straight connector by type. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "NOTDEFINED"
+  ports:
+    - name: "port_1"
+      system_type: "NOTDEFINED"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "NOTDEFINED"
+      nominal_size: "outer_diameter"
+      position: "[0, 0, 0]"
+      direction: "[-1, 0, 0]"
+    - name: "port_2"
+      system_type: "NOTDEFINED"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "NOTDEFINED"
+      nominal_size: "if is_transition then outer_diameter_2 else outer_diameter"
+      when: "not(is_cap) and predefined_type != \"ENTRY\" and predefined_type != \"EXIT\""
+      position: "if is_bend then bend_end else [length, 0, 0]"
+      direction: "if is_bend then [cos(bend_angle), sin(bend_angle), 0] else [1, 0, 0]"
+    - name: "branch"
+      system_type: "NOTDEFINED"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "NOTDEFINED"
+      nominal_size: "branch_diameter"
+      when: "is_junction"
+      position: "[run_length / 2, run_length / 2, 0]"
+      direction: "[0, 1, 0]"
+IfcCableCarrierFitting:
+  archetype: "fitting"
+  name: "Cable carrier fitting (class template)"
+  description: "Cable tray or trunking fitting: bend, tee, cross, reducer or connector between straight lengths. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "BEND"
+  parameters:
+    tray_height:
+      type: "length"
+      default: 0.06
+      label: "Tray side height"
+      group: "Size"
+      limits:
+        min: 0.02
+        max: 0.3
+    outer_diameter:
+      label: "Tray width"
+      default: 0.3
+    branch_diameter:
+      label: "Branch tray width"
+      visible: "list_contains([\"JUNCTION\", \"TEE\", \"CROSS\"], predefined_type)"
+      default: 0.3
+    outer_diameter_2:
+      label: "Outlet tray width"
+      visible: "predefined_type = \"TRANSITION\" or predefined_type = \"REDUCER\""
+      default: 0.2
+    fitting_length:
+      visible: "not(list_contains([\"BEND\", \"JUNCTION\", \"TEE\", \"CROSS\"], predefined_type))"
+    wall_thickness:
+      default: 0.0015
+    material:
+      default: "steel"
+  rules:
+    derived:
+      is_junction: "predefined_type = \"JUNCTION\" or predefined_type = \"TEE\" or predefined_type = \"CROSS\""
+      is_transition: "predefined_type = \"TRANSITION\" or predefined_type = \"REDUCER\""
+      is_cross: "predefined_type = \"CROSS\""
+  recipe:
+    bend_body:
+      args:
+        profile: "rectangle([-r, -tray_height / 2], [r, tray_height / 2])"
+        center: "[0, bend_radius, 0]"
+        axis: "[0, 0, 1]"
+        angle: "bend_angle"
+    junction_body:
+      args:
+        items: "[box([0, -r, -tray_height / 2], [run_length, r, tray_height / 2]), box([run_length / 2 - branch_diameter / 2, 0, -tray_height / 2], [run_length / 2 + branch_diameter / 2, run_length / 2, tray_height / 2]), if is_cross then box([run_length / 2 - branch_diameter / 2, -run_length / 2, -tray_height / 2], [run_length / 2 + branch_diameter / 2, 0, tray_height / 2]) else null]"
+    transition_body:
+      op: "box"
+      args:
+        min: "[0, -max(r, outer_diameter_2 / 2), -tray_height / 2]"
+        max: "[fitting_length, max(r, outer_diameter_2 / 2), tray_height / 2]"
+      note: "Drawn as the wider tray over the length; the reduction is not modelled."
+    cap_body:
+      op: "box"
+      args:
+        min: "[0, -r, -tray_height / 2]"
+        max: "[fitting_length, r, tray_height / 2]"
+    sleeve_body:
+      op: "box"
+      args:
+        min: "[0, -r, -tray_height / 2]"
+        max: "[fitting_length, r, tray_height / 2]"
+  ports:
+    - name: "port_1"
+      system_type: "ELECTRICAL"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "CABLECARRIER"
+      nominal_size: "outer_diameter"
+      position: "[0, 0, 0]"
+      direction: "[-1, 0, 0]"
+    - name: "port_2"
+      system_type: "ELECTRICAL"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "CABLECARRIER"
+      nominal_size: "if is_transition then outer_diameter_2 else outer_diameter"
+      when: "not(is_cap) and predefined_type != \"ENTRY\" and predefined_type != \"EXIT\""
+      position: "if is_bend then bend_end else [length, 0, 0]"
+      direction: "if is_bend then [cos(bend_angle), sin(bend_angle), 0] else [1, 0, 0]"
+    - name: "branch"
+      system_type: "ELECTRICAL"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "CABLECARRIER"
+      nominal_size: "branch_diameter"
+      when: "is_junction"
+      position: "[run_length / 2, run_length / 2, 0]"
+      direction: "[0, 1, 0]"
+    - name: "branch_2"
+      system_type: "ELECTRICAL"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "CABLECARRIER"
+      nominal_size: "branch_diameter"
+      when: "is_cross"
+      position: "[run_length / 2, -run_length / 2, 0]"
+      direction: "[0, -1, 0]"
+  materials:
+    - "steel"
+IfcCableFitting:
+  archetype: "fitting"
+  name: "Cable fitting (class template)"
+  description: "Cable connector, junction, fan-out or entry between cable segments. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "CONNECTOR"
+  parameters:
+    outer_diameter:
+      default: 0.02
+    branch_diameter:
+      default: 0.02
+    outer_diameter_2:
+      default: 0.015
+    wall_thickness:
+      default: 0.002
+    material:
+      default: "plastic"
+  ports:
+    - name: "port_1"
+      system_type: "ELECTRICAL"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "CABLE"
+      nominal_size: "outer_diameter"
+      position: "[0, 0, 0]"
+      direction: "[-1, 0, 0]"
+    - name: "port_2"
+      system_type: "ELECTRICAL"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "CABLE"
+      nominal_size: "if is_transition then outer_diameter_2 else outer_diameter"
+      when: "not(is_cap) and predefined_type != \"ENTRY\" and predefined_type != \"EXIT\""
+      position: "if is_bend then bend_end else [length, 0, 0]"
+      direction: "if is_bend then [cos(bend_angle), sin(bend_angle), 0] else [1, 0, 0]"
+    - name: "branch"
+      system_type: "ELECTRICAL"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "CABLE"
+      nominal_size: "branch_diameter"
+      when: "is_junction"
+      position: "[run_length / 2, run_length / 2, 0]"
+      direction: "[0, 1, 0]"
+  materials:
+    - "plastic"
+IfcDuctFitting:
+  archetype: "fitting"
+  name: "Duct fitting (class template)"
+  description: "Round duct fitting whose form follows its predefined type: bend, junction, transition, connector, cap, entry, exit. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "BEND"
+  parameters:
+    outer_diameter:
+      default: 0.25
+    branch_diameter:
+      default: 0.25
+    outer_diameter_2:
+      default: 0.2
+    wall_thickness:
+      default: 0.0008
+    material:
+      default: "sheet_metal"
+  ports:
+    - name: "port_1"
+      system_type: "VENTILATION"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "DUCT"
+      nominal_size: "outer_diameter"
+      position: "[0, 0, 0]"
+      direction: "[-1, 0, 0]"
+    - name: "port_2"
+      system_type: "VENTILATION"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "DUCT"
+      nominal_size: "if is_transition then outer_diameter_2 else outer_diameter"
+      when: "not(is_cap) and predefined_type != \"ENTRY\" and predefined_type != \"EXIT\""
+      position: "if is_bend then bend_end else [length, 0, 0]"
+      direction: "if is_bend then [cos(bend_angle), sin(bend_angle), 0] else [1, 0, 0]"
+    - name: "branch"
+      system_type: "VENTILATION"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "DUCT"
+      nominal_size: "branch_diameter"
+      when: "is_junction"
+      position: "[run_length / 2, run_length / 2, 0]"
+      direction: "[0, 1, 0]"
+  materials:
+    - "sheet_metal"
+IfcJunctionBox:
+  archetype: "point"
+  name: "Junction box (class template)"
+  description: "Electrical junction box on a wall or ceiling: a small box with incoming and outgoing cables. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "POWER"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.1
+    depth:
+      default: 0.05
+    height:
+      default: 0.1
+    mount_height:
+      default: 2.3
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "JB"
+    casing_material:
+      default: "plastic"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "incoming"
+      system_type: "ELECTRICAL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.5, depth / 2, top]"
+      direction: "[0, 0, 1]"
+    - name: "outgoing"
+      system_type: "ELECTRICAL"
+      flow_direction: "SOURCE"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.5, depth / 2, bottom]"
+      direction: "[0, 0, -1]"
   materials:
     - "plastic"
