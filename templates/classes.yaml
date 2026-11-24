@@ -6276,3 +6276,21 @@ IfcVoidingFeature:
       default: 0.5
     host_kind:
       default: "wall"
+IfcBuiltElement:
+  archetype: "any"
+  name: "Built element (class template)"
+  description: "Generic built element (supertype) for elements with no specific IFC class: a box, a section along a path or a slab from an outline, as the user picks. Sizes are illustrative defaults."
+  default_type: "NOTDEFINED"
+IfcBuildingElementProxy:
+  archetype: "any"
+  name: "Building element proxy (class template)"
+  description: "Proxy for an element that has no fitting IFC class, or a provision for space or a void: a box, a section along a path or a slab from an outline, as the user picks. Sizes are illustrative defaults."
+  default_type: "ELEMENT"
+IfcCivilElement:
+  archetype: "any"
+  name: "Civil element (class template)"
+  description: "Generic civil element (supertype) for civil works with no specific IFC class: a box, a section along a path or a slab from an outline, as the user picks. Sizes are illustrative defaults."
+  default_type: "NOTDEFINED"
+  parameters:
+    form:
+      default: "outline"

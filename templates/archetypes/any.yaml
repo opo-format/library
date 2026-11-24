@@ -1,0 +1,238 @@
+# Archetype `any` (spec/objects/archetypes.md): for generic classes, the user picks the form.
+# Class template sources (proposal 0002 §4). `opo generate` builds the templates from these files,
+# the per-class table (classes.yaml) and the IFC data in the IFC folder. Licence: CC0-1.0.
+archetype: "any"
+description: "Generic element whose form the user picks: a box at a point, a rectangular section along a path, or a slab from an outline."
+parameters:
+  form:
+    type: "choice"
+    default: "box"
+    label: "Form"
+    group: "Form"
+    options:
+      - "box"
+      - "path"
+      - "outline"
+    option_labels:
+      box: "Box at a point"
+      path: "Section along a path"
+      outline: "Slab from an outline"
+  width:
+    type: "length"
+    default: 1.0
+    label: "Width"
+    group: "Size"
+    visible: "form != \"outline\""
+    limits:
+      min: 0.01
+      max: 100
+  depth:
+    type: "length"
+    default: 1.0
+    label: "Depth"
+    group: "Size"
+    visible: "form = \"box\""
+    limits:
+      min: 0.01
+      max: 100
+  height:
+    type: "length"
+    default: 1.0
+    label: "Height or thickness"
+    group: "Size"
+    limits:
+      min: 0.005
+      max: 100
+  base_offset:
+    type: "length"
+    default: 0.0
+    label: "Offset from storey"
+    group: "Placement"
+    limits:
+      min: -100
+      max: 100
+  material:
+    type: "material"
+    default: "reinforced_concrete"
+    label: "Material"
+    group: "Materials"
+    options: "materials"
+slots:
+  path:
+    type: "polyline"
+    plane: "xy"
+    default: [[0.0, 0.0], [3.0, 0.0]]
+    rules:
+      open: true
+      min_segment_length: 0.01
+    description: "Path in plan (form: path)."
+  outline:
+    type: "polygon"
+    plane: "xy"
+    default: [[0.0, 0.0], [3.0, 0.0], [3.0, 2.0], [0.0, 2.0]]
+    rules:
+      closed: true
+      non_self_intersecting: true
+    description: "Outline in plan (form: outline)."
+rules:
+  derived:
+    is_box: "form = \"box\""
+    is_path: "form = \"path\""
+    is_outline: "form = \"outline\""
+    top: "base_offset + height"
+    plan_length: "sum(for i in 1..count(path) - 1 return sqrt((path[i + 1][1] - path[i][1]) ** 2 + (path[i + 1][2] - path[i][2]) ** 2))"
+    outline_area: "abs(sum(for i in 1..count(outline) return outline[i][1] * outline[modulo(i, count(outline)) + 1][2] - outline[modulo(i, count(outline)) + 1][1] * outline[i][2])) / 2"
+    volume: "if is_box then width * depth * height else if is_path then width * height * plan_length else outline_area * height"
+  checks:
+    path_points:
+      expr: "not(is_path) or count(path) >= 2"
+      severity: "error"
+      message: "The path needs at least two points."
+    outline_points:
+      expr: "not(is_outline) or count(outline) >= 3"
+      severity: "error"
+      message: "The outline needs at least three points."
+  rulesets: {}
+recipe:
+  plan_box:
+    op: "rectangle"
+    plane: "xy"
+    when: "is_box"
+    args:
+      min: "[-width / 2, 0]"
+      max: "[width / 2, depth]"
+  plan_band:
+    op: "band"
+    plane: "xy"
+    when: "is_path"
+    args:
+      path: "path"
+      left: "width / 2"
+      right: "-width / 2"
+  plan_outline:
+    op: "polygon"
+    plane: "xy"
+    when: "is_outline"
+    args:
+      points: "outline"
+  plan_region:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[plan_box, plan_band, plan_outline]"
+  body:
+    op: "extrude"
+    plane: "xy"
+    args:
+      profile: "plan_region"
+      from: "base_offset"
+      to: "top"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+  model.medium:
+    context: "model"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+  model.high:
+    context: "model"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_region"
+        class: "projected"
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_region"
+        class: "projected"
+  plan.high:
+    context: "plan"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "derived"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    derive:
+      from: "model.high"
+      method: "cut_or_project"
+  elevation:
+    context: "elevation"
+    lod: "all"
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "ELEVATION_VIEW"
+    derive:
+      from: "model.{lod}"
+      method: "project"
+  section:
+    context: "section"
+    lod: "all"
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "SECTION_VIEW"
+    derive:
+      from: "model.{lod}"
+      method: "cut"
+host:
+  is_host: false
+  level: "Placed on a storey; the body starts at the offset from the storey."
+  insertion:
+    point: "[0, 0, 0]"
+    description: "Box: centre of the back edge. Path and outline: their own plan coordinates."
+handles: []
+ports: []
+materials:
+  - "reinforced_concrete"
+ifc:
+  quantities:
+    GrossVolume: "volume"
+    Height: "height"
