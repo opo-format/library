@@ -1,0 +1,15 @@
+id: "ramp"
+name: "Ramp"
+status: "planned"
+priority: "P2"
+catalogue_id: "C-06"
+ifc:
+  class: "IfcRamp"
+sheet:
+  scope: "Ramp along a path with automatic intermediate landings, level landings at top/bottom, edge protection (kerbs / wheel guards), nested handrails both sides."
+  ifc: "IfcRamp · STRAIGHT_RUN_RAMP / TWO_STRAIGHT_RUN_RAMP / QUARTER_TURN_RAMP / TWO_QUARTER_TURN_RAMP / HALF_TURN_RAMP / SPIRAL_RAMP · aggregates IfcRampFlight (STRAIGHT / SPIRAL) + landings (IfcSlab · LANDING) · `Pset_RampCommon`"
+  based_on: "— · `accessibility` (ISO 21542, ADA, AD M)."
+  inputs: "Slot `path` (polyline centreline) or straight start + direction · bottom/top levels."
+  parameters: "`slope` (default from rule set: ISO 21542 *(to verify)*, 1:12 US; 5 % (1:20) when no rule set) · `width` (default 1.2 m / 36\" clear; ISO 21542 ≥ 1.0 m between handrails) · `max_run` (from rule set: ISO 21542 *(to verify)*, 30\" rise US) · `landing_length` (1.5 m / 60\") · `edge_protection` none | kerb | rail (height 0.1 m) · `handrails` both | left | right | none."
+  rules: "Slope ≤ max · run between landings ≤ max (landings inserted automatically) · width ≥ min · turning landings ≥ 1.5 × 1.5 m / 60\" × 60\" · handrails both sides when required."
+  lod: "Plan: outline, slope arrow with % or ratio text, landings, handrails · elevation/section: sloped surface."

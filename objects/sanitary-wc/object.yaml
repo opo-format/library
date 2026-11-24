@@ -1,0 +1,19 @@
+id: "sanitary-wc"
+name: "WC"
+status: "planned"
+priority: "P2"
+catalogue_id: "F-01"
+ifc:
+  class: "IfcSanitaryTerminal"
+  predefinedType: "TOILETPAN"
+sheet:
+  scope: "Floor-standing (close-coupled or back-to-wall) and wall-hung WC with concealed or exposed cistern, seat and lid, flush plate; clearance zone."
+  not_in_scope:
+    - "the installation frame in detail (outline only at high LOD)"
+  ifc: "IfcSanitaryTerminal · TOILETPAN (+ CISTERN as nested or part)"
+  based_on: "— · EN 33 (connecting dimensions), EN 997 (WC pans with integral trap) · `accessibility`."
+  inputs: "Host wall (rear)."
+  parameters: "`mounting` floor | wall_hung · `cistern` concealed | close_coupled | high_level · `projection` (wall to front of pan; default 0.52 m / 28\" floor-standing US) · `pan_width` (0.36 m / 14½\") · `seat_height` (0.40–0.42 m standard; 0.46–0.48 m accessible / 17\"–19\" ADA) · `frame_depth` (concealed cistern, default 0.15 m) · `flush_plate_height`."
+  rules: "`accessibility`: seat height range, centreline to side wall (ADA 16\"–18\"), free space beside (ISO 21542 *(to verify)*), clearance zone (ADA 60\" × 56\" wall-hung / 59\" floor-standing)."
+  sizes: "EU wall-hung projections about 0.48–0.56 m, extended accessible pans about 0.70 m *(from maker data, typical)* · US elongated / round bowls: projection about 28\"–30\" *(to verify)*; seat heights standard 15\" and \"comfort height\" 17\"–19\"."
+  lod: "3D: low box · medium pan, seat, cistern box · high pan form, seat/lid, flush plate. Plan: low outline · medium outline + seat + cistern (dashed if concealed) · high outline from 3D. Clearance zone: plan annotation at medium/high."

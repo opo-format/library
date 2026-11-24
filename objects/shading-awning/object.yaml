@@ -1,0 +1,20 @@
+id: "shading-awning"
+name: "Awning"
+status: "planned"
+priority: "P3"
+catalogue_id: "S-06"
+ifc:
+  class: "IfcShadingDevice"
+  predefinedType: "AWNING"
+sheet:
+  scope: "Folding-arm awning (cassette or open), drop-arm awning and fixed (Dutch) awning over windows, doors or terraces: cassette or roller tube, fabric, front bar, arms at the set projection and pitch."
+  not_in_scope:
+    - "fabric patterns"
+    - "arm mechanics"
+  ifc: "IfcShadingDevice · AWNING"
+  based_on: "— · EN 13561 (folding arm, pivot arm, Dutch awnings; Dutch awning wind resistance outside its scope) · EN 12216."
+  inputs: "Host window/door, or wall face + width."
+  parameters: "`kind` folding_arm | drop_arm | dutch · `width` · `projection` (default 2.5 m / 8') · `pitch` (default 15°) · `extended` (0–1) · `cassette` none | semi | full · `valance` (height) · `wind_class` (data)."
+  rules: "Shared rules + headroom under the front bar ≥ min (default 2.0 m / 6'8\", project value; warning)."
+  sizes: "Maker width × projection ranges *(to collect)*."
+  lod: "Plan: projection outline (dashed when retracted state is shown) · elevation: cassette and front bar."

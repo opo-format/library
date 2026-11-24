@@ -1,0 +1,19 @@
+id: "covering-cladding"
+name: "Cladding"
+status: "planned"
+priority: "P2"
+catalogue_id: "K-06"
+ifc:
+  class: "IfcCovering"
+  predefinedType: "CLADDING"
+sheet:
+  scope: "Rainscreen or panel cladding on a wall or façade surface: panel layout on a grid (same grid input as curtain walls), open or closed joints, panel thickness, cavity and subframe depth (simple layers), returns at openings, corners. Panels of metal, fibre cement, stone, ceramic, timber boards (board widths and orientation)."
+  not_in_scope:
+    - "fixing design"
+  ifc: "IfcCovering · CLADDING (each panel an `IfcCovering` part, or one covering with a panel pattern *(to decide)*)"
+  based_on: "— · grid and surface logic shared with O-16 · IFC."
+  inputs: "Host wall or façade surface (face or baseline + levels), like curtain walls."
+  parameters: "`kind` panels | boards | tiles · `module` U × V (or board width + orientation) · `joint` open | closed, `joint_width` · `bond` stack | running (offset) · `panel_thickness` · `cavity` · `subframe_depth` · `return_at_openings` (bool)."
+  rules: "Cut panels at edges ≥ min width (warning) · openings in the host wall cut the cladding and add returns (derived)."
+  sizes: "Panel presets from public maker ranges *(to collect)*."
+  lod: "Elevation: panel joints (medium) · plan/section: panel, cavity, subframe layers (medium), returns (high)."

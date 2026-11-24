@@ -1,0 +1,17 @@
+id: "sanitary-washbasin"
+name: "Washbasin"
+status: "planned"
+priority: "P2"
+catalogue_id: "F-04"
+ifc:
+  class: "IfcSanitaryTerminal"
+  predefinedType: "WASHHANDBASIN"
+sheet:
+  scope: "Wall-hung, pedestal, semi-pedestal, countertop / undercounter / vessel basin; tap holes; optional vanity unit (nested F-08 base unit variant); mirror zone above (annotation)."
+  ifc: "IfcSanitaryTerminal · WASHHANDBASIN"
+  based_on: "— · `accessibility` (ISO 21542 *(to verify)*; ADA rim ≤ 34\", knee ≥ 27\")."
+  inputs: "Host wall; or host worktop for countertop types."
+  parameters: "`type` wall_hung | pedestal | countertop | undercounter | vessel · `width` (default 0.6 m / 24\") · `depth` (0.45 m / 18\") · `rim_height` (default 0.85 m / 34\"; typical) · `tap_holes` 0 | 1 | 3 · `overflow` (bool) · `accessible` (bool → knee space zone, shallow siphon)."
+  rules: "Rim height and knee clearance under `accessibility`."
+  sizes: "EU widths 0.45–0.8 m in 50 mm steps *(typical maker range, to verify)* · US vanity tops 24\", 30\", 36\", 48\" *(typical, to verify)*."
+  lod: "Plan: low outline · medium outline + bowl + tap · high from 3D."

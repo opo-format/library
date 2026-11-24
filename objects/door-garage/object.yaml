@@ -1,0 +1,18 @@
+id: "door-garage"
+name: "Garage door"
+status: "planned"
+priority: "P3"
+catalogue_id: "O-07"
+ifc:
+  class: "IfcDoor"
+  predefinedType: "DOOR"
+sheet:
+  scope: "Sectional, up-and-over or roller door: closed panel face with section joints, guide rails, headroom box. Open position drawn as overhead (dashed) in plan."
+  not_in_scope:
+    - "opener mechanics"
+  ifc: "IfcDoor · DOOR · OperationType ROLLINGUP (roller) · LIFTING_HORIZONTAL / LIFTING_VERTICAL_LEFT / _RIGHT exist in IFC 4.3 `IfcDoorTypeOperationEnum`; sectional and up-and-over use USERDEFINED (`ObjectType` SECTIONAL / UP_AND_OVER) unless the IFC definitions of the LIFTING_* values are confirmed to fit"
+  based_on: "— · EN 13241 (industrial, commercial and garage doors: product standard, no sizes) · market standard sizes."
+  parameters: "`type` sectional | up_and_over | roller · `sections` (derived from height) · `headroom` (lintel space required) · `side_room`."
+  rules: "Lintel height in host ≥ required headroom (check)."
+  sizes: "EU sectional (makers' standard sizes, 125 mm steps): 2375, 2500 × 2000, 2125, 2250; double 5000 × 2000–2250 · UK: 7'0\" × 6'6\", 7'0\" × 7'0\"; double 14' × 7' · US: 8' × 7', 9' × 7'; double 16' × 7' / 8'."
+  lod: "3D medium: panel with joints + rails; high + track overhead (hidden in plan)."

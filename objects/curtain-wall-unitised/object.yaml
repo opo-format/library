@@ -1,0 +1,13 @@
+id: "curtain-wall-unitised"
+name: "Unitised curtain wall"
+status: "planned"
+priority: "P2"
+catalogue_id: "O-17"
+ifc:
+  class: "IfcCurtainWall"
+  predefinedType: "USERDEFINED"
+sheet:
+  scope: "Factory-built units, typically one floor high and one module wide, hung from slab-edge brackets: split (male/female) mullions, stack joint at each floor (with the horizontal split transom), integrated spandrel and vision areas inside each unit, interlocking joints visible in plan/section at high LOD. The usual system for high-rise. Same joint options on the glass (captured, SSG)."
+  ifc: "IfcCurtainWall · USERDEFINED (UNITISED) · each unit an `IfcElementAssembly` *(to decide)*"
+  parameters: "`module_width` · `unit_height` (= floor-to-floor, from levels) · `stack_joint_height` (above slab) · `split_mullion` (profile pair) · unit types per cell (vision / spandrel split heights) · joint types as O-16."
+  rules: "Units align with slab levels (error if a level falls inside a unit without a stack joint) · module width × height within transport/handling limits *(data)*."

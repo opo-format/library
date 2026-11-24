@@ -1,0 +1,17 @@
+id: "fire-hose-reel"
+name: "Fire hose reel / cabinet"
+status: "planned"
+priority: "P3"
+catalogue_id: "M-06"
+ifc:
+  class: "IfcFireSuppressionTerminal"
+  predefinedType: "HOSEREEL"
+sheet:
+  scope: "Wall-mounted or recessed hose reel cabinet: cabinet size, recess into the host wall, door swing."
+  ifc: "IfcFireSuppressionTerminal · HOSEREEL (FIREHYDRANT for landing valves)"
+  based_on: "— · EN 671-1 (hose reels with semi-rigid hose) *(scope to verify)*."
+  inputs: "Host wall."
+  parameters: "`mount` surface | recessed · `width`, `height`, `depth` (maker data) · `height_to_centre` (project value) · `door_swing` left | right."
+  rules: "Recessed depth ≤ host wall thickness (check) · door swing clear (warning)."
+  sizes: "Maker sizes *(to collect)*."
+  lod: "Plan: cabinet outline + swing · elevation: cabinet face."

@@ -1,0 +1,24 @@
+id: "transport-lift"
+name: "Lift (elevator)"
+status: "planned"
+priority: "P2"
+catalogue_id: "T-01"
+ifc:
+  class: "IfcTransportElement"
+  predefinedType: "ELEVATOR"
+sheet:
+  scope: "One lift in a shaft: car (internal clear width × depth × height), car door and one landing door per served level (front, or front and rear for through-cars), shaft clear space, pit depth below the lowest level, headroom above the highest level, slab openings. Shown in plan with the car, the doors and the shaft symbol."
+  not_in_scope:
+    - "machine room design"
+    - "guide rails"
+    - "counterweight"
+    - "lift calculations (traffic analysis)"
+  ifc: "IfcTransportElement · ELEVATOR · landing doors as nested `IfcDoor` · DOOR (OperationType SLIDING_TO_LEFT / SLIDING_TO_RIGHT / DOUBLE_DOOR_SLIDING) · shaft walls are **not** part of the object (they are walls); the object reserves the shaft space and checks it · Priority: core of every high-rise."
+  based_on: "— · EN 81-70 car types · EN 81-20 · ISO 4190-1 (lift installation dimensions: car, shaft, pit and headroom tables) *(values to collect)* · ASME A17.1 · ADA §407."
+  inputs: "Levels served (list) · position and orientation of the shaft (insertion point + front direction)."
+  parameters: "`car_type` (EN 81-70 type 1–5, or custom) · `car_width`, `car_depth`, `car_height` (default 2.2 m / 7'4\") · `door_width`, `door_height` (default 2.1 m / 7'0\") · `door_type` side_opening | centre_opening · `door_position` centred | side · `entrances` front | front_rear | front_side · `shaft_width`, `shaft_depth` (derived from car and door with clearance defaults, or entered) · `pit_depth`, `headroom` (derived from speed class or entered *(defaults to collect from ISO 4190-1)*) · `rated_load` (data, kg) · `speed` (data, m/s) · `fire_lift` (bool, data)."
+  rules: "Car and door ≥ minimum for the chosen car type (rule set `lifts`, below) · shaft ≥ car + door clearances (check) · pit and headroom fit between the lowest/highest served level and the building's slabs (check against levels) · landing in front of each door free of obstacles (annotation zone; size from `accessibility`). · Rule set `lifts` (EU, EN 81-70 car types: minimum car width × depth / minimum door clear width): type 1: car 1000 × 1250 (450 kg) / 1000 × 1300 mm, door 800 mm (one wheelchair user); type 2: car 1100 × 1400 mm, door 900 mm (wheelchair user + companion); type 3: car 1100 × 2100 mm, door 900 mm (wheelchair user + companion, through or adjacent doors); type 4: car 1600 × 1400 or 1400 × 1600 mm, door 900 mm (wheelchair turning in the car); type 5: car 2000 × 1400 or 1400 × 2000 mm, door 1100 mm (stretcher / large wheelchairs). US: ADA §407.4 car sizes by door position *(values to collect from the ADA text)*."
+  sizes: "EN 81-70 types 1–5 as variants · rated loads and matching car sizes from ISO 4190-1 *(to collect)* · US typical car sizes by maker *(to collect)*."
+  lod: "Plan low: shaft rectangle with a cross · medium: car outline, doors (open line), shaft · high: door panels, frames, car wall thickness. Section: pit, car at the lowest level, headroom zone."
+  open_questions:
+    - "Whether the shaft walls should be generated as a nested wall assembly (option) or always left to the wall tool."

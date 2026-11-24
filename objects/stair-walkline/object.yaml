@@ -1,0 +1,15 @@
+id: "stair-walkline"
+name: "Stair on a walkline (winders)"
+status: "planned"
+priority: "P1"
+catalogue_id: "C-04"
+ifc:
+  class: "IfcStair"
+sheet:
+  scope: "Stair defined by a drawn walkline (polyline/curve) with segments marked flight or landing and corners marked landing or winders; balanced winders computed by a **sandboxed WASM script step** that outputs an ordinary recipe. Free-form stairs, any number of turns."
+  ifc: "IfcStair · CURVED_RUN_STAIR or matching …_WINDING_STAIR type (derived from the walkline)"
+  based_on: "— · spec §4.14 script step · `stairs` rule set (winder rules)."
+  inputs: "Slot `walkline` (flat curve; per-segment flags flight | landing; per-corner flags landing | winders) · width either side of the walkline (`inner_width`, `outer_width`) · levels."
+  parameters: "as C-01 + `balancing` none | balanced (WASM) · `min_inner_going`."
+  rules: "All C-01 rules at the walkline; winder going at narrow end ≥ min; even tread depth along the walkline."
+  lod: "As C-01; baked fallback contains the computed treads so tools without WASM can show it."

@@ -1,0 +1,18 @@
+id: "structure-column"
+name: "Column"
+status: "planned"
+priority: "P2"
+catalogue_id: "K-01"
+ifc:
+  class: "IfcColumn"
+sheet:
+  scope: "Vertical member between two levels (or base and top elevations): profile, rotation, material, optional base plate and cap plate (steel, high LOD), optional cladding or fire casing as an offset outline."
+  not_in_scope:
+    - "connection design"
+  ifc: "IfcColumn · COLUMN (PILASTER for engaged columns)"
+  based_on: "— · IFC profile definitions · profile library above."
+  inputs: "Insertion point (or grid intersection) · base level and top level (or offsets)."
+  parameters: "`profile` (library or custom) · `rotation` · `base_level`, `top_level`, offsets · `material` steel | concrete | timber | other · `base_plate`, `cap_plate` (bool + size) · `casing` none | offset (thickness)."
+  rules: "Profile fits within an enclosing wall when the column is engaged (check, warning) · height derived from levels."
+  sizes: "Profile library (all markets)."
+  lod: "Plan: cut profile, hatched by material (low: outline) · elevation and section: member with plates at high."

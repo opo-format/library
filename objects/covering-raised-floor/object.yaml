@@ -1,0 +1,17 @@
+id: "covering-raised-floor"
+name: "Raised access floor"
+status: "planned"
+priority: "P3"
+catalogue_id: "K-05"
+ifc:
+  class: "IfcCovering"
+  predefinedType: "FLOORING"
+sheet:
+  scope: "Raised floor over a slab in a room or drawn boundary: panel grid, finished floor height, pedestals (high LOD), perimeter, ramps or steps to adjacent floors (nested C-06 or stair), cut-outs for floor boxes."
+  ifc: "IfcCovering · FLOORING"
+  based_on: "— · EN 12825 (raised access floors) · market panel sizes."
+  inputs: "Boundary · level."
+  parameters: "`panel` (default 600 × 600 mm; US 2' × 2') · `finished_height` (default 0.15 m / 6\") · `panel_thickness` · `grid_origin` · `pedestals` (bool)."
+  rules: "Finished height ≥ panel thickness + min void (warning) · step to adjacent floor flagged where no ramp/step is placed (warning)."
+  sizes: "Panel sizes per market (typical)."
+  lod: "Plan: grid lines (medium) · section: panels, void, pedestals (high)."

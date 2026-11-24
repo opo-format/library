@@ -30,11 +30,12 @@ build:
         if [ -f "$d/object.yaml" ]; then {{opo}} build "$d" --library . -o build; fi
     done
 
-# Build, then check every built template and object.
+# Build, then check every built template and object and the catalogue entries.
 check: build
     #!/usr/bin/env bash
     set -euo pipefail
     shopt -s nullglob
+    {{opo}} catalogue --library . -o build/catalogue.md
     dirs=(build/library/templates/*/ build/library/objects/*/)
     if [ ${#dirs[@]} -gt 0 ]; then {{opo}} check --root build --ifc build/ifc/psets.json "${dirs[@]}"; fi
     just opo={{opo}} golden

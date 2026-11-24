@@ -1,0 +1,16 @@
+id: "sanitary-shower"
+name: "Shower"
+status: "planned"
+priority: "P2"
+catalogue_id: "F-05"
+ifc:
+  class: "IfcSanitaryTerminal"
+  predefinedType: "SHOWER"
+sheet:
+  scope: "Shower tray (raised, low-profile, or level-access floor area with drain), screen/enclosure (none, fixed panel, hinged door, sliding, quadrant), shower head and mixer position, drain (point / linear)."
+  ifc: "IfcSanitaryTerminal · SHOWER (tray as part; screen as nested IfcPlate or part)"
+  based_on: "— · `accessibility` (level access; ADA shower seat and controls) · market tray sizes."
+  inputs: "Host walls (corner or alcove); optional `outline` slot for walk-in areas."
+  parameters: "`tray` raised | low | level · `width`, `depth` · `shape` rectangle | square | quadrant | pentagon · `enclosure` none | panel | door | sliding | quadrant · `drain` point | linear (+ position) · `head_height` · `mixer_height`."
+  sizes: "EU/UK trays: squares 760, 800, 900, 1000 mm; rectangles 1000 × 800, 1200 × 800, 1200 × 900, 1400 × 800, 1700 × 800 mm (sizes made by all major UK makers) · US bases: 32\" × 32\", 36\" × 36\" (ADA minimum 36\" × 36\"), 48\" × 36\", 60\" × 32\"."
+  lod: "Plan: tray outline + drain + cross (annotation) · enclosure as glass line (cut) · door swing arc."

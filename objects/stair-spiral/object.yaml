@@ -1,0 +1,19 @@
+id: "stair-spiral"
+name: "Spiral stair"
+status: "planned"
+priority: "P2"
+catalogue_id: "C-05"
+ifc:
+  class: "IfcStair"
+  predefinedType: "SPIRAL_STAIR"
+sheet:
+  scope: "Centre column with fan-shaped treads around it, optional outer stringer, helical handrail, landing at top."
+  not_in_scope:
+    - "helical stairs without a column (later)"
+  ifc: "IfcStair · SPIRAL_STAIR"
+  based_on: "— · IRC spiral rules."
+  inputs: "Levels · centre point."
+  parameters: "`outer_diameter` (default 1.6 m / 5'), `column_diameter` (default 0.1 m / 4\") · `rotation` (total angle, derived from risers × tread angle) · `direction` cw | ccw · `tread_angle` · `top_landing` (angle) · balusters per tread."
+  rules: "IRC: clear width ≥ 26\", rise ≤ 9½\", tread ≥ 7½\" at 12\" from the narrow edge, headroom ≥ 6'6\" · EU: no EN/ISO rule; project values."
+  sizes: "Makers' standard diameters *(to collect, metric and imperial)*."
+  lod: "Plan: circle, tread radials, walkline arc, cut line, UP arrow."

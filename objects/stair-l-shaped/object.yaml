@@ -1,0 +1,15 @@
+id: "stair-l-shaped"
+name: "L-shaped stair"
+status: "planned"
+priority: "P1"
+catalogue_id: "C-02"
+ifc:
+  class: "IfcStair"
+sheet:
+  scope: "Two flights at 90° with a quarter landing or winders at the corner; left or right turn."
+  ifc: "IfcStair · QUARTER_TURN_STAIR (landing) / QUARTER_WINDING_STAIR (winders) · 2 IfcStairFlight + IfcSlab LANDING"
+  based_on: "as C-01."
+  inputs: "as C-01."
+  parameters: "(beyond C-01) `turn` left | right · `corner` landing | winders · `winders` (count, default 3) · `split_riser` (risers in first flight) · `walkline_offset`."
+  rules: "as C-01 + winder going at walkline ≥ min and at narrow end ≥ min (`stairs.winders`)."
+  lod: "Plan: winder lines radiating to the walkline geometry; walkline curved through the corner."

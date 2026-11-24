@@ -1,0 +1,17 @@
+id: "door-folding"
+name: "Folding door"
+status: "planned"
+priority: "P3"
+catalogue_id: "O-05"
+ifc:
+  class: "IfcDoor"
+  predefinedType: "DOOR"
+sheet:
+  scope: "Bifold (2 panels) or multi-panel folding door on a top track, one or both sides."
+  not_in_scope:
+    - "glazed folding façade systems (later)"
+  ifc: "IfcDoor · DOOR · OperationType FOLDING_TO_LEFT / FOLDING_TO_RIGHT / DOUBLE_DOOR_FOLDING"
+  based_on: "— · IFC as above · US bifold sizes."
+  parameters: "`panels` (2–8) · `stack_side` left | right | split · `fold_angle` (drawing only) · panel thickness."
+  sizes: "US bifold closet doors use the 24\"–36\" × 80\" leaf range *(per-panel sizes to collect)* · EU: by maker, use O-01 opening sizes."
+  lod: "Plan: zig-zag panels at fold angle + arcs (medium), stack only (low)."

@@ -1,0 +1,16 @@
+id: "air-terminal"
+name: "Air terminal"
+status: "planned"
+priority: "P3"
+catalogue_id: "M-02"
+ifc:
+  class: "IfcAirTerminal"
+sheet:
+  scope: "Ceiling diffuser (square, round, linear slot), wall grille, floor register, external louvre: face size, neck size, plenum box (high), throw direction as data."
+  ifc: "IfcAirTerminal · DIFFUSER / GRILLE / LOUVRE / REGISTER"
+  based_on: "— · IFC."
+  inputs: "Host ceiling, wall or floor."
+  parameters: "`kind` (IFC type) · `face_size` (default 600 × 600 for lay-in diffusers / 24\" × 24\") · `neck_diameter` · `slots` (linear: count, length) · `airflow` (data) · `system` supply | extract | return (data, sets the symbol)."
+  rules: "Lay-in diffusers match the ceiling module (check against K-04)."
+  sizes: "Face sizes by maker *(to collect)*."
+  lod: "RCP symbol (low) · face outline with pattern (medium/high)."

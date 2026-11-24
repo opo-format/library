@@ -1,0 +1,15 @@
+id: "curtain-wall-stick"
+name: "Stick curtain wall (captured, butt-joint, SSG)"
+status: "planned"
+priority: "P1"
+catalogue_id: "O-16"
+ifc:
+  class: "IfcCurtainWall"
+sheet:
+  scope: "Mullion-and-transom system assembled on site: continuous mullions anchored to slabs, transoms between them, glazing **captured** with pressure plates and caps, or **butt-jointed** (silicone joints, no caps) on one or both directions, or **SSG** (glass bonded, flush outside). Spandrel zones, shadow boxes, vents and doors in cells. Corners outside/inside."
+  not_in_scope:
+    - "thermal/structural analysis"
+    - "bracket design"
+  ifc: "IfcCurtainWall · USERDEFINED (STICK) · Priority: high-rise core element; also exercises surface/grid inputs and nesting."
+  parameters: "grid U/V (see shared rules) · `mullion_profile` (face width × depth, default 0.05 × 0.15 m / 2\" × 6\") · `transom_profile` · `joint_vertical`, `joint_horizontal` captured | butt_joint | ssg · `cap_profile` (captured: depth, shape) · `butt_joint_width` (default 0.015–0.02 m) · `glass_thickness` (IGU, default 0.032 m) · `glass_offset` (glass plane vs. mullion face) · `spandrel_zone` per floor (height from slab) · `slab_edge` (fire stop line, bracket type)."
+  rules: "Shared rules + mullion span between anchors (floor-to-floor) vs. depth."

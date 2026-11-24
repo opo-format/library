@@ -1,0 +1,18 @@
+id: "window-hung"
+name: "Hung window (single / double hung)"
+status: "planned"
+priority: "P2"
+catalogue_id: "O-09"
+ifc:
+  class: "IfcWindow"
+  predefinedType: "WINDOW"
+sheet:
+  scope: "Two vertically sliding sashes, meeting rail, check rails, optional grilles; the US/UK sash window."
+  not_in_scope:
+    - "counterweight boxes in detail (high LOD shows box outline only)"
+  ifc: "IfcWindow · WINDOW · PartitioningType DOUBLE_PANEL_HORIZONTAL · panel OperationType SLIDINGVERTICAL (both sashes, or lower only for single hung)"
+  based_on: "FreeCAD \"Sash 2-pane\" preset (reference) · IFC as above · US standard sizes."
+  parameters: "as O-08 plus `hung` single | double · `upper_ratio` (default 0.5) · `meeting_rail_height` · `open_fraction` (drawing)."
+  rules: "`escape_windows`: net clear = lower sash opening area (single hung) or the larger sash (double hung)."
+  sizes: "US: widths 24\", 28\", 32\", 36\", 40\", 44\", 48\" × heights 36\", 44\", 48\", 52\", 54\", 60\", 62\", 72\"; size codes by rough opening in feet-inches (e.g. 2030 = 2'0\" × 3'0\", 2440 = 2'4\" × 4'0\"), actual unit ½\" smaller than the rough opening · UK sash: makers' sizes (to collect)."
+  lod: "Elevation shows meeting rail and arrows; plan shows two sash lines."

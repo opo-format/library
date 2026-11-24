@@ -1,0 +1,19 @@
+id: "door-sliding"
+name: "Sliding door"
+status: "planned"
+priority: "P2"
+catalogue_id: "O-03"
+ifc:
+  class: "IfcDoor"
+  predefinedType: "DOOR"
+sheet:
+  scope: "Leaf (or two bi-parting leaves) sliding on a track in front of the wall (surface-mounted) or inside a lining; top track and cover, floor guide, recessed pull handles. Optional glazed leaf (uses window glazing component)."
+  not_in_scope:
+    - "lift-and-slide patio doors (later, as a window/door system)"
+  ifc: "IfcDoor · DOOR · OperationType SLIDING_TO_LEFT / SLIDING_TO_RIGHT / DOUBLE_DOOR_SLIDING"
+  based_on: "FreeCAD BIM \"Sliding door\" preset (LGPL, reference: opening value slides the leaf, invertible direction) · O-01 frame/lining types · IFC as above."
+  inputs: "Host wall."
+  parameters: "`track`: surface | in_lining · `leaves`: 1 | 2 (bi-parting) · `overlap` (leaf overlap onto wall at each side, default 0.05 m / 2\") · `track_height` (above leaf) · `slide_side`: left | right · `open_fraction` (0–1, drawing only) · `leaf_glazing`: none | full | vision panel."
+  rules: "Free wall length beside the opening ≥ leaf width (check against host) · `accessibility` uses clear width with the leaf fully open."
+  sizes: "Same leaf sizes as O-01 per market (generic metric, UK, US); US closet bypass sizes *(to collect)*."
+  lod: "3D: low slab · medium leaf, track box, pulls · high + track profile, floor guide, handle recesses. Plan: low leaf line + arrow · medium leaf in open/closed position + track line (overhead class) · high cut. Elevation: leaf, track, arrow (annotation)."

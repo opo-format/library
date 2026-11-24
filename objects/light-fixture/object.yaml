@@ -1,0 +1,18 @@
+id: "light-fixture"
+name: "Light fixture"
+status: "planned"
+priority: "P3"
+catalogue_id: "E-08"
+ifc:
+  class: "IfcLightFixture"
+sheet:
+  scope: "Pendant, recessed downlight, surface ceiling light, wall light, track spot, floor lamp; housing geometry, light emitting surface, mounting (ceiling host, wall host, suspension length); photometric file attached as an asset in the package (spec §5.2 `assets/`)."
+  not_in_scope:
+    - "lighting calculation (application's job)"
+  ifc: "IfcLightFixture · POINTSOURCE / DIRECTIONSOURCE / SECURITYLIGHTING · `Pset_LightFixtureTypeCommon` · light source IfcLightSourceGoniometric with photometry as an external reference (`IfcLightDistributionDataSourceSelect`: Eulumdat, IES, CIBSE TM14)"
+  based_on: "— · IFC lighting entities · Eulumdat (LDT) / IES LM-63 photometric formats. Rust parsing of IFC lighting and Eulumdat conversion exists in the `bimifc-parser` crate (MPL-2.0) — reference for the Curva implementation."
+  inputs: "Host ceiling / slab / wall (optional; freestanding for floor lamps)."
+  parameters: "`kind` pendant | downlight | surface | wall | track_spot | floor · `diameter` or `length × width` · `height` / `suspension_length` · `cut_out` (recessed: ceiling void diameter) · `luminous_flux`, `colour_temperature`, `power` (data) · `photometry` (asset reference) · `beam_angle`."
+  rules: "Recessed: ceiling void depth ≥ fixture depth (check against host)."
+  sizes: "Recessed downlight cut-outs by maker *(to collect)*."
+  lod: "Plan: reflected ceiling plan symbol (circle + cross for downlights, outline for linear) at low/medium; 3D housing at medium/high."

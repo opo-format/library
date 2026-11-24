@@ -1,0 +1,14 @@
+id: "opening-niche"
+name: "Opening / niche"
+status: "planned"
+priority: "P2"
+catalogue_id: "O-15"
+ifc:
+  class: "IfcOpeningElement"
+sheet:
+  scope: "Void in a wall or slab without a filling: rectangular, arched, or custom outline; through or recess with depth. Optional reveal/lintel lines in plan."
+  ifc: "IfcOpeningElement · OPENING (through) / RECESS (niche)"
+  based_on: "— · IFC."
+  inputs: "Optional `outline` slot (as O-13) · host wall or slab."
+  parameters: "`width`, `height`, `sill_height` · `type` through | recess · `depth` (recess) · `shape` rectangle | arch | custom."
+  lod: "Plan: low gap lines · medium + lintel line above (overhead) · elevation outline."

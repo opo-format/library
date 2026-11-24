@@ -1,0 +1,17 @@
+id: "site-furniture"
+name: "Site furniture (bench, bike rack, bollard, bin)"
+status: "planned"
+priority: "P3"
+catalogue_id: "G-02"
+ifc:
+  class: "IfcFurniture"
+  predefinedType: "USERDEFINED"
+sheet:
+  scope: "Bench, bicycle rack (stands with spacing), bollard, litter bin, planter box. Simple solids with the parameters that matter for layout."
+  ifc: "IfcFurniture · USERDEFINED (`ObjectType` BENCH / BIKE_RACK / BOLLARD / BIN / PLANTER)"
+  based_on: "— · IFC (no predefined site-furniture types in IFC 4.3 `IfcFurnitureTypeEnum`)."
+  inputs: "Point + direction, or a line (rows of stands, bollards)."
+  parameters: "`kind` · `count` and `spacing` along the line (bike racks, bollards; bike stand spacing default 1.0 m / 3') · `length`, `height`, `width` per kind · `backrest`, `armrests` (bench)."
+  rules: "Bike stand spacing and clear aisle ≥ project values (warning)."
+  sizes: "Typical sizes per kind."
+  lod: "Plan outline (low/medium) · 3D body (medium/high)."

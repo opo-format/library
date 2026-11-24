@@ -1,0 +1,20 @@
+id: "chimney-fireplace"
+name: "Chimney / fireplace"
+status: "planned"
+priority: "P3"
+catalogue_id: "K-08"
+ifc:
+  class: "IfcChimney"
+  predefinedType: "USERDEFINED"
+sheet:
+  scope: "Masonry or system chimney stack through floors and roof (flue outline, casing, stack above roof, cap) and an optional fireplace or stove opening with hearth. Floor and roof openings derived."
+  not_in_scope:
+    - "flue calculations"
+    - "distances to combustibles beyond a warning zone"
+  ifc: "IfcChimney · USERDEFINED (`ObjectType` CHIMNEY / FIREPLACE)"
+  based_on: "— · EN 1443 (chimneys: general requirements) · EN 13229 (inset appliances and open fires) *(scope to verify)*."
+  inputs: "Base level, top (roof), insertion point."
+  parameters: "`flue` size (round or rectangular) · `casing_thickness` · `height_above_roof` · `fireplace` none | open | inset · `opening_width`, `opening_height` · `hearth_depth`."
+  rules: "Stack height above the roof ≥ project value (warning; national rules not in OPO) · hearth projection ≥ project value (warning)."
+  sizes: "—"
+  lod: "Plan: flue and casing cut · section: stack through floors, fireplace opening."

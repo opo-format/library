@@ -1,0 +1,12 @@
+id: "stair-u-shaped"
+name: "U-shaped stair"
+status: "planned"
+priority: "P1"
+catalogue_id: "C-03"
+ifc:
+  class: "IfcStair"
+sheet:
+  scope: "Two parallel flights with a half landing (or winders), stairwell gap between flights (well width)."
+  ifc: "IfcStair · HALF_TURN_STAIR / HALF_WINDING_STAIR · 2 flights + half landing"
+  parameters: "(beyond C-02) `well_width` (default 0.1 m / 4\"; 0 = no well) · landing depth ≥ flight width."
+  rules: "as C-02 + well width affects the guard requirement (see `guards`)."

@@ -1,0 +1,19 @@
+id: "covering-suspended-ceiling"
+name: "Suspended ceiling"
+status: "planned"
+priority: "P2"
+catalogue_id: "K-04"
+ifc:
+  class: "IfcCovering"
+  predefinedType: "CEILING"
+sheet:
+  scope: "Suspended ceiling in a room or a drawn boundary: grid (exposed, concealed or none), tiles or plasterboard, ceiling height, void depth to the slab, perimeter trim, bulkheads at changes in height, cut-outs for light fixtures (E-08) and air terminals (M-02) placed in the ceiling."
+  not_in_scope:
+    - "hanger and fixing design"
+  ifc: "IfcCovering · CEILING"
+  based_on: "— · EN 13964 (suspended ceilings: requirements) · market grid sizes."
+  inputs: "Boundary (room/space or drawn polygon) · height above the level."
+  parameters: "`system` exposed_grid | concealed_grid | plasterboard · `module` (default 600 × 600 mm; 600 × 1200, 625 × 625; US 2' × 2', 2' × 4') · `grid_origin` (centred, or a set point) · `grid_rotation` · `tile_thickness` · `height` (default 2.7 m / 9') · `void_depth` (derived from the slab above) · `trim` profile."
+  rules: "Void ≥ deepest item above it (beams, ducts as data; warning) · cut tiles at the perimeter ≥ half a module (warning; suggests a grid origin that avoids slivers) · hosted light fixtures and air terminals snap to the grid (check)."
+  sizes: "Module sizes per market (typical, not norm values)."
+  lod: "Reflected ceiling plan: outline (low) · grid lines and hosted items (medium) · trim and bulkheads (high). Section: ceiling line and void."

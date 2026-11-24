@@ -1,0 +1,13 @@
+id: "sanitary-bidet"
+name: "Bidet"
+status: "planned"
+priority: "P3"
+catalogue_id: "F-02"
+ifc:
+  class: "IfcSanitaryTerminal"
+  predefinedType: "BIDET"
+sheet:
+  scope: "Floor-standing or wall-hung bidet, tap hole, clearance zone; matches F-01 sizes for pairing."
+  ifc: "IfcSanitaryTerminal · BIDET"
+  parameters: "`mounting` · `projection` (default as F-01) · `width` · `rim_height`."
+  sizes: "EU: pairs with WC series (projection 0.52–0.56 m) · US: rare; same as EU."

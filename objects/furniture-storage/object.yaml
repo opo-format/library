@@ -1,0 +1,13 @@
+id: "furniture-storage"
+name: "Freestanding storage (sideboard, chest)"
+status: "planned"
+priority: "P3"
+catalogue_id: "E-07"
+ifc:
+  class: "IfcFurniture"
+  predefinedType: "USERDEFINED"
+sheet:
+  scope: "Box furniture on legs or plinth with doors and/or drawers; reuses the F-08 front/handle components."
+  ifc: "IfcFurniture · USERDEFINED (SIDEBOARD, CHEST_OF_DRAWERS, CABINET) · FILECABINET for office pedestals"
+  parameters: "`width`, `height`, `depth` · `fronts` layout · `base` legs | plinth | wall_hung · `handle`."
+  lod: "As F-08."

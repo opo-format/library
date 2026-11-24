@@ -1,0 +1,14 @@
+id: "furniture-sofa"
+name: "Sofa / armchair"
+status: "planned"
+priority: "P3"
+catalogue_id: "E-03"
+ifc:
+  class: "IfcFurniture"
+  predefinedType: "SOFA"
+sheet:
+  scope: "Armchair, 2-, 3-seat sofa, corner sofa (L), chaise; base, seat cushions, back cushions, arms."
+  ifc: "IfcFurniture · SOFA"
+  parameters: "`seats` 1–4 · `shape` straight | corner_left | corner_right | chaise · `seat_width` per seat · `depth` · `seat_height` · `arm_width`, `arm_height` · `back_height` · `legs` visible | plinth."
+  sizes: "By maker *(typical ranges to collect; no norm)*."
+  lod: "Plan: outline + cushion divisions (medium)."

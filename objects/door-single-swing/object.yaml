@@ -1,6 +1,9 @@
 id: "door-single-swing"
 name: "Single swing door"
 version: "0.2.0"
+status: "draft"
+priority: "P1"
+catalogue_id: "O-01"
 type_name: "Single swing door 900 × 2100 opening"
 description: "Single swing door with frame, rebated or flush leaf, lever handle, three levels of detail and size catalogues for generic metric, UK and US."
 tags:

@@ -1,0 +1,22 @@
+id: "door-double-swing"
+name: "Double swing door"
+status: "planned"
+priority: "P2"
+catalogue_id: "O-02"
+ifc:
+  class: "IfcDoor"
+  predefinedType: "DOOR"
+sheet:
+  scope: "Two leaves in one frame: equal pair, or unequal (active leaf + fixed/standing leaf). Rebated meeting stiles, flush bolts on the standing leaf (medium/high), handle on the active leaf, optional pull handle or second lever on the standing leaf."
+  not_in_scope:
+    - "panic hardware details"
+    - "automatic operators"
+  ifc: "IfcDoor · DOOR · OperationType DOUBLE_DOOR_SINGLE_SWING (DOUBLE_DOOR_DOUBLE_SWING if double-acting) · two `Pset_DoorPanelProperties` (PanelPosition LEFT / RIGHT, PanelWidth ratio)"
+  based_on: "bim-all-doors (two-leaf configuration, standing-leaf width `gs_SecondLeaf_w`, meeting-stile rebate) · IFC as above · generic metric pair openings, UK and US pair sizes."
+  inputs: "Host wall. No drawn input."
+  parameters: "(beyond O-01) `leaf_split`: equal | unequal · `standing_leaf_width` (unequal; default 0.375 m / 12\") · `meeting_rebate` · `double_acting` (bool; no stop, both swings drawn) · `standing_leaf_bolts` (bool)."
+  rules: "Active leaf ≥ 0.6 m (check) · `accessibility` measures the active leaf only (ADA, ISO 21542 practice)."
+  sizes: "Generic metric pair openings 1250–2000 × 2100 mm (not a norm) · UK pairs 1981 × 1067 / 1168 / 1220 mm (6'6\" × 3'6\" / 3'10\" / 4'0\") · US pairs from two standard leaves, e.g. 2 × 24\", 2 × 30\", 2 × 36\" × 80\" *(typical, to verify)*."
+  lod: "3D: low slab · medium frame, two leaves, levers · high + bolts, hinges, meeting stile rebate. Plan: low two lines + two arcs · medium jambs + leaves + arcs · high cut. Elevation: swing indicators on both leaves."
+  open_questions:
+    - "Standing leaf as a separate panel object or a parameter? (Parameter for now.)"

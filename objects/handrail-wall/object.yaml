@@ -1,0 +1,16 @@
+id: "handrail-wall"
+name: "Wall handrail"
+status: "planned"
+priority: "P2"
+catalogue_id: "C-08"
+ifc:
+  class: "IfcRailing"
+  predefinedType: "HANDRAIL"
+sheet:
+  scope: "Handrail on brackets along a wall (stairs, ramps, corridors), with end returns or extensions."
+  ifc: "IfcRailing · HANDRAIL"
+  based_on: "Bonsai WALL_MOUNTED_HANDRAIL type (reference) · `handrails`, `accessibility` (extensions at ends of ramps/stairs)."
+  inputs: "Slot `path` or host stair / ramp side."
+  parameters: "`height` (default 0.9 m / 36\") · `profile` round Ø 0.04 m / 1½\" | rectangular · `wall_clearance` (≥ 0.05 m / 1½\") · `bracket_spacing` (default 1.0 m / 4') · `extension_top`, `extension_bottom` (ADA: 12\" at ramps; to add for stairs) · `end` return_to_wall | rounded."
+  rules: "Height within rule set range · profile within grippable range · clearance ≥ min."
+  lod: "Plan: line (medium), brackets (high)."

@@ -1,0 +1,18 @@
+id: "shading-screen"
+name: "External screen"
+status: "planned"
+priority: "P3"
+catalogue_id: "S-07"
+ifc:
+  class: "IfcShadingDevice"
+  predefinedType: "USERDEFINED"
+  objectType: "SCREEN"
+sheet:
+  scope: "Fabric screen rolling down in front of a window or curtain wall bay: cassette, zip or cable guides, bottom bar. Fabric openness as data (affects visible and solar transmittance in `Pset_ShadingDeviceCommon`)."
+  ifc: "IfcShadingDevice · USERDEFINED (`ObjectType` SCREEN)"
+  based_on: "— · EN 13561 (vertical roller blinds) · EN 12216."
+  inputs: "Host window, door or curtain wall bay."
+  parameters: "`cassette` size · `guide` zip | cable | none · `lowered` (0–1) · `openness` (data, %) · `wind_class` (data)."
+  rules: "Shared rules."
+  sizes: "Maker ranges *(to collect)*."
+  lod: "As S-03 without slats."

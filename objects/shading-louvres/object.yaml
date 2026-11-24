@@ -1,0 +1,21 @@
+id: "shading-louvres"
+name: "Louvres / brise-soleil"
+status: "planned"
+priority: "P2"
+catalogue_id: "S-01"
+ifc:
+  class: "IfcShadingDevice"
+  predefinedType: "USERDEFINED"
+  objectType: "LOUVRE"
+sheet:
+  scope: "Fixed or adjustable horizontal or vertical blades on a frame or on brackets in front of a façade, window or curtain wall: blade arrays over one or many bays, end frames, support brackets or outriggers."
+  not_in_scope:
+    - "solar calculation (the app uses the geometry)"
+    - "structural design of outriggers"
+  ifc: "IfcShadingDevice · USERDEFINED (`ObjectType` LOUVRE)"
+  based_on: "— · EN 13561 lists brise-soleil (wind resistance of non-retractable products is outside its scope) · IFC as above."
+  inputs: "Host (window, curtain wall bay range, or façade surface) or a drawn rectangle on a face."
+  parameters: "`direction` horizontal | vertical · `blade_profile` flat | aerofoil | rectangular tube | custom (2D profile input) · `blade_depth` (default 0.2 m / 8\") · `blade_thickness` · `spacing` (default 0.3 m / 12\") or `count` · `blade_angle` (fixed, or range if adjustable) · `projection` (distance from face) · `frame` none | perimeter | end plates · `bracket_spacing`."
+  rules: "Shared rules + blade span between supports ≤ maker maximum *(data)* · cut-off angle derived (shows the sun angle at which blades block direct sun: derived value, no check)."
+  sizes: "None (host-driven). Blade presets from public maker ranges *(to collect)*."
+  lod: "As shared; high adds blade end caps and pivot pins."
