@@ -40,6 +40,13 @@ jobs:
       - name: "Install opo at the pinned commit"
         run: test -x ~/.cargo/bin/opo || just install
       - run: just check
+      - name: "Previews (not committed, decision 0016)"
+        run: just previews
+      - uses: actions/upload-artifact@v4
+        with:
+          name: previews
+          path: build/previews/
+          retention-days: 30
 
   reuse:
     name: "Licences (REUSE)"
