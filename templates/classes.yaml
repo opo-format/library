@@ -4329,3 +4329,598 @@ IfcPipeSegment:
       direction: "for k in 1..3 return seg_end[k] / len_end"
   materials:
     - "copper"
+IfcBearing:
+  archetype: "point"
+  name: "Bearing (class template)"
+  description: "Structural bearing between a superstructure and its support: a block on the support. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "ELASTOMERIC"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 0.4
+    depth:
+      default: 0.3
+    height:
+      default: 0.06
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "BRG"
+    casing_material:
+      default: "steel"
+  materials:
+    - "steel"
+IfcFooting:
+  archetype: "point"
+  name: "Footing (class template)"
+  description: "Pad footing or pile cap below a column: a concrete block with its top at the given level. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "PAD_FOOTING"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 1.2
+    depth:
+      default: 1.2
+    height:
+      default: 0.5
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "F"
+    casing_material:
+      default: "reinforced_concrete"
+  materials:
+    - "reinforced_concrete"
+IfcMooringDevice:
+  archetype: "point"
+  name: "Mooring device (class template)"
+  description: "Bollard, hook or line tensioner on a quay: a block on the deck. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "BOLLARD"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 0.4
+    depth:
+      default: 0.4
+    height:
+      default: 0.6
+    clearance_front:
+      default: 0.6
+    clearance_side:
+      default: 0.6
+    symbol_code:
+      default: "MB"
+    casing_material:
+      default: "steel"
+  materials:
+    - "steel"
+IfcNavigationElement:
+  archetype: "point"
+  name: "Navigation element (class template)"
+  description: "Beacon or buoy marking a waterway: a body at its position. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "BEACON"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 0.5
+    depth:
+      default: 0.5
+    height:
+      default: 2.0
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "NAV"
+    casing_material:
+      default: "steel"
+  materials:
+    - "steel"
+IfcBuildingElementPart:
+  archetype: "point"
+  name: "Building element part (class template)"
+  description: "Part of a built element such as a precast panel, insulation piece or apron: a block placed in its element. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "PRECASTPANEL"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 1.2
+    depth:
+      default: 0.1
+    height:
+      default: 2.4
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "BEP"
+    casing_material:
+      default: "reinforced_concrete"
+  materials:
+    - "reinforced_concrete"
+IfcDiscreteAccessory:
+  archetype: "point"
+  name: "Discrete accessory (class template)"
+  description: "Bracket, anchor plate, flashing, lock or other accessory fixed to an element: a small block. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "BRACKET"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.15
+    depth:
+      default: 0.1
+    height:
+      default: 0.15
+    mount_height:
+      default: 1.0
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "ACC"
+    casing_material:
+      default: "steel"
+  materials:
+    - "steel"
+IfcFastener:
+  archetype: "point"
+  name: "Fastener (class template)"
+  description: "Weld, glue or mortar joint between elements: a small block standing for the joint. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "WELD"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 0.05
+    depth:
+      default: 0.01
+    height:
+      default: 0.01
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "W"
+    casing_material:
+      default: "steel"
+  materials:
+    - "steel"
+IfcImpactProtectionDevice:
+  archetype: "point"
+  name: "Impact protection device (class template)"
+  description: "Bumper, crash cushion or fender: a block in front of what it protects. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "BUMPER"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 1.0
+    depth:
+      default: 0.2
+    height:
+      default: 0.3
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "IPD"
+    casing_material:
+      default: "plastic"
+  materials:
+    - "plastic"
+IfcMechanicalFastener:
+  archetype: "point"
+  name: "Mechanical fastener (class template)"
+  description: "Bolt, anchor bolt, screw, dowel or nail: a small body standing for the fastener. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "BOLT"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 0.02
+    depth:
+      default: 0.02
+    height:
+      default: 0.1
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "BLT"
+    casing_material:
+      default: "steel"
+  materials:
+    - "steel"
+IfcTendonAnchor:
+  archetype: "point"
+  name: "Tendon anchor (class template)"
+  description: "Anchor at the end of a prestressing tendon: a block at the tendon end. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "FIXED_END"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 0.25
+    depth:
+      default: 0.15
+    height:
+      default: 0.25
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "TA"
+    casing_material:
+      default: "steel"
+  materials:
+    - "steel"
+IfcSign:
+  archetype: "point"
+  name: "Sign (class template)"
+  description: "Sign, marker or mirror on a wall or post: a thin panel. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "PICTORAL"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.6
+    depth:
+      default: 0.02
+    height:
+      default: 0.4
+    mount_height:
+      default: 1.8
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "SGN"
+    casing_material:
+      default: "aluminium"
+  materials:
+    - "aluminium"
+IfcVibrationDamper:
+  archetype: "point"
+  name: "Vibration damper (class template)"
+  description: "Damper between structure and equipment or within the structure: a block. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "VISCOUS"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 0.2
+    depth:
+      default: 0.2
+    height:
+      default: 0.4
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "VD"
+    casing_material:
+      default: "steel"
+  materials:
+    - "steel"
+IfcVibrationIsolator:
+  archetype: "point"
+  name: "Vibration isolator (class template)"
+  description: "Spring or rubber mount under equipment: a small block on the floor. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "SPRING"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 0.1
+    depth:
+      default: 0.1
+    height:
+      default: 0.08
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "VI"
+    casing_material:
+      default: "steel"
+  materials:
+    - "steel"
+IfcFurnishingElement:
+  archetype: "point"
+  name: "Furnishing element (class template)"
+  description: "Generic furnishing element (supertype) with no specific IFC class: a body on the floor. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 0.8
+    depth:
+      default: 0.5
+    height:
+      default: 0.8
+    clearance_front:
+      default: 0.6
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "FUR"
+    casing_material:
+      default: "timber"
+  materials:
+    - "timber"
+IfcFurniture:
+  archetype: "point"
+  name: "Furniture (class template)"
+  description: "Table, chair, desk, shelf, bed or cabinet: a table by default, as a body with its use zone in front. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "TABLE"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 1.6
+    depth:
+      default: 0.8
+    height:
+      default: 0.75
+    clearance_front:
+      default: 0.75
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "TBL"
+    casing_material:
+      default: "timber"
+  materials:
+    - "timber"
+IfcSystemFurnitureElement:
+  archetype: "point"
+  name: "System furniture element (class template)"
+  description: "Work surface, panel or subrack of a furniture system: a work surface by default. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "WORKSURFACE"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 1.6
+    depth:
+      default: 0.8
+    height:
+      default: 0.03
+    mount_height:
+      default: 0.72
+    clearance_front:
+      default: 0.8
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "WS"
+    casing_material:
+      default: "timber"
+  materials:
+    - "timber"
+IfcGeographicElement:
+  archetype: "point"
+  name: "Geographic element (class template)"
+  description: "Tree, planting or other geographic element: a tree by default, drawn as a block with its canopy width. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "VEGETATION"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 4.0
+    depth:
+      default: 4.0
+    height:
+      default: 6.0
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "TREE"
+    casing_material:
+      default: "timber"
+  materials:
+    - "timber"
+IfcBorehole:
+  archetype: "point"
+  name: "Borehole (class template)"
+  description: "Borehole of a ground investigation: a marker at the ground with the bore depth as data. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 0.2
+    depth:
+      default: 0.2
+    height:
+      default: 0.2
+    clearance_front:
+      default: 0.0
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "BH"
+    casing_material:
+      default: "steel"
+    bore_depth:
+      type: "length"
+      default: 10.0
+      label: "Depth below ground"
+      group: "Size"
+      limits:
+        min: 0.5
+        max: 500
+  materials:
+    - "steel"
+IfcTransportElement:
+  archetype: "point"
+  name: "Transport element (class template)"
+  description: "Lift, escalator, moving walkway or crane: a lift car by default, with its power supply. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "ELEVATOR"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 1.1
+    depth:
+      default: 1.4
+    height:
+      default: 2.2
+    clearance_front:
+      default: 1.5
+    clearance_side:
+      default: 0.0
+    symbol_code:
+      default: "LIFT"
+    cable_size:
+      type: "length"
+      default: 0.02
+      label: "Cable connection size"
+      group: "Connections"
+      limits:
+        min: 0.005
+        max: 0.2
+  ports:
+    - name: "power"
+      system_type: "ELECTRICAL"
+      flow_direction: "SINK"
+      port_type: "CABLE"
+      nominal_size: "cable_size"
+      position: "[-width / 2 + width * 0.5, depth / 2, top]"
+      direction: "[0, 0, 1]"
+IfcVehicle:
+  archetype: "point"
+  name: "Vehicle (class template)"
+  description: "Vehicle such as a car, rolling stock or vessel, for layouts and clearance checks: a car by default. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "VEHICLEWHEELED"
+  parameters:
+    mount:
+      default: "floor"
+    width:
+      default: 1.8
+    depth:
+      default: 4.5
+    height:
+      default: 1.5
+    clearance_front:
+      default: 0.8
+    clearance_side:
+      default: 0.6
+    symbol_code:
+      default: "CAR"
+IfcDistributionElement:
+  archetype: "point"
+  name: "Distribution element (class template)"
+  description: "Generic distribution element (supertype) with no specific IFC class: a body with one connection. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.3
+    depth:
+      default: 0.2
+    height:
+      default: 0.3
+    mount_height:
+      default: 1.2
+    clearance_front:
+      default: 0.5
+    clearance_side:
+      default: 0.05
+    symbol_code:
+      default: "DE"
+    pipe_size:
+      type: "length"
+      default: 0.022
+      label: "Pipe connection outside diameter"
+      group: "Connections"
+      limits:
+        min: 0.008
+        max: 0.6
+  rules:
+    derived:
+      connections:
+        expr: "[{from: [-width / 2 + width * 0.5, 0, bottom + height / 2], to: [-width / 2 + width * 0.5, -0.05, bottom + height / 2], d: pipe_size}]"
+        note: "One stub per pipe or duct port."
+  ports:
+    - name: "connection"
+      system_type: "NOTDEFINED"
+      flow_direction: "SOURCEANDSINK"
+      port_type: "PIPE"
+      nominal_size: "pipe_size"
+      position: "connections[1].to"
+      direction: "[0, -1, 0]"
+IfcDistributionFlowElement:
+  archetype: "point"
+  name: "Distribution flow element (class template)"
+  description: "Generic distribution flow element (supertype) with no specific IFC class: an inline body with an inlet and an outlet. Sizes are illustrative defaults, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    mount:
+      default: "wall"
+    width:
+      default: 0.3
+    depth:
+      default: 0.2
+    height:
+      default: 0.3
+    mount_height:
+      default: 1.2
+    clearance_front:
+      default: 0.5
+    clearance_side:
+      default: 0.05
+    symbol_code:
+      default: "DFE"
+    pipe_size:
+      type: "length"
+      default: 0.022
+      label: "Pipe connection outside diameter"
+      group: "Connections"
+      limits:
+        min: 0.008
+        max: 0.6
+  rules:
+    derived:
+      connections:
+        expr: "[{from: [-width / 2, depth * 0.5, bottom + height / 2], to: [-width / 2 - 0.05, depth * 0.5, bottom + height / 2], d: pipe_size}, {from: [width / 2, depth * 0.5, bottom + height / 2], to: [width / 2 + 0.05, depth * 0.5, bottom + height / 2], d: pipe_size}]"
+        note: "One stub per pipe or duct port."
+  ports:
+    - name: "inlet"
+      system_type: "NOTDEFINED"
+      flow_direction: "SINK"
+      port_type: "PIPE"
+      nominal_size: "pipe_size"
+      position: "connections[1].to"
+      direction: "[-1, 0, 0]"
+    - name: "outlet"
+      system_type: "NOTDEFINED"
+      flow_direction: "SOURCE"
+      port_type: "PIPE"
+      nominal_size: "pipe_size"
+      position: "connections[2].to"
+      direction: "[1, 0, 0]"
