@@ -23,7 +23,7 @@ check: build
     just golden
 
 # Until phase 5: the generated templates equal those committed in the standard repository
-# (checked out at the commit in opo-spec into ./opo-spec).
+# (checked out at the commit in opo-spec-version into ./opo-spec).
 golden:
     #!/usr/bin/env bash
     set -euo pipefail

@@ -20,7 +20,7 @@ jobs:
           repository: opo-format/opo
           path: opo-spec
           fetch-depth: 0
-      - run: git -C opo-spec checkout "$(cat opo-spec)"
+      - run: git -C opo-spec checkout "$(cat opo-spec-version)"
       - id: opo
         run: echo "rev=$(cat opo-version)" >> "$GITHUB_OUTPUT"
       - name: "Cache the opo command"

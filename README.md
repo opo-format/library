@@ -17,7 +17,7 @@ ifc/                   IFC 4.3 ADD2 data extracted for the generator
 styles/                materials.yaml and hatches.yaml, embedded into objects at build
 references.yaml        every cited source
 opo-version            the opo-rs commit the library is built with
-opo-spec               the standard repository commit the templates are compared with (until phase 5)
+opo-spec-version       the standard repository commit the templates are compared with (until phase 5)
 ```
 
 ## Building
