@@ -4,8 +4,20 @@ label: "2010 ADA Standards"
 uri: "https://opo-format.org/rulesets/accessibility/us-ada-2010@0.1"
 source: "2010 ADA Standards §404.2.3 (32 in clear, door open 90°) and §404.2.7 (hardware 34–48 in above floor)."
 values:
-  min_clear_width: "inch(32)"
+  min_clear_width:
+    value: "inch(32)"
+    source: "iso-21542-2021-eu-en-17210-functional-requirements-ada-2010"
+    status: "to_verify"
+    note: "2010 ADA Standards 404.2.3 minimum clear width; check the text."
   measure: "\"usable_clear_width\""
-  handle_min: "inch(34)"
-  handle_max: "inch(48)"
+  handle_min:
+    value: "inch(34)"
+    source: "iso-21542-2021-eu-en-17210-functional-requirements-ada-2010"
+    status: "to_verify"
+    note: "2010 ADA Standards 404.2.7 lowest height of operable parts; check the text."
+  handle_max:
+    value: "inch(48)"
+    source: "iso-21542-2021-eu-en-17210-functional-requirements-ada-2010"
+    status: "to_verify"
+    note: "2010 ADA Standards 404.2.7 highest height of operable parts; check the text."
 node: "f5107809-48bd-5407-82f5-98a158a1c95b"

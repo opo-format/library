@@ -10,25 +10,65 @@ variants:
   - name: "Opening 700 × 2100"
     node: "f1598c52-7e15-5e26-af78-8eb1d3b524db"
     values:
-      nominal_width: 0.7
-      nominal_height: 2.1
+      nominal_width:
+        value: 0.7
+        source: "generic-metric-openings-no-eu-door-size-norm-exists"
+        status: "illustrative"
+        note: "Round metric opening width; no EU door size norm exists."
+      nominal_height:
+        value: 2.1
+        source: "generic-metric-openings-no-eu-door-size-norm-exists"
+        status: "illustrative"
+        note: "Round metric opening height; no EU door size norm exists."
   - name: "Opening 800 × 2100"
     node: "e40b89fd-2c64-5ce5-9518-a08d78932615"
     values:
-      nominal_width: 0.8
-      nominal_height: 2.1
+      nominal_width:
+        value: 0.8
+        source: "generic-metric-openings-no-eu-door-size-norm-exists"
+        status: "illustrative"
+        note: "Round metric opening width; no EU door size norm exists."
+      nominal_height:
+        value: 2.1
+        source: "generic-metric-openings-no-eu-door-size-norm-exists"
+        status: "illustrative"
+        note: "Round metric opening height; no EU door size norm exists."
   - name: "Opening 900 × 2100"
     node: "a7583bf9-5bd7-5576-90fe-4b54f43c3666"
     values:
-      nominal_width: 0.9
-      nominal_height: 2.1
+      nominal_width:
+        value: 0.9
+        source: "generic-metric-openings-no-eu-door-size-norm-exists"
+        status: "illustrative"
+        note: "Round metric opening width; no EU door size norm exists."
+      nominal_height:
+        value: 2.1
+        source: "generic-metric-openings-no-eu-door-size-norm-exists"
+        status: "illustrative"
+        note: "Round metric opening height; no EU door size norm exists."
   - name: "Opening 1000 × 2100"
     node: "ada45df6-680a-5101-bb75-2d91da75aa76"
     values:
-      nominal_width: 1.0
-      nominal_height: 2.1
+      nominal_width:
+        value: 1.0
+        source: "generic-metric-openings-no-eu-door-size-norm-exists"
+        status: "illustrative"
+        note: "Round metric opening width; no EU door size norm exists."
+      nominal_height:
+        value: 2.1
+        source: "generic-metric-openings-no-eu-door-size-norm-exists"
+        status: "illustrative"
+        note: "Round metric opening height; no EU door size norm exists."
   - name: "Opening 1100 × 2100"
     node: "5516a8c9-1d0b-53cc-823c-aac2b05ed904"
     values:
-      nominal_width: 1.1
-      nominal_height: 2.1
+      nominal_width:
+        value: 1.1
+        source: "generic-metric-openings-no-eu-door-size-norm-exists"
+        status: "illustrative"
+        note: "Round metric opening width; no EU door size norm exists."
+      nominal_height:
+        value: 2.1
+        source: "generic-metric-openings-no-eu-door-size-norm-exists"
+        status: "illustrative"
+        note: "Round metric opening height; no EU door size norm exists."
