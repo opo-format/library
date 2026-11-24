@@ -1,0 +1,325 @@
+# Archetype `hosted` (spec/objects/archetypes.md).
+# Class template sources (proposal 0002 §4). `opo generate` builds the templates from these files,
+# the per-class table (classes.yaml) and the IFC data in ifc/. Licence: CC0-1.0.
+archetype: "hosted"
+description: "Sits in or on a host and changes it: openings, doors, windows, projections."
+parameters:
+  outline_mode:
+    type: "choice"
+    default: "rectangle"
+    label: "Shape"
+    group: "Size"
+    options:
+      - "rectangle"
+      - "custom"
+    option_labels:
+      rectangle: "Rectangle (width × height drive)"
+      custom: "Custom outline (outline drives, width and height read-only)"
+  width:
+    type: "length"
+    default: 1.0
+    label: "Width"
+    group: "Size"
+    visible: "outline_mode = \"rectangle\""
+    limits:
+      min: 0.01
+      max: 50
+  height:
+    type: "length"
+    default: 1.0
+    label: "Height"
+    group: "Size"
+    visible: "outline_mode = \"rectangle\""
+    limits:
+      min: 0.01
+      max: 50
+  sill_height:
+    type: "length"
+    default: 0.9
+    label: "Bottom above host base"
+    group: "Placement"
+    limits:
+      min: -5
+      max: 50
+  host_kind:
+    type: "choice"
+    default: "wall"
+    label: "Host"
+    group: "Placement"
+    options:
+      - "wall"
+      - "slab"
+    description: "Set by the application from the host; slab openings use the plan plane."
+  recess_depth:
+    type: "length"
+    default: 0.1
+    label: "Recess depth"
+    group: "Size"
+    visible: "predefined_type = \"RECESS\""
+    limits:
+      min: 0.001
+      max: 5
+  recess_side:
+    type: "choice"
+    default: "front"
+    label: "Recess from"
+    group: "Size"
+    visible: "predefined_type = \"RECESS\""
+    options:
+      - "front"
+      - "back"
+slots:
+  outline:
+    type: "polygon"
+    plane: "xz"
+    default: null
+    optional: true
+    rules:
+      closed: true
+      fits_host: true
+    description: "Custom outline in the host plane (custom outline mode)."
+rules:
+  derived:
+    profile_points: "if outline_mode = \"custom\" and outline != null then outline else [[-width / 2, sill_height], [width / 2, sill_height], [width / 2, sill_height + height], [-width / 2, sill_height + height]]"
+    is_recess: "predefined_type = \"RECESS\""
+    y_from: "if is_recess and recess_side = \"front\" then host.y_max - recess_depth else host.y_min - 0.01"
+    y_to: "if is_recess and recess_side = \"back\" then host.y_min + recess_depth else host.y_max + 0.01"
+    z_from: "if is_recess and recess_side = \"front\" then host.top - recess_depth else host.bottom - 0.01"
+    z_to: "if is_recess and recess_side = \"back\" then host.bottom + recess_depth else host.top + 0.01"
+    open_width: "max(for p in profile_points return p[1]) - min(for p in profile_points return p[1])"
+    open_height: "max(for p in profile_points return p[2]) - min(for p in profile_points return p[2])"
+    depth: "if is_recess then recess_depth else host.thickness"
+    area: "abs(sum(for i in 1..count(profile_points) return profile_points[i][1] * profile_points[modulo(i, count(profile_points)) + 1][2] - profile_points[modulo(i, count(profile_points)) + 1][1] * profile_points[i][2])) / 2"
+    above_cut:
+      expr: "min(for p in profile_points return p[2]) > view.cut_height"
+      note: "Opening starts above the plan cut: drawn dashed."
+  checks:
+    outline_given:
+      expr: "outline_mode = \"rectangle\" or outline != null"
+      severity: "error"
+      message: "Custom outline mode needs an outline."
+    recess_fits:
+      expr: "not(is_recess) or recess_depth < host.thickness"
+      severity: "error"
+      message: "A recess must be shallower than its host."
+  rulesets: {}
+recipe:
+  profile:
+    op: "polygon"
+    plane: "xz"
+    args:
+      points: "profile_points"
+  void_wall:
+    op: "extrude"
+    plane: "xz"
+    when: "host_kind = \"wall\""
+    args:
+      profile: "profile"
+      from: "y_from"
+      to: "y_to"
+  profile_plan:
+    op: "polygon"
+    plane: "xy"
+    args:
+      points: "profile_points"
+  void_slab:
+    op: "extrude"
+    plane: "xy"
+    when: "host_kind = \"slab\""
+    args:
+      profile: "profile_plan"
+      from: "z_from"
+      to: "z_to"
+  void:
+    op: "union"
+    args:
+      items: "[void_wall, void_slab]"
+  plan_wall:
+    op: "rectangle"
+    plane: "xy"
+    when: "host_kind = \"wall\" and above_cut"
+    args:
+      min: "[min(for p in profile_points return p[1]), host.y_min]"
+      max: "[max(for p in profile_points return p[1]), host.y_max]"
+  plan_wall_cross:
+    op: "union"
+    plane: "xy"
+    when: "host_kind = \"wall\" and above_cut"
+    args:
+      items: "[line([min(for p in profile_points return p[1]), host.y_min], [max(for p in profile_points return p[1]), host.y_max]), line([min(for p in profile_points return p[1]), host.y_max], [max(for p in profile_points return p[1]), host.y_min])]"
+  plan_slab_cross:
+    op: "union"
+    plane: "xy"
+    when: "host_kind = \"slab\" and outline_mode = \"rectangle\""
+    args:
+      items: "[boundary_curves(profile_plan), line(profile_points[1], profile_points[3]), line(profile_points[2], profile_points[4])]"
+  elev_outline:
+    op: "boundary_curves"
+    plane: "xz"
+    args:
+      region: "profile"
+  elev_cross:
+    op: "union"
+    plane: "xz"
+    when: "outline_mode = \"rectangle\""
+    args:
+      items: "[line(profile_points[1], profile_points[3]), line(profile_points[2], profile_points[4])]"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "void"
+        role: "void"
+    note: "The void is not drawn; it cuts the host."
+  model.medium:
+    context: "model"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "void"
+        role: "void"
+  model.high:
+    context: "model"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "void"
+        role: "void"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_wall"
+        class: "overhead"
+      - geometry: "plan_slab_cross"
+        class: "projected"
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_wall"
+        class: "overhead"
+      - geometry: "plan_wall_cross"
+        class: "overhead"
+      - geometry: "plan_slab_cross"
+        class: "projected"
+    note: "Wall openings below the cut show as a gap in the host's cut; openings above the cut are drawn dashed with a cross. Slab openings: outline with a cross."
+  plan.high:
+    context: "plan"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_wall"
+        class: "overhead"
+      - geometry: "plan_wall_cross"
+        class: "overhead"
+      - geometry: "plan_slab_cross"
+        class: "projected"
+  elevation:
+    context: "elevation"
+    lod: "all"
+    source: "authored"
+    ifc:
+      context: "Profile"
+      targetView: "ELEVATION_VIEW"
+    items:
+      - geometry: "elev_outline"
+        class: "projected"
+      - geometry: "elev_cross"
+        class: "annotation"
+host:
+  hosts:
+    - "IfcWall"
+    - "IfcSlab"
+    - "IfcRoof"
+    - "IfcCovering"
+    - "IfcPlate"
+    - "IfcCurtainWall"
+    - "IfcBeam"
+    - "IfcColumn"
+    - "IfcMember"
+  inputs:
+    thickness:
+      type: "length"
+      default: 0.2
+    y_min:
+      type: "length"
+      default: -0.1
+    y_max:
+      type: "length"
+      default: 0.1
+    bottom:
+      type: "length"
+      default: 0.0
+    top:
+      type: "length"
+      default: 3.0
+  void:
+    geometry: "void"
+    ifc: "this element (IfcRelVoidsElement to the host)"
+  insertion:
+    point: "[0, 0, 0]"
+    description: "Wall: centre of the width on the host axis at the host base. Slab: the outline's own coordinates on the slab."
+handles:
+  - parameter: "width"
+    view:
+      - "elevation"
+      - "model"
+    at: "[width / 2, 0, sill_height + height / 2]"
+    axis: "x"
+    symmetric: true
+  - parameter: "height"
+    view:
+      - "elevation"
+      - "model"
+    at: "[0, 0, sill_height + height]"
+    axis: "z"
+  - slot: "outline"
+    kind: "points"
+    view:
+      - "elevation"
+    visible: "outline_mode = \"custom\""
+materials: []
+ifc:
+  quantities:
+    Width: "open_width"
+    Height: "open_height"
+    Depth: "depth"
+    Area: "area"
+    Volume: "area * depth"

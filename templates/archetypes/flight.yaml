@@ -1,0 +1,361 @@
+# Archetype `flight` (spec/objects/archetypes.md).
+# Class template sources (proposal 0002 §4). `opo generate` builds the templates from these files,
+# the per-class table (classes.yaml) and the IFC data in ifc/. Licence: CC0-1.0.
+archetype: "flight"
+description: "Level to level: stairs and ramps."
+parameters:
+  rise_mode:
+    type: "choice"
+    default: "storey"
+    label: "Total rise"
+    group: "Rise"
+    options:
+      - "storey"
+      - "value"
+    option_labels:
+      storey: "Storey height"
+      value: "Value"
+  rise_value:
+    type: "length"
+    default: 3.0
+    label: "Total rise"
+    group: "Rise"
+    visible: "rise_mode = \"value\""
+    limits:
+      min: 0.1
+      max: 10
+  max_riser:
+    type: "length"
+    default: 0.18
+    label: "Maximum riser"
+    group: "Steps"
+    limits:
+      min: 0.05
+      max: 0.3
+    description: "Generic default (no EN/ISO stair geometry norm); a rule set layer sets regional limits."
+  going:
+    type: "length"
+    default: 0.28
+    label: "Going"
+    group: "Steps"
+    limits:
+      min: 0.1
+      max: 0.6
+  width:
+    type: "length"
+    default: 1.0
+    label: "Width"
+    group: "Size"
+    limits:
+      min: 0.4
+      max: 10
+  structure:
+    type: "choice"
+    default: "waist"
+    label: "Structure"
+    group: "Structure"
+    options:
+      - "waist"
+      - "solid"
+    option_labels:
+      waist: "Concrete waist slab"
+      solid: "Solid (on fill or masonry)"
+  waist_thickness:
+    type: "length"
+    default: 0.15
+    label: "Waist thickness"
+    group: "Structure"
+    visible: "structure = \"waist\""
+    limits:
+      min: 0.05
+      max: 0.5
+  material:
+    type: "material"
+    default: "reinforced_concrete"
+    label: "Material"
+    group: "Materials"
+    options: "materials"
+  arrow_label:
+    type: "text"
+    default: "UP"
+    label: "Walking line label"
+    group: "Drawing"
+slots: {}
+rules:
+  derived:
+    total_rise: "if rise_mode = \"storey\" then level.height else rise_value"
+    risers: "ceiling(total_rise / max_riser)"
+    riser: "total_rise / risers"
+    treads: "risers - 1"
+    run: "treads * going"
+    pitch: "atan2(riser, going)"
+    step_rule:
+      expr: "2 * riser + going"
+      note: "Shown for information (2R + G); checked only by a rule set."
+    waist_v:
+      expr: "waist_thickness / cos(pitch)"
+      note: "Waist thickness measured vertically."
+    under_x0: "max(0, (waist_v - riser) * going / riser)"
+    under_z0: "max(0, riser - waist_v)"
+    steps:
+      expr: "for j in 1..2 * treads return if modulo(j, 2) = 1 then [(j - 1) / 2 * going, (j + 1) / 2 * riser] else [j / 2 * going, j / 2 * riser]"
+      note: "Nosing and back of each tread (two points per tread)."
+    profile_points: "if structure = \"waist\" then concatenate([[0, 0]], steps, [[run, total_rise], [run, total_rise - waist_v], [under_x0, under_z0]]) else concatenate([[0, 0]], steps, [[run, total_rise], [run, 0]])"
+    x_cut:
+      expr: "min(run, max(0, (view.cut_height - riser) * going / riser))"
+      note: "Where the plan cut height meets the stair."
+    hw: "width / 2"
+  checks:
+    min_risers:
+      expr: "risers >= 2"
+      severity: "error"
+      message: "A stair needs at least two risers."
+    riser_range:
+      expr: "rules.stairs = null or (riser >= rules.stairs.riser_min and riser <= rules.stairs.riser_max)"
+      severity: "warning"
+      message: "Riser is outside the active rule set."
+    going_range:
+      expr: "rules.stairs = null or (going >= rules.stairs.going_min and going <= rules.stairs.going_max)"
+      severity: "warning"
+      message: "Going is outside the active rule set."
+    step_rule_range:
+      expr: "rules.stairs = null or rules.stairs.rule_min = null or (step_rule >= rules.stairs.rule_min and step_rule <= rules.stairs.rule_max)"
+      severity: "warning"
+      message: "2R + G is outside the active rule set."
+    width_min:
+      expr: "rules.stairs = null or rules.stairs.width_min = null or width >= rules.stairs.width_min"
+      severity: "warning"
+      message: "Width is below the active rule set."
+    straight_only:
+      expr: "predefined_type = \"STRAIGHT_RUN_STAIR\" or predefined_type = \"USERDEFINED\" or predefined_type = \"NOTDEFINED\""
+      severity: "warning"
+      message: "This class template draws a straight run; use the library objects (C-02…C-05) for other stair forms."
+  rulesets:
+    stairs:
+      default: null
+      note: "No stair rule set by default (no EN/ISO stair geometry norm). Layers add regional limits (spec/objects/rulesets.md)."
+      fields:
+        riser_min: "length"
+        riser_max: "length"
+        going_min: "length"
+        going_max: "length"
+        rule_min: "length"
+        rule_max: "length"
+        width_min: "length"
+recipe:
+  profile:
+    op: "polygon"
+    plane: "xz"
+    args:
+      points: "profile_points"
+  body:
+    op: "extrude"
+    plane: "xz"
+    args:
+      profile: "profile"
+      from: "-hw"
+      to: "hw"
+  outline_below:
+    op: "rectangle"
+    plane: "xy"
+    args:
+      min: "[0, -hw]"
+      max: "[x_cut, hw]"
+  outline_above:
+    op: "rectangle"
+    plane: "xy"
+    when: "x_cut < run"
+    args:
+      min: "[x_cut, -hw]"
+      max: "[run, hw]"
+  treads_below:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "for k in 1..treads return k"
+      as: "k"
+      index: "i"
+      do: "if k * going <= x_cut then line([k * going, -hw], [k * going, hw]) else null"
+  treads_above:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "for k in 1..treads return k"
+      as: "k"
+      index: "i"
+      do: "if k * going > x_cut then line([k * going, -hw], [k * going, hw]) else null"
+  cut_line:
+    op: "polyline"
+    plane: "xy"
+    when: "x_cut < run"
+    args:
+      points: "[[x_cut - 0.15, -hw], [x_cut - 0.05, -0.1 * width], [x_cut + 0.05, 0.1 * width], [x_cut + 0.15, hw]]"
+  walk_line:
+    op: "polyline"
+    plane: "xy"
+    args:
+      points: "[[going / 2, 0], [run, 0]]"
+  arrow:
+    op: "polyline"
+    plane: "xy"
+    args:
+      points: "[[run - 0.15, -0.075], [run, 0], [run - 0.15, 0.075]]"
+  label:
+    op: "text"
+    plane: "xy"
+    args:
+      at: "[going / 2, -0.12]"
+      value: "arrow_label"
+      height: "0.0025"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+  model.medium:
+    context: "model"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+  model.high:
+    context: "model"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "outline_below"
+        class: "projected"
+      - geometry: "outline_above"
+        class: "overhead"
+      - geometry: "cut_line"
+        class: "cut"
+      - geometry: "walk_line"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "arrow"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "label"
+        class: "annotation"
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "outline_below"
+        class: "projected"
+      - geometry: "treads_below"
+        class: "projected"
+      - geometry: "outline_above"
+        class: "overhead"
+      - geometry: "treads_above"
+        class: "overhead"
+      - geometry: "cut_line"
+        class: "cut"
+      - geometry: "walk_line"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "arrow"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "label"
+        class: "annotation"
+    note: "Treads below the cut drawn, above it dashed; break line at the cut; walking line with arrow and label."
+  plan.high:
+    context: "plan"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "outline_below"
+        class: "projected"
+      - geometry: "treads_below"
+        class: "projected"
+      - geometry: "outline_above"
+        class: "overhead"
+      - geometry: "treads_above"
+        class: "overhead"
+      - geometry: "cut_line"
+        class: "cut"
+      - geometry: "walk_line"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "arrow"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "label"
+        class: "annotation"
+  section:
+    context: "section"
+    lod: "all"
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "SECTION_VIEW"
+    derive:
+      from: "model.{lod}"
+      method: "cut"
+host:
+  is_host: false
+  level: "Base on a storey, top at the next storey (or a set rise)."
+  slab_opening:
+    note: "The application cuts the upper slab over the run plus headroom (detailed objects C-01…C-04 define this)."
+  nested: "Railings (C-07) are nested by the library objects, not the class template."
+handles:
+  - parameter: "width"
+    view:
+      - "plan"
+    at: "[run / 2, hw, 0]"
+    axis: "y"
+materials:
+  - "reinforced_concrete"
+ifc:
+  properties:
+    Pset_StairCommon.NumberOfRiser: "risers"
+    Pset_StairCommon.NumberOfTreads: "treads"
+    Pset_StairCommon.RiserHeight: "riser"
+    Pset_StairCommon.TreadLength: "going"
+    Pset_StairCommon.WaistThickness: "if structure = \"waist\" then waist_thickness else null"
+  decomposition: "IfcStair aggregating one IfcStairFlight (predefined STRAIGHT) in the template; landings and further flights in the library objects."

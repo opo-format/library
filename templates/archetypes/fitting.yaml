@@ -1,0 +1,327 @@
+# Archetype `fitting` (spec/objects/archetypes.md).
+# Class template sources (proposal 0002 §4). `opo generate` builds the templates from these files,
+# the per-class table (classes.yaml) and the IFC data in ifc/. Licence: CC0-1.0.
+archetype: "fitting"
+description: "Joins the ends of distribution segments: bends, junctions, transitions."
+parameters:
+  outer_diameter:
+    type: "length"
+    default: 0.05
+    label: "Outside diameter"
+    group: "Size"
+    limits:
+      min: 0.006
+      max: 3
+  wall_thickness:
+    type: "length"
+    default: 0.003
+    label: "Wall thickness"
+    group: "Size"
+    limits:
+      min: 0.0005
+      max: 0.1
+  bend_angle:
+    type: "angle"
+    default: 90.0
+    label: "Bend angle"
+    group: "Bend"
+    visible: "predefined_type = \"BEND\""
+    limits:
+      min: 1
+      max: 180
+  bend_radius_factor:
+    type: "number"
+    default: 1.5
+    label: "Bend radius ÷ outside diameter"
+    group: "Bend"
+    visible: "predefined_type = \"BEND\""
+    limits:
+      min: 0.6
+      max: 10
+  branch_diameter:
+    type: "length"
+    default: 0.05
+    label: "Branch outside diameter"
+    group: "Junction"
+    visible: "predefined_type = \"JUNCTION\""
+    limits:
+      min: 0.006
+      max: 3
+  outer_diameter_2:
+    type: "length"
+    default: 0.04
+    label: "Outlet outside diameter"
+    group: "Transition"
+    visible: "predefined_type = \"TRANSITION\""
+    limits:
+      min: 0.006
+      max: 3
+  fitting_length:
+    type: "length"
+    default: 0.1
+    label: "Length"
+    group: "Size"
+    visible: "predefined_type != \"BEND\" and predefined_type != \"JUNCTION\""
+    limits:
+      min: 0.005
+      max: 3
+  material:
+    type: "material"
+    default: "copper"
+    label: "Material"
+    group: "Materials"
+    options: "materials"
+slots: {}
+rules:
+  derived:
+    r: "outer_diameter / 2"
+    bend_radius: "bend_radius_factor * outer_diameter"
+    bend_end: "[bend_radius * sin(bend_angle), bend_radius - bend_radius * cos(bend_angle), 0]"
+    run_length: "max(3 * outer_diameter, 2 * branch_diameter)"
+    socket_d:
+      expr: "outer_diameter + 2 * wall_thickness"
+      note: "Connector body diameter (sleeve over the pipe)."
+    is_bend: "predefined_type = \"BEND\""
+    is_junction: "predefined_type = \"JUNCTION\""
+    is_transition: "predefined_type = \"TRANSITION\""
+    is_cap: "predefined_type = \"OBSTRUCTION\""
+    is_straight:
+      expr: "not(is_bend or is_junction or is_transition or is_cap)"
+      note: "CONNECTOR, ENTRY, EXIT, USERDEFINED, NOTDEFINED: a straight sleeve."
+    length: "if is_bend then 3.141592653589793 * bend_radius * bend_angle / 180 else if is_junction then run_length else fitting_length"
+  checks:
+    bend_radius_ok:
+      expr: "not(is_bend) or bend_radius > r"
+      severity: "error"
+      message: "The bend radius must be larger than the pipe radius."
+    branch_ok:
+      expr: "not(is_junction) or branch_diameter <= outer_diameter"
+      severity: "warning"
+      message: "A branch larger than the run is unusual; check the sizes."
+  rulesets: {}
+recipe:
+  bend_body:
+    op: "revolve"
+    plane: "yz"
+    when: "is_bend"
+    args:
+      profile: "circle([0, 0], r)"
+      center: "[0, bend_radius, 0]"
+      axis: "[0, 0, 1]"
+      angle: "bend_angle"
+  junction_body:
+    op: "union"
+    when: "is_junction"
+    args:
+      items: "[cylinder([0, 0, 0], [run_length, 0, 0], r), cylinder([run_length / 2, 0, 0], [run_length / 2, run_length / 2, 0], branch_diameter / 2)]"
+  transition_body:
+    op: "revolve"
+    plane: "xy"
+    when: "is_transition"
+    args:
+      profile: "polygon([[0, 0], [fitting_length, 0], [fitting_length, outer_diameter_2 / 2], [0, r]])"
+      center: "[0, 0, 0]"
+      axis: "[1, 0, 0]"
+      angle: "360"
+    note: "Concentric reducer."
+  cap_body:
+    op: "cylinder"
+    when: "is_cap"
+    args:
+      start: "[0, 0, 0]"
+      end: "[fitting_length, 0, 0]"
+      radius: "socket_d / 2"
+  sleeve_body:
+    op: "cylinder"
+    when: "is_straight"
+    args:
+      start: "[0, 0, 0]"
+      end: "[fitting_length, 0, 0]"
+      radius: "socket_d / 2"
+  body:
+    op: "union"
+    args:
+      items: "[bend_body, junction_body, transition_body, cap_body, sleeve_body]"
+  bend_axis:
+    op: "arc"
+    plane: "xy"
+    when: "is_bend"
+    args:
+      center: "[0, bend_radius]"
+      radius: "bend_radius"
+      start_angle: "-90"
+      end_angle: "-90 + bend_angle"
+  straight_axis:
+    op: "line"
+    plane: "xy"
+    when: "not(is_bend)"
+    args:
+      start: "[0, 0]"
+      end: "[length, 0]"
+  branch_axis:
+    op: "line"
+    plane: "xy"
+    when: "is_junction"
+    args:
+      start: "[run_length / 2, 0]"
+      end: "[run_length / 2, run_length / 2]"
+  single_line:
+    op: "union"
+    args:
+      items: "[bend_axis, straight_axis, branch_axis]"
+  plan_bend:
+    op: "band"
+    plane: "xy"
+    when: "is_bend"
+    args:
+      path: "bend_axis"
+      left: "r"
+      right: "-r"
+  plan_junction:
+    op: "union"
+    plane: "xy"
+    when: "is_junction"
+    args:
+      items: "[rectangle([0, -r], [run_length, r]), rectangle([run_length / 2 - branch_diameter / 2, 0], [run_length / 2 + branch_diameter / 2, run_length / 2])]"
+  plan_transition:
+    op: "polygon"
+    plane: "xy"
+    when: "is_transition"
+    args:
+      points: "[[0, -r], [fitting_length, -outer_diameter_2 / 2], [fitting_length, outer_diameter_2 / 2], [0, r]]"
+  plan_straight:
+    op: "rectangle"
+    plane: "xy"
+    when: "is_cap or is_straight"
+    args:
+      min: "[0, -socket_d / 2]"
+      max: "[fitting_length, socket_d / 2]"
+  plan_outline:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[plan_bend, plan_junction, plan_transition, plan_straight]"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+  model.medium:
+    context: "model"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+  model.high:
+    context: "model"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "single_line"
+        class: "projected"
+    note: "Single-line drawing at small scales."
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_outline"
+        class: "projected"
+  plan.high:
+    context: "plan"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_outline"
+        class: "projected"
+  section:
+    context: "section"
+    lod: "all"
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "SECTION_VIEW"
+    derive:
+      from: "model.{lod}"
+      method: "cut"
+host:
+  is_host: false
+  placement: "Snapped to the ends of pipe segments; the application inserts fittings where segments meet."
+  insertion:
+    point: "[0, 0, 0]"
+    description: "Port 1 (inlet) at the origin, pointing along -x."
+handles: []
+ports:
+  - name: "port_1"
+    system_type: "NOTDEFINED"
+    flow_direction: "SOURCEANDSINK"
+    port_type: "PIPE"
+    nominal_size: "outer_diameter"
+    position: "[0, 0, 0]"
+    direction: "[-1, 0, 0]"
+  - name: "port_2"
+    system_type: "NOTDEFINED"
+    flow_direction: "SOURCEANDSINK"
+    port_type: "PIPE"
+    nominal_size: "if is_transition then outer_diameter_2 else outer_diameter"
+    when: "not(is_cap) and predefined_type != \"ENTRY\" and predefined_type != \"EXIT\""
+    position: "if is_bend then bend_end else [length, 0, 0]"
+    direction: "if is_bend then [cos(bend_angle), sin(bend_angle), 0] else [1, 0, 0]"
+  - name: "branch"
+    system_type: "NOTDEFINED"
+    flow_direction: "SOURCEANDSINK"
+    port_type: "PIPE"
+    nominal_size: "branch_diameter"
+    when: "is_junction"
+    position: "[run_length / 2, run_length / 2, 0]"
+    direction: "[0, 1, 0]"
+materials:
+  - "copper"
+ifc:
+  quantities:
+    Length: "length"
+    GrossCrossSectionArea: "3.141592653589793 * r ** 2"
+    NetCrossSectionArea: "3.141592653589793 * (r ** 2 - (r - wall_thickness) ** 2)"

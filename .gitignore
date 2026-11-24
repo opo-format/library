@@ -1,4 +1,5 @@
 /build
+/.cache/
 /opo-spec/
 *.opo
 .DS_Store

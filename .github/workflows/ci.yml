@@ -28,6 +28,11 @@ jobs:
         with:
           path: ~/.cargo/bin/opo
           key: opo-${{ steps.opo.outputs.rev }}
+      - name: "Cache the IFC sources"
+        uses: actions/cache@v4
+        with:
+          path: .cache/ifc
+          key: ifc-${{ hashFiles('ifc-version') }}
       - uses: dtolnay/rust-toolchain@stable
       - uses: taiki-e/install-action@v2
         with:

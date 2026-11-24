@@ -1,0 +1,260 @@
+# Archetype `assembly` (spec/objects/archetypes.md).
+# Class template sources (proposal 0002 §4). `opo generate` builds the templates from these files,
+# the per-class table (classes.yaml) and the IFC data in ifc/. Licence: CC0-1.0.
+archetype: "assembly"
+description: "Nests other OPO objects."
+parameters:
+  span:
+    type: "length"
+    default: 8.0
+    label: "Span"
+    group: "Truss"
+    limits:
+      min: 1
+      max: 100
+  truss_depth:
+    type: "length"
+    default: 1.0
+    label: "Depth (chord centres)"
+    group: "Truss"
+    limits:
+      min: 0.2
+      max: 10
+  panels:
+    type: "integer"
+    default: 8
+    label: "Panels"
+    group: "Truss"
+    limits:
+      min: 2
+      max: 60
+  pattern:
+    type: "choice"
+    default: "warren"
+    label: "Pattern"
+    group: "Truss"
+    options:
+      - "warren"
+      - "pratt"
+  chord_width:
+    type: "length"
+    default: 0.12
+    label: "Chord section"
+    group: "Members"
+    limits:
+      min: 0.02
+      max: 1
+    description: "Square hollow section, width = depth."
+  chord_wall:
+    type: "length"
+    default: 0.006
+    label: "Chord wall thickness"
+    group: "Members"
+    limits:
+      min: 0.002
+      max: 0.05
+  web_width:
+    type: "length"
+    default: 0.08
+    label: "Web member section"
+    group: "Members"
+    limits:
+      min: 0.02
+      max: 1
+  web_wall:
+    type: "length"
+    default: 0.005
+    label: "Web wall thickness"
+    group: "Members"
+    limits:
+      min: 0.002
+      max: 0.05
+  material:
+    type: "material"
+    default: "steel"
+    label: "Material"
+    group: "Materials"
+    options: "materials"
+slots: {}
+rules:
+  derived:
+    panel: "span / panels"
+    member_object: "\"opo-format.org/library/templates/IfcMember\""
+    chord_values: "{predefined_type: \"CHORD\", profile_kind: \"rect_hollow\", width: chord_width, depth: chord_width, wall_thickness: chord_wall, material: material}"
+    web_values: "{predefined_type: \"MEMBER\", profile_kind: \"rect_hollow\", width: web_width, depth: web_width, wall_thickness: web_wall, material: material}"
+    diagonals:
+      expr: "for k in 1..panels return if pattern = \"warren\" then (if modulo(k, 2) = 1 then [[(k - 1) * panel, 0, 0], [k * panel, 0, truss_depth]] else [[(k - 1) * panel, 0, truss_depth], [k * panel, 0, 0]]) else (if k <= panels / 2 then [[(k - 1) * panel, 0, truss_depth], [k * panel, 0, 0]] else [[(k - 1) * panel, 0, 0], [k * panel, 0, truss_depth]])"
+      note: "Warren: alternating diagonals. Pratt: diagonals slope down towards the middle."
+    verticals: "if pattern = \"pratt\" then for k in 0..panels return [[k * panel, 0, 0], [k * panel, 0, truss_depth]] else []"
+    member_count: "2 + count(diagonals) + count(verticals)"
+  checks:
+    panels_even:
+      expr: "pattern != \"warren\" or modulo(panels, 2) = 0"
+      severity: "warning"
+      message: "A Warren truss with an odd number of panels ends on a different chord at each support."
+  rulesets: {}
+recipe:
+  top_chord:
+    op: "instance"
+    args:
+      object: "member_object"
+      values: "chord_values"
+      inputs: "{path: [[0, 0, truss_depth], [span, 0, truss_depth]]}"
+  bottom_chord:
+    op: "instance"
+    args:
+      object: "member_object"
+      values: "chord_values"
+      inputs: "{path: [[0, 0, 0], [span, 0, 0]]}"
+  web_diagonals:
+    op: "for_each"
+    args:
+      items: "diagonals"
+      as: "d"
+      index: "i"
+      do: "instance(member_object, web_values, {path: d})"
+  web_verticals:
+    op: "for_each"
+    args:
+      items: "verticals"
+      as: "d"
+      index: "i"
+      do: "instance(member_object, web_values, {path: d})"
+  plan_line:
+    op: "line"
+    plane: "xy"
+    args:
+      start: "[0, 0]"
+      end: "[span, 0]"
+  plan_band:
+    op: "rectangle"
+    plane: "xy"
+    args:
+      min: "[0, -chord_width / 2]"
+      max: "[span, chord_width / 2]"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "top_chord"
+        material: "material"
+        part: "Chord"
+      - geometry: "bottom_chord"
+        material: "material"
+        part: "Chord"
+      - geometry: "web_diagonals"
+        material: "material"
+        part: "Web"
+      - geometry: "web_verticals"
+        material: "material"
+        part: "Web"
+  model.medium:
+    context: "model"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "top_chord"
+        material: "material"
+        part: "Chord"
+      - geometry: "bottom_chord"
+        material: "material"
+        part: "Chord"
+      - geometry: "web_diagonals"
+        material: "material"
+        part: "Web"
+      - geometry: "web_verticals"
+        material: "material"
+        part: "Web"
+  model.high:
+    context: "model"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "top_chord"
+        material: "material"
+        part: "Chord"
+      - geometry: "bottom_chord"
+        material: "material"
+        part: "Chord"
+      - geometry: "web_diagonals"
+        material: "material"
+        part: "Web"
+      - geometry: "web_verticals"
+        material: "material"
+        part: "Web"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_line"
+        class: "overhead"
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_band"
+        class: "overhead"
+  plan.high:
+    context: "plan"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "derived"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    derive:
+      from: "model.high"
+      method: "project"
+  elevation:
+    context: "elevation"
+    lod: "all"
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "ELEVATION_VIEW"
+    derive:
+      from: "model.{lod}"
+      method: "project"
+host:
+  is_host: false
+  nested:
+    objects:
+      - "opo-format.org/library/templates/IfcMember"
+    rule: "Nested objects are referenced by id and version; a packaged .opo embeds them (spec §4.9)."
+handles: []
+materials:
+  - "steel"
+ifc:
+  decomposition: "IfcElementAssembly aggregating the nested members (IfcRelAggregates); each nested instance exports as its own class (IfcMember CHORD / MEMBER)."

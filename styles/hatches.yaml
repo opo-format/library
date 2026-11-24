@@ -1,0 +1,111 @@
+block:
+  label: "Concrete block"
+  kind: "lines"
+  scale_mode: "paper"
+  lines:
+    - angle: 45
+      origin: [0.0, 0.0]
+      offset: [0, 0.0028]
+    - angle: 135
+      origin: [0.0, 0.0]
+      offset: [0, 0.0028]
+brick_stretcher_elevation:
+  label: "Brickwork, stretcher bond (elevation, real size)"
+  kind: "lines"
+  scale_mode: "model"
+  lines:
+    - angle: 0
+      origin: [0.0, 0.0]
+      offset: [0, 0.075]
+    - angle: 90
+      origin: [0.0, 0.0]
+      offset: [0.075, -0.1125]
+      dashes: [0.075, -0.075]
+  note: "225 × 75 mm module (brick + joint), illustrative."
+insulation_rigid:
+  label: "Insulation, rigid"
+  kind: "lines"
+  scale_mode: "paper"
+  lines:
+    - angle: 45
+      origin: [0.0, 0.0]
+      offset: [0, 0.0035]
+    - angle: 135
+      origin: [0.0, 0.0]
+      offset: [0, 0.0035]
+    - angle: 0
+      origin: [0.0, 0.0]
+      offset: [0, 0.0035]
+      dashes: [0.0005, -0.003]
+insulation_soft:
+  label: "Insulation, soft (zigzag)"
+  kind: "lines"
+  scale_mode: "paper"
+  lines:
+    - angle: 51.34019174590991
+      origin: [0, 0]
+      offset: [0.001952172, 0.001561738]
+      dashes: [0.003201562, -0.003201562]
+    - angle: -51.34019174590991
+      origin: [0.002, 0.0025]
+      offset: [-0.001952172, 0.001561738]
+      dashes: [0.003201562, -0.003201562]
+masonry:
+  label: "Masonry"
+  kind: "lines"
+  scale_mode: "paper"
+  lines:
+    - angle: 45
+      origin: [0.0, 0.0]
+      offset: [0, 0.0014]
+plaster:
+  label: "Plaster / render"
+  kind: "lines"
+  scale_mode: "paper"
+  lines:
+    - angle: 0
+      origin: [0.0, 0.0]
+      offset: [0.0006, 0.0009]
+      dashes: [0, -0.0013]
+reinforced_concrete:
+  label: "Reinforced concrete"
+  kind: "lines"
+  scale_mode: "paper"
+  lines:
+    - angle: 45
+      origin: [0.0, 0.0]
+      offset: [0, 0.0024]
+    - angle: 0
+      origin: [0.0, 0.0]
+      offset: [0.0011, 0.0019]
+      dashes: [0, -0.0027]
+screed:
+  label: "Screed"
+  kind: "lines"
+  scale_mode: "paper"
+  lines:
+    - angle: 0
+      origin: [0.0, 0.0]
+      offset: [0.0009, 0.0013]
+      dashes: [0, -0.0019]
+    - angle: 0
+      origin: [0.0004, 0.0006]
+      offset: [0.0015, 0.0026]
+      dashes: [0.0004, -0.0026]
+solid_dark:
+  label: "Solid, dark"
+  kind: "solid"
+  colour: "#3a3a3a"
+solid_light:
+  label: "Solid, light grey"
+  kind: "solid"
+  colour: "#d4d4d4"
+timber:
+  label: "Timber (sawn, in section)"
+  kind: "lines"
+  scale_mode: "paper"
+  lines:
+    - angle: 135
+      origin: [0.0, 0.0]
+      offset: [0, 0.0022]
+      dashes: [0.006, -0.0012]
