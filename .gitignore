@@ -1,4 +1,4 @@
-build/
-dist/
+/build
+/opo-spec/
 *.opo
 .DS_Store

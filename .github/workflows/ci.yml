@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: "just check"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: "Standard repository at the pinned commit (golden comparison)"
+        uses: actions/checkout@v5
+        with:
+          repository: opo-format/opo
+          path: opo-spec
+          fetch-depth: 0
+      - run: git -C opo-spec checkout "$(cat opo-spec-version)"
+      - id: opo
+        run: echo "rev=$(cat opo-version)" >> "$GITHUB_OUTPUT"
+      - name: "Cache the opo command"
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/opo
+          key: opo-${{ steps.opo.outputs.rev }}
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: just
+      - name: "Install opo at the pinned commit"
+        run: test -x ~/.cargo/bin/opo || just install
+      - run: just check
+
+  reuse:
+    name: "Licences (REUSE)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: fsfe/reuse-action@v5
