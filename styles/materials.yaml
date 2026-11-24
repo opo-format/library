@@ -6,6 +6,21 @@ aluminium:
     hatch: "solid_dark"
   density: 2700
   ifc_name: "Aluminium"
+asphalt:
+  label: "Asphalt"
+  category: "finish"
+  colour: "#4a4a4a"
+  cut:
+    hatch: "solid_dark"
+  density: 2400
+  ifc_name: "Asphalt"
+bituminous_membrane:
+  label: "Bituminous membrane"
+  category: "membrane"
+  colour: "#2f2f2f"
+  cut:
+    hatch: "solid_dark"
+  ifc_name: "Bituminous membrane"
 brick_masonry:
   label: "Brick masonry"
   category: "masonry"
@@ -51,6 +66,14 @@ glass:
     hatch: "solid_light"
   density: 2500
   ifc_name: "Glass"
+gravel:
+  label: "Gravel"
+  category: "earth"
+  colour: "#b9ad98"
+  cut:
+    hatch: "screed"
+  density: 1800
+  ifc_name: "Gravel"
 mineral_wool:
   label: "Mineral wool insulation"
   category: "insulation"
@@ -115,6 +138,14 @@ sheet_metal:
   cut:
     hatch: "solid_dark"
   ifc_name: "Sheet metal, coated"
+soil:
+  label: "Soil"
+  category: "earth"
+  colour: "#8b6f4e"
+  cut:
+    hatch: "screed"
+  density: 1700
+  ifc_name: "Soil"
 stainless_steel:
   label: "Stainless steel"
   category: "steel"
@@ -144,3 +175,10 @@ vitreous_china:
   cut:
     hatch: "solid_light"
   ifc_name: "Vitreous china"
+void:
+  label: "No material (virtual zone)"
+  category: "other"
+  colour: "#eef3f8"
+  cut:
+    hatch: "solid_light"
+  ifc_name: "No material (virtual zone)"

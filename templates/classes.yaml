@@ -5281,3 +5281,279 @@ IfcTendonConduit:
   slots:
     path:
       default: [[0.0, 0.0, 0.0], [10.0, 0.0, 0.0]]
+IfcCourse:
+  archetype: "area"
+  name: "Course (class template)"
+  description: "Course of a pavement, ballast bed or revetment from a boundary: one layer at its level. The build-up is an illustrative default, not maker or norm values."
+  default_type: "PAVEMENT"
+  parameters:
+    layers:
+      default:
+        - material: "asphalt"
+          thickness: 0.05
+          function: "finish"
+          core: true
+    load_bearing:
+      default: false
+    is_external:
+      default: false
+    reference:
+      default: "top"
+  materials:
+    - "asphalt"
+IfcCovering:
+  archetype: "area"
+  name: "Covering (class template)"
+  description: "Floor, ceiling, roof or wall covering from a boundary: a flooring build-up lying on the slab by default. The build-up is an illustrative default, not maker or norm values."
+  default_type: "FLOORING"
+  parameters:
+    layers:
+      default:
+        - material: "ceramic_tile"
+          thickness: 0.01
+          function: "finish"
+        - material: "cement_screed"
+          thickness: 0.05
+          function: "finish"
+          core: true
+    load_bearing:
+      default: false
+    is_external:
+      default: false
+    reference:
+      default: "bottom"
+  materials:
+    - "ceramic_tile"
+IfcEarthworksElement:
+  archetype: "area"
+  name: "Earthworks element (class template)"
+  description: "Generic earthworks element (supertype) with no specific IFC class: a soil body from a boundary. The build-up is an illustrative default, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    layers:
+      default:
+        - material: "soil"
+          thickness: 0.5
+          function: "structure"
+          core: true
+    load_bearing:
+      default: false
+    is_external:
+      default: false
+    reference:
+      default: "top"
+  materials:
+    - "soil"
+IfcEarthworksFill:
+  archetype: "area"
+  name: "Earthworks fill (class template)"
+  description: "Backfill, embankment or subgrade from a boundary: a fill layer below its top level. The build-up is an illustrative default, not maker or norm values."
+  default_type: "BACKFILL"
+  parameters:
+    layers:
+      default:
+        - material: "gravel"
+          thickness: 0.3
+          function: "structure"
+          core: true
+    load_bearing:
+      default: false
+    is_external:
+      default: false
+    reference:
+      default: "top"
+  materials:
+    - "gravel"
+IfcReinforcedSoil:
+  archetype: "area"
+  name: "Reinforced soil (class template)"
+  description: "Grouted, compacted or replaced ground from a boundary: a treated soil layer. The build-up is an illustrative default, not maker or norm values."
+  default_type: "GROUTED"
+  parameters:
+    layers:
+      default:
+        - material: "soil"
+          thickness: 1.0
+          function: "structure"
+          core: true
+    load_bearing:
+      default: true
+    is_external:
+      default: false
+    reference:
+      default: "top"
+  materials:
+    - "soil"
+IfcPavement:
+  archetype: "area"
+  name: "Pavement (class template)"
+  description: "Flexible or rigid pavement from a boundary: surface, binder and base courses. The build-up is an illustrative default, not maker or norm values."
+  default_type: "FLEXIBLE"
+  parameters:
+    layers:
+      default:
+        - material: "asphalt"
+          thickness: 0.04
+          function: "finish"
+        - material: "asphalt"
+          thickness: 0.06
+          function: "structure"
+        - material: "gravel"
+          thickness: 0.25
+          function: "structure"
+          core: true
+    load_bearing:
+      default: true
+    is_external:
+      default: true
+    reference:
+      default: "top"
+  materials:
+    - "asphalt"
+    - "gravel"
+IfcPlate:
+  archetype: "area"
+  name: "Plate (class template)"
+  description: "Steel sheet, gusset, base plate or curtain panel from an outline: one thin layer. The build-up is an illustrative default, not maker or norm values."
+  default_type: "SHEET"
+  parameters:
+    layers:
+      default:
+        - material: "steel"
+          thickness: 0.01
+          function: "structure"
+          core: true
+    load_bearing:
+      default: false
+    is_external:
+      default: false
+    reference:
+      default: "bottom"
+  materials:
+    - "steel"
+IfcRoof:
+  archetype: "area"
+  name: "Roof (class template)"
+  description: "Flat roof from a boundary: membrane, insulation and concrete deck, with its top at the offset. Pitched roof forms are library objects. The build-up is an illustrative default, not maker or norm values."
+  default_type: "FLAT_ROOF"
+  parameters:
+    layers:
+      default:
+        - material: "bituminous_membrane"
+          thickness: 0.005
+          function: "membrane"
+        - material: "rigid_insulation"
+          thickness: 0.16
+          function: "insulation"
+        - material: "reinforced_concrete"
+          thickness: 0.2
+          function: "structure"
+          core: true
+    load_bearing:
+      default: true
+    is_external:
+      default: true
+    reference:
+      default: "top"
+  materials:
+    - "bituminous_membrane"
+IfcReinforcingMesh:
+  archetype: "area"
+  name: "Reinforcing mesh (class template)"
+  description: "Welded reinforcing mesh from an outline: drawn as one thin layer of the mesh depth. The build-up is an illustrative default, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    layers:
+      default:
+        - material: "steel"
+          thickness: 0.012
+          function: "structure"
+          core: true
+    load_bearing:
+      default: true
+    is_external:
+      default: false
+    reference:
+      default: "bottom"
+  materials:
+    - "steel"
+IfcGeomodel:
+  archetype: "area"
+  name: "Geomodel (class template)"
+  description: "Geotechnical model of the ground from a boundary: one soil body. Strata are separate elements. The build-up is an illustrative default, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    layers:
+      default:
+        - material: "soil"
+          thickness: 5.0
+          function: "structure"
+          core: true
+    load_bearing:
+      default: false
+    is_external:
+      default: false
+    reference:
+      default: "top"
+  materials:
+    - "soil"
+IfcGeoslice:
+  archetype: "area"
+  name: "Geoslice (class template)"
+  description: "Slice of a geotechnical model from a boundary: one soil layer. The build-up is an illustrative default, not maker or norm values."
+  default_type: "NOTDEFINED"
+  parameters:
+    layers:
+      default:
+        - material: "soil"
+          thickness: 1.0
+          function: "structure"
+          core: true
+    load_bearing:
+      default: false
+    is_external:
+      default: false
+    reference:
+      default: "top"
+  materials:
+    - "soil"
+IfcGeotechnicalStratum:
+  archetype: "area"
+  name: "Geotechnical stratum (class template)"
+  description: "Stratum of soil, void or water from a boundary: one layer of the stratum thickness. The build-up is an illustrative default, not maker or norm values."
+  default_type: "SOLID"
+  parameters:
+    layers:
+      default:
+        - material: "soil"
+          thickness: 2.0
+          function: "structure"
+          core: true
+    load_bearing:
+      default: false
+    is_external:
+      default: false
+    reference:
+      default: "top"
+  materials:
+    - "soil"
+IfcVirtualElement:
+  archetype: "area"
+  name: "Virtual element (class template)"
+  description: "Boundary, clearance zone or provision for a void from an outline: a zone without a physical material."
+  default_type: "CLEARANCE"
+  parameters:
+    layers:
+      default:
+        - material: "void"
+          thickness: 0.1
+          function: "other"
+          core: true
+    load_bearing:
+      default: false
+    is_external:
+      default: false
+    reference:
+      default: "bottom"
+  materials:
+    - "void"
