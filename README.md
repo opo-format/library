@@ -17,7 +17,7 @@ styles/                materials.yaml and hatches.yaml, embedded into objects at
 references.yaml        every cited source
 opo-version            the opo-rs commit the library is built with
 ifc-version            the buildingSMART/IFC4.x-development commit whose UML sources `opo ifc` reads at build
-opo-spec-version       the standard repository commit the templates are compared with (until phase 5)
+opo-spec-version       the standard repository commit whose conformance fixtures the templates are compared with
 ```
 
 ## Building

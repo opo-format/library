@@ -40,8 +40,9 @@ check: build
     if [ ${#dirs[@]} -gt 0 ]; then {{opo}} check --root build --ifc build/ifc/psets.json "${dirs[@]}"; fi
     just opo={{opo}} golden
 
-# Until phase 5: the generated templates equal those committed in the standard repository
-# (checked out at the commit in opo-spec-version into ./opo-spec).
+# Regression guard: the generated templates equal the frozen fixtures of the conformance suite
+# in the standard repository (checked out at the commit in opo-spec-version into ./opo-spec).
+# Remove a template from the comparison when it changes on purpose.
 golden:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -49,7 +50,8 @@ golden:
     if [ ! -d opo-spec ]; then echo "golden: ./opo-spec not present, skipped"; exit 0; fi
     for d in build/library/templates/*/; do
         t=$(basename "$d")
-        if [ -d "opo-spec/library/templates/$t" ]; then {{opo}} compare "$d" "opo-spec/library/templates/$t" --ignore-generator; fi
+        f=opo-spec/conformance/fixtures/library/templates/$t
+        if [ -d "$f" ]; then {{opo}} compare "$d" "$f" --ignore-generator; fi
     done
 
 # Install opo at the pinned version.
