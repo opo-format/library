@@ -1,0 +1,928 @@
+id: "door-single-swing"
+name: "Single swing door"
+version: "0.2.0"
+type_name: "Single swing door 900 × 2100 opening"
+description: "Single swing door with frame, rebated or flush leaf, lever handle, three levels of detail and size catalogues for generic metric, UK and US."
+tags:
+  - "door"
+  - "single swing"
+  - "generic"
+references:
+  - ref: "bim-all-doors-dormakaba"
+    role: "parametric basis"
+    used: "Dimension chain with selectable nominal reference (opening, frame outside, leaf, clear passage); frame types; rebate and leaf lap logic; frame system defaults (lining, stop, lap, gaps); default 115 mm wall."
+  - ref: "ifc-4.3-pset-doorliningproperties-pset-doorpanelproperties"
+    role: "IFC parameters"
+    used: "Names and meaning of LiningDepth, LiningThickness, CasingThickness, CasingDepth, ThresholdThickness, ThresholdDepth, PanelDepth."
+  - ref: "osarch-door-window-generator-discussion-door-frame-set"
+    role: "frame variants"
+    used: "Hollow metal and lining-with-stop frame types."
+  - ref: "generic-metric-openings-no-eu-door-size-norm-exists"
+    role: "sizes"
+    used: "Openings 700-1100 x 2100 mm, default 900 x 2100. Not a norm."
+  - ref: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
+    role: "sizes"
+    used: "Leaf sizes 2040 × 526…926 (40 mm) and 1981 × 610…838 (35 mm)."
+  - ref: "us-industry-standard-door-sizes"
+    role: "sizes"
+    used: "Leaf 24, 28, 30, 32, 36 in × 80 in; rough opening = leaf + 2 in × + 2½ in."
+  - ref: "iso-21542-2021-eu-en-17210-functional-requirements-ada-2010"
+    role: "rules"
+    used: "Accessibility rule set layers."
+parameters:
+  nominal_reference:
+    type: "choice"
+    default: "opening"
+    label: "Nominal size refers to"
+    group: "Size"
+    options:
+      - "opening"
+      - "frame_outside"
+      - "leaf"
+      - "clear_passage"
+    option_labels:
+      opening: "Wall opening"
+      frame_outside: "Frame outside"
+      leaf: "Door leaf"
+      clear_passage: "Clear passage (frame)"
+    description: "Which measure the nominal width/height describe. UK and US sizes name the leaf."
+  nominal_width:
+    type: "length"
+    default: 0.9
+    label: "Nominal width"
+    group: "Size"
+    limits:
+      min: 0.4
+      max: 1.4
+      step:
+        metric: 0.005
+        imperial: 0.0127
+  nominal_height:
+    type: "length"
+    default: 2.1
+    label: "Nominal height"
+    group: "Size"
+    limits:
+      min: 1.8
+      max: 3.0
+      step:
+        metric: 0.005
+        imperial: 0.0127
+  frame_type:
+    type: "choice"
+    default: "wrap_around"
+    label: "Frame type"
+    group: "Frame"
+    options:
+      - "wrap_around"
+      - "block"
+      - "lining"
+      - "hollow_metal"
+    option_labels:
+      wrap_around: "Wrap-around frame (Umfassungszarge)"
+      block: "Block frame (Blockzarge)"
+      lining: "Lining with applied stop and architraves"
+      hollow_metal: "Hollow metal frame"
+  block_depth:
+    type: "length"
+    default: 0.1
+    label: "Block frame depth"
+    group: "Frame"
+    visible: "frame_type = \"block\""
+    limits:
+      min: 0.04
+      max: 0.3
+  lining_thickness:
+    type: "length"
+    default: 0.017
+    label: "Lining thickness"
+    group: "Frame"
+    limits:
+      min: 0.01
+      max: 0.1
+    description: "Frame member width in the plane of the leaf, opening side (IFC LiningThickness)."
+  casing_width:
+    type: "length"
+    default: 0.06
+    label: "Casing / architrave width"
+    group: "Frame"
+    visible: "frame_type != \"block\""
+    limits:
+      min: 0.0
+      max: 0.15
+    description: "IFC CasingThickness (dimension in the plane of the leaf)."
+  casing_depth:
+    type: "length"
+    default: 0.01
+    label: "Casing / architrave depth"
+    group: "Frame"
+    visible: "frame_type != \"block\""
+    limits:
+      min: 0.0
+      max: 0.03
+    description: "IFC CasingDepth (dimension perpendicular to the leaf)."
+  stop_width:
+    type: "length"
+    default: 0.015
+    label: "Stop / rebate width"
+    group: "Frame"
+    limits:
+      min: 0.0
+      max: 0.03
+    description: "How far the stop projects into the opening, per side: frame rebate minus clear passage."
+  stop_depth:
+    type: "length"
+    default: 0.038
+    label: "Applied stop depth"
+    group: "Frame"
+    visible: "frame_type = \"lining\""
+    limits:
+      min: 0.01
+      max: 0.06
+  fit_gap:
+    type: "length"
+    default: 0.005
+    label: "Fitting gap, sides"
+    group: "Frame system"
+    limits:
+      min: 0.0
+      max: 0.03
+    description: "Wall opening to frame outside, per side."
+  fit_gap_top:
+    type: "length"
+    default: 0.005
+    label: "Fitting gap, top"
+    group: "Frame system"
+    limits:
+      min: 0.0
+      max: 0.05
+  leaf_type:
+    type: "choice"
+    default: "rebated"
+    label: "Leaf edge"
+    group: "Leaf"
+    options:
+      - "rebated"
+      - "flush"
+    option_labels:
+      rebated: "Rebated (gefälzt)"
+      flush: "Flush (stumpf)"
+  leaf_thickness:
+    type: "length"
+    default: 0.04
+    label: "Leaf thickness"
+    group: "Leaf"
+    limits:
+      min: 0.025
+      max: 0.08
+      step:
+        metric: 0.001
+        imperial: 0.0015875
+    description: "IFC PanelDepth."
+  leaf_lap:
+    type: "length"
+    default: 0.0095
+    label: "Leaf lap, sides"
+    group: "Leaf"
+    visible: "leaf_type = \"rebated\""
+    limits:
+      min: 0.0
+      max: 0.02
+    description: "How far a rebated leaf overlaps the frame rebate at each side."
+  leaf_lap_top:
+    type: "length"
+    default: 0.009
+    label: "Leaf lap, top"
+    group: "Leaf"
+    visible: "leaf_type = \"rebated\""
+    limits:
+      min: 0.0
+      max: 0.02
+  leaf_lap_thickness:
+    type: "length"
+    default: 0.013
+    label: "Leaf lap thickness"
+    group: "Leaf"
+    visible: "leaf_type = \"rebated\""
+    limits:
+      min: 0.005
+      max: 0.03
+  leaf_gap:
+    type: "length"
+    default: 0.003
+    label: "Leaf gap to frame"
+    group: "Leaf"
+    limits:
+      min: 0.0
+      max: 0.01
+  floor_gap:
+    type: "length"
+    default: 0.007
+    label: "Gap under leaf"
+    group: "Leaf"
+    limits:
+      min: 0.0
+      max: 0.03
+  threshold:
+    type: "boolean"
+    default: false
+    label: "Threshold"
+    group: "Threshold"
+  threshold_thickness:
+    type: "length"
+    default: 0.015
+    label: "Threshold thickness"
+    group: "Threshold"
+    visible: "threshold"
+    limits:
+      min: 0.003
+      max: 0.05
+    description: "IFC ThresholdThickness."
+  handle_height:
+    type: "length"
+    default: 1.0
+    label: "Handle height"
+    group: "Hardware"
+    limits:
+      min: 0.8
+      max: 1.25
+      step:
+        metric: 0.005
+        imperial: 0.0127
+    description: "Finished floor to centre of the lever."
+  backset:
+    type: "length"
+    default: 0.055
+    label: "Backset"
+    group: "Hardware"
+    limits:
+      min: 0.04
+      max: 0.1
+    description: "Leaf edge (lock side) to centre of the handle."
+  key_rose:
+    type: "boolean"
+    default: true
+    label: "Key rose below handle"
+    group: "Hardware"
+  key_distance:
+    type: "length"
+    default: 0.072
+    label: "Handle to key distance"
+    group: "Hardware"
+    visible: "key_rose"
+    limits:
+      min: 0.05
+      max: 0.1
+  opening_angle:
+    type: "angle"
+    default: 90.0
+    label: "Plan opening angle"
+    group: "Drawing"
+    limits:
+      min: 30.0
+      max: 180.0
+      step:
+        metric: 15.0
+        imperial: 15.0
+  frame_material:
+    type: "material"
+    default: "painted_timber"
+    label: "Frame material"
+    group: "Materials"
+    options: "materials"
+  leaf_material:
+    type: "material"
+    default: "painted_timber"
+    label: "Leaf material"
+    group: "Materials"
+    options: "materials"
+  hardware_material:
+    type: "material"
+    default: "stainless_steel"
+    label: "Hardware material"
+    group: "Materials"
+    options: "materials"
+slots: {}
+rules:
+  derived:
+    bottom_gap:
+      expr: "floor_gap + (if threshold then threshold_thickness else 0)"
+      note: "Finished floor to underside of leaf."
+    opening_width: "if nominal_reference = \"opening\" then nominal_width else if nominal_reference = \"frame_outside\" then nominal_width + 2 * fit_gap else if nominal_reference = \"leaf\" then (if leaf_type = \"rebated\" then nominal_width - 2 * leaf_lap else nominal_width + 2 * leaf_gap) + 2 * lining_thickness + 2 * fit_gap else nominal_width + 2 * stop_width + 2 * lining_thickness + 2 * fit_gap"
+    opening_height: "if nominal_reference = \"opening\" then nominal_height else if nominal_reference = \"frame_outside\" then nominal_height + fit_gap_top else if nominal_reference = \"leaf\" then (if leaf_type = \"rebated\" then nominal_height - leaf_lap_top + bottom_gap else nominal_height + leaf_gap + bottom_gap) + lining_thickness + fit_gap_top else nominal_height + stop_width + lining_thickness + fit_gap_top"
+    frame_width: "opening_width - 2 * fit_gap"
+    frame_height: "opening_height - fit_gap_top"
+    rebate_width: "frame_width - 2 * lining_thickness"
+    rebate_height: "frame_height - lining_thickness"
+    clear_width:
+      expr: "rebate_width - 2 * stop_width"
+      note: "Clear passage of the frame, door closed."
+    clear_height: "rebate_height - stop_width"
+    leaf_width: "if leaf_type = \"rebated\" then rebate_width + 2 * leaf_lap else rebate_width - 2 * leaf_gap"
+    leaf_height: "if leaf_type = \"rebated\" then rebate_height + leaf_lap_top - bottom_gap else rebate_height - leaf_gap - bottom_gap"
+    usable_clear_width:
+      expr: "clear_width - leaf_thickness"
+      note: "Clear width with the leaf open at 90°: the open leaf takes its thickness off the hinge side."
+    lining_depth:
+      expr: "if frame_type = \"block\" then block_depth else host.thickness"
+      note: "IFC LiningDepth; wrap-around, lining and hollow metal frames span the wall."
+    has_casing: "frame_type != \"block\""
+    casing_d: "if has_casing then casing_depth else 0"
+    frame_front:
+      expr: "lining_depth / 2"
+      note: "Swing-side face of the lining (y)."
+    leaf_front: "if leaf_type = \"rebated\" then frame_front + leaf_lap_thickness else frame_front"
+    leaf_back: "leaf_front - leaf_thickness"
+    stop_back: "if frame_type = \"lining\" then leaf_back - stop_depth else -lining_depth / 2"
+    front_casing_inset:
+      expr: "if leaf_type = \"rebated\" then leaf_lap + mm(2) else 0"
+      note: "Front casing steps back so the rebated leaf lap sits beside it."
+    hinge: "[-leaf_width / 2, leaf_front]"
+    leaf_tip: "[hinge[1] + leaf_width * cos(opening_angle), hinge[2] + leaf_width * sin(opening_angle)]"
+    handle_x: "leaf_width / 2 - backset"
+    hinge_count: "if leaf_height > mm(2300) then 3 else 2"
+    hinge_z:
+      expr: "[bottom_gap + mm(250), bottom_gap + leaf_height - mm(250), bottom_gap + leaf_height / 2]"
+      note: "Typical hinge positions (250 mm from leaf ends, third hinge centred). Not a norm value."
+  checks:
+    leaf_min:
+      expr: "leaf_width >= mm(400)"
+      severity: "error"
+      message: "Door leaf is narrower than 400 mm."
+    single_leaf_max:
+      expr: "leaf_width <= mm(1250)"
+      severity: "warning"
+      message: "Leaf wider than 1250 mm: consider a double door."
+    leaf_fits_frame:
+      expr: "leaf_thickness + (if frame_type = \"lining\" then stop_depth else mm(5)) <= lining_depth"
+      severity: "error"
+      message: "Leaf and stop do not fit in the frame depth."
+    handle_on_leaf:
+      expr: "handle_height + mm(30) < bottom_gap + leaf_height and backset < leaf_width / 2"
+      severity: "error"
+      message: "Handle lies outside the leaf."
+    clear_width:
+      expr: "rules.accessibility = null or (if rules.accessibility.measure = \"clear_passage\" then clear_width else usable_clear_width) >= rules.accessibility.min_clear_width"
+      severity: "warning"
+      message: "Clear width is below the accessibility minimum of the active rule set."
+    handle_range:
+      expr: "rules.accessibility = null or rules.accessibility.handle_min = null or (handle_height >= rules.accessibility.handle_min and handle_height <= rules.accessibility.handle_max)"
+      severity: "warning"
+      message: "Handle height is outside the range of the active accessibility rule set."
+  rulesets:
+    accessibility:
+      default: null
+      note: "No accessibility requirement by default. Layers activate one, e.g. layers/ruleset-iso-21542.ifcx or layers/ruleset-us-ada.ifcx."
+      fields:
+        min_clear_width: "length"
+        measure: "choice: clear_passage | usable_clear_width"
+        handle_min: "length"
+        handle_max: "length"
+recipe:
+  opening:
+    op: "rectangle"
+    plane: "xz"
+    args:
+      min: "[-opening_width / 2, 0]"
+      max: "[opening_width / 2, opening_height]"
+  frame_outline:
+    op: "rectangle"
+    plane: "xz"
+    args:
+      min: "[-frame_width / 2, 0]"
+      max: "[frame_width / 2, frame_height]"
+  rebate_outline:
+    op: "rectangle"
+    plane: "xz"
+    args:
+      min: "[-rebate_width / 2, -mm(1)]"
+      max: "[rebate_width / 2, rebate_height]"
+  clear_outline:
+    op: "rectangle"
+    plane: "xz"
+    args:
+      min: "[-clear_width / 2, -mm(1)]"
+      max: "[clear_width / 2, clear_height]"
+  casing_outline:
+    op: "rectangle"
+    plane: "xz"
+    when: "has_casing"
+    args:
+      min: "[-frame_width / 2 - casing_width, 0]"
+      max: "[frame_width / 2 + casing_width, frame_height + casing_width]"
+  front_casing_hole:
+    op: "rectangle"
+    plane: "xz"
+    when: "has_casing"
+    args:
+      min: "[-rebate_width / 2 - front_casing_inset, -mm(1)]"
+      max: "[rebate_width / 2 + front_casing_inset, rebate_height + front_casing_inset]"
+  leaf_outline:
+    op: "rectangle"
+    plane: "xz"
+    args:
+      min: "[-leaf_width / 2, bottom_gap]"
+      max: "[leaf_width / 2, bottom_gap + leaf_height]"
+  leaf_core_outline:
+    op: "rectangle"
+    plane: "xz"
+    when: "leaf_type = \"rebated\""
+    args:
+      min: "[-rebate_width / 2 + leaf_gap, bottom_gap]"
+      max: "[rebate_width / 2 - leaf_gap, rebate_height - leaf_gap]"
+  lining_profile:
+    op: "difference"
+    args:
+      a: "frame_outline"
+      b: "rebate_outline"
+  lining:
+    op: "extrude"
+    args:
+      profile: "lining_profile"
+      from: "-lining_depth / 2"
+      to: "lining_depth / 2"
+  stop_profile:
+    op: "difference"
+    args:
+      a: "rebate_outline"
+      b: "clear_outline"
+  stop:
+    op: "extrude"
+    args:
+      profile: "stop_profile"
+      from: "stop_back"
+      to: "leaf_back"
+  front_casing:
+    op: "extrude"
+    when: "has_casing"
+    args:
+      profile: "difference(casing_outline, front_casing_hole)"
+      from: "frame_front"
+      to: "frame_front + casing_d"
+  back_casing:
+    op: "extrude"
+    when: "has_casing"
+    args:
+      profile: "difference(casing_outline, rebate_outline)"
+      from: "-frame_front - casing_d"
+      to: "-frame_front"
+  threshold_body:
+    op: "extrude"
+    plane: "xz"
+    when: "threshold"
+    args:
+      profile: "rectangle([-rebate_width / 2, 0], [rebate_width / 2, threshold_thickness])"
+      from: "-lining_depth / 2"
+      to: "lining_depth / 2"
+  leaf_flush:
+    op: "extrude"
+    when: "leaf_type = \"flush\""
+    args:
+      profile: "leaf_outline"
+      from: "leaf_back"
+      to: "leaf_front"
+  leaf_lap_part:
+    op: "extrude"
+    when: "leaf_type = \"rebated\""
+    args:
+      profile: "leaf_outline"
+      from: "leaf_front - leaf_lap_thickness"
+      to: "leaf_front"
+  leaf_core:
+    op: "extrude"
+    when: "leaf_type = \"rebated\""
+    args:
+      profile: "leaf_core_outline"
+      from: "leaf_back"
+      to: "leaf_front - leaf_lap_thickness"
+  leaf:
+    op: "union"
+    args:
+      items: "[leaf_flush, leaf_lap_part, leaf_core]"
+    note: "Union skips steps whose 'when' is false."
+  panel_low:
+    op: "extrude"
+    args:
+      profile: "frame_outline"
+      from: "leaf_back"
+      to: "leaf_front"
+  rose_front:
+    op: "extrude"
+    plane: "xz"
+    args:
+      profile: "circle([handle_x, handle_height], mm(26))"
+      from: "leaf_front"
+      to: "leaf_front + mm(8)"
+  neck_front:
+    op: "extrude"
+    plane: "xz"
+    args:
+      profile: "circle([handle_x, handle_height], mm(9.5))"
+      from: "leaf_front + mm(8)"
+      to: "leaf_front + mm(55)"
+  lever_front:
+    op: "extrude"
+    plane: "yz"
+    args:
+      profile: "circle([leaf_front + mm(45.5), handle_height], mm(9.5))"
+      from: "handle_x - mm(130)"
+      to: "handle_x + mm(9.5)"
+  rose_back:
+    op: "extrude"
+    plane: "xz"
+    args:
+      profile: "circle([handle_x, handle_height], mm(26))"
+      from: "leaf_back - mm(8)"
+      to: "leaf_back"
+  neck_back:
+    op: "extrude"
+    plane: "xz"
+    args:
+      profile: "circle([handle_x, handle_height], mm(9.5))"
+      from: "leaf_back - mm(55)"
+      to: "leaf_back - mm(8)"
+  lever_back:
+    op: "extrude"
+    plane: "yz"
+    args:
+      profile: "circle([leaf_back - mm(45.5), handle_height], mm(9.5))"
+      from: "handle_x - mm(130)"
+      to: "handle_x + mm(9.5)"
+  key_rose_front:
+    op: "extrude"
+    plane: "xz"
+    when: "key_rose"
+    args:
+      profile: "circle([handle_x, handle_height - key_distance], mm(20))"
+      from: "leaf_front"
+      to: "leaf_front + mm(8)"
+  key_rose_back:
+    op: "extrude"
+    plane: "xz"
+    when: "key_rose"
+    args:
+      profile: "circle([handle_x, handle_height - key_distance], mm(20))"
+      from: "leaf_back - mm(8)"
+      to: "leaf_back"
+  handle:
+    op: "union"
+    args:
+      items: "[rose_front, neck_front, lever_front, rose_back, neck_back, lever_back, key_rose_front, key_rose_back]"
+  lever_simple_profile:
+    op: "rectangle"
+    plane: "xz"
+    args:
+      min: "[handle_x - mm(130), handle_height - mm(10)]"
+      max: "[handle_x + mm(10), handle_height + mm(10)]"
+  handle_simple:
+    op: "union"
+    args:
+      items: "[extrude(lever_simple_profile, leaf_front, leaf_front + mm(55)), extrude(lever_simple_profile, leaf_back - mm(55), leaf_back)]"
+  hinge_knuckle:
+    op: "circle"
+    plane: "xy"
+    args:
+      center: "hinge"
+      radius: "mm(7)"
+  hinges:
+    op: "union"
+    args:
+      items: "[extrude(hinge_knuckle, hinge_z[1] - mm(50), hinge_z[1] + mm(50)), extrude(hinge_knuckle, hinge_z[2] - mm(50), hinge_z[2] + mm(50)), if hinge_count = 3 then extrude(hinge_knuckle, hinge_z[3] - mm(50), hinge_z[3] + mm(50)) else null]"
+  void:
+    op: "extrude"
+    args:
+      profile: "opening"
+      from: "-host.thickness / 2 - mm(10)"
+      to: "host.thickness / 2 + mm(10)"
+  jamb_left_plan:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[rectangle([-frame_width / 2, -lining_depth / 2], [-rebate_width / 2, lining_depth / 2]), rectangle([-rebate_width / 2, stop_back], [-clear_width / 2, leaf_back]), if has_casing then rectangle([-frame_width / 2 - casing_width, frame_front], [-rebate_width / 2 - front_casing_inset, frame_front + casing_d]) else null, if has_casing then rectangle([-frame_width / 2 - casing_width, -frame_front - casing_d], [-rebate_width / 2, -frame_front]) else null]"
+  jamb_right_plan:
+    op: "mirror"
+    args:
+      geometry: "jamb_left_plan"
+      axis: "\"x\""
+  leaf_closed_plan:
+    op: "rectangle"
+    plane: "xy"
+    args:
+      min: "[-leaf_width / 2, leaf_back]"
+      max: "[leaf_width / 2, leaf_front]"
+  leaf_open_plan:
+    op: "rotate"
+    args:
+      geometry: "leaf_closed_plan"
+      center: "hinge"
+      angle: "opening_angle"
+  leaf_line_plan:
+    op: "line"
+    plane: "xy"
+    args:
+      start: "hinge"
+      end: "leaf_tip"
+  swing_arc_plan:
+    op: "arc"
+    plane: "xy"
+    args:
+      center: "hinge"
+      radius: "leaf_width"
+      start_angle: "0"
+      end_angle: "opening_angle"
+  swing_indicator:
+    op: "polyline"
+    plane: "xz"
+    args:
+      points: "[[leaf_width / 2, bottom_gap], [-leaf_width / 2, bottom_gap + leaf_height / 2], [leaf_width / 2, bottom_gap + leaf_height]]"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "panel_low"
+        material: "leaf_material"
+  model.medium:
+    context: "model"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "lining"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "stop"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "front_casing"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "back_casing"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "threshold_body"
+        material: "frame_material"
+        part: "Threshold"
+      - geometry: "leaf"
+        material: "leaf_material"
+        part: "Leaf"
+      - geometry: "handle_simple"
+        material: "hardware_material"
+        part: "Hardware"
+  model.high:
+    context: "model"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "lining"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "stop"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "front_casing"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "back_casing"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "threshold_body"
+        material: "frame_material"
+        part: "Threshold"
+      - geometry: "leaf"
+        material: "leaf_material"
+        part: "Leaf"
+      - geometry: "handle"
+        material: "hardware_material"
+        part: "Hardware"
+      - geometry: "hinges"
+        material: "hardware_material"
+        part: "Hardware"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "leaf_line_plan"
+        class: "cut"
+      - geometry: "swing_arc_plan"
+        class: "annotation"
+        role: "swing"
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "jamb_left_plan"
+        class: "cut"
+        hatch: "frame_material"
+      - geometry: "jamb_right_plan"
+        class: "cut"
+        hatch: "frame_material"
+      - geometry: "leaf_open_plan"
+        class: "cut"
+        hatch: "leaf_material"
+      - geometry: "swing_arc_plan"
+        class: "annotation"
+        role: "swing"
+  plan.high:
+    context: "plan"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "derived"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    derive:
+      from: "model.high"
+      method: "cut"
+      exclude_parts:
+        - "Leaf"
+    overlay:
+      - geometry: "leaf_open_plan"
+        class: "cut"
+        hatch: "leaf_material"
+      - geometry: "swing_arc_plan"
+        class: "annotation"
+        role: "swing"
+    note: "Frame, casings and stop are cut from the 3D at the view's cut height; the leaf is drawn open with its swing."
+  elevation.low:
+    context: "elevation"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Profile"
+      targetView: "ELEVATION_VIEW"
+    items:
+      - geometry: "frame_outline"
+        class: "projected"
+  elevation.medium:
+    context: "elevation"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Profile"
+      targetView: "ELEVATION_VIEW"
+    items:
+      - geometry: "casing_outline"
+        class: "projected"
+      - geometry: "frame_outline"
+        class: "projected"
+      - geometry: "leaf_outline"
+        class: "projected"
+      - geometry: "lever_simple_profile"
+        class: "projected"
+      - geometry: "swing_indicator"
+        class: "annotation"
+        role: "swing"
+  elevation.high:
+    context: "elevation"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "ELEVATION_VIEW"
+    derive:
+      from: "model.high"
+      method: "project"
+    overlay:
+      - geometry: "swing_indicator"
+        class: "annotation"
+        role: "swing"
+  section:
+    context: "section"
+    lod: "all"
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "SECTION_VIEW"
+    derive:
+      from: "model.{lod}"
+      method: "cut"
+host:
+  hosts:
+    - "IfcWall"
+  inputs:
+    thickness:
+      type: "length"
+      from: "host thickness at the insertion point"
+      default: 0.115
+  void:
+    geometry: "void"
+    ifc: "IfcOpeningElement"
+  insertion:
+    point: "[0, 0, 0]"
+    description: "Centre of the opening width, at finished floor level, on the host's axis. x along the wall, y through it (front = swing side), z up."
+  flip:
+    x:
+      label: "Hinge side"
+      values:
+        - "left"
+        - "right"
+    "y":
+      label: "Swing side"
+      values:
+        - "front"
+        - "back"
+  snap_points:
+    - name: "opening_left"
+      point: "[-opening_width / 2, 0, 0]"
+    - name: "opening_right"
+      point: "[opening_width / 2, 0, 0]"
+    - name: "opening_head"
+      point: "[0, 0, opening_height]"
+handles:
+  - parameter: "nominal_width"
+    view:
+      - "elevation"
+      - "model"
+    at: "[opening_width / 2, 0, opening_height / 2]"
+    axis: "x"
+    symmetric: true
+  - parameter: "nominal_height"
+    view:
+      - "elevation"
+      - "model"
+    at: "[0, 0, opening_height]"
+    axis: "z"
+  - parameter: "handle_height"
+    view:
+      - "elevation"
+    at: "[handle_x, 0, handle_height]"
+    axis: "z"
+  - parameter: "opening_angle"
+    view:
+      - "plan"
+    at: "leaf_tip"
+    kind: "angle"
+    center: "hinge"
+materials:
+  - "painted_timber"
+  - "stainless_steel"
+ifc:
+  class: "IfcDoor"
+  predefinedType: "DOOR"
+  properties:
+    bsi::ifc::prop::OverallWidth: "frame_width"
+    bsi::ifc::prop::OverallHeight: "frame_height"
+    bsi::ifc::prop::OperationType: "if flip.x = \"right\" then \"SINGLE_SWING_RIGHT\" else \"SINGLE_SWING_LEFT\""
+    bsi::ifc::prop::LiningDepth: "lining_depth"
+    bsi::ifc::prop::LiningThickness: "lining_thickness"
+    bsi::ifc::prop::CasingThickness: "if has_casing then casing_width else null"
+    bsi::ifc::prop::CasingDepth: "if has_casing then casing_depth else null"
+    bsi::ifc::prop::ThresholdThickness: "if threshold then threshold_thickness else 0"
+    bsi::ifc::prop::ThresholdDepth: "if threshold then lining_depth else null"
+    bsi::ifc::prop::PanelDepth: "leaf_thickness"
+    bsi::ifc::prop::PanelWidth: "1"
+    bsi::ifc::prop::PanelOperation: "\"SWINGING\""
+    bsi::ifc::prop::PanelPosition: "\"MIDDLE\""
+  property_sets:
+    Pset_DoorLiningProperties:
+      - "LiningDepth"
+      - "LiningThickness"
+      - "CasingThickness"
+      - "CasingDepth"
+      - "ThresholdThickness"
+      - "ThresholdDepth"
+    Pset_DoorPanelProperties:
+      - "PanelDepth"
+      - "PanelWidth"
+      - "PanelOperation"
+      - "PanelPosition"
+  parameter_pset: "OPO_Parameters"
+  note: "IFC4.3 deprecates IfcDoorLiningProperties/IfcDoorPanelProperties in favour of these property sets. All parameters are also written to OPO_Parameters."

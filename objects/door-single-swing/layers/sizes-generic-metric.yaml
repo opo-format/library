@@ -1,0 +1,34 @@
+kind: "sizes"
+system:
+  name: "Generic metric doors, opening sizes (not a norm)"
+  node: "36f75935-4ec3-572d-836a-e61f1814fb87"
+  values:
+    nominal_reference: "opening"
+    frame_type: "wrap_around"
+    leaf_type: "rebated"
+variants:
+  - name: "Opening 700 × 2100"
+    node: "f1598c52-7e15-5e26-af78-8eb1d3b524db"
+    values:
+      nominal_width: 0.7
+      nominal_height: 2.1
+  - name: "Opening 800 × 2100"
+    node: "e40b89fd-2c64-5ce5-9518-a08d78932615"
+    values:
+      nominal_width: 0.8
+      nominal_height: 2.1
+  - name: "Opening 900 × 2100"
+    node: "a7583bf9-5bd7-5576-90fe-4b54f43c3666"
+    values:
+      nominal_width: 0.9
+      nominal_height: 2.1
+  - name: "Opening 1000 × 2100"
+    node: "ada45df6-680a-5101-bb75-2d91da75aa76"
+    values:
+      nominal_width: 1.0
+      nominal_height: 2.1
+  - name: "Opening 1100 × 2100"
+    node: "5516a8c9-1d0b-53cc-823c-aac2b05ed904"
+    values:
+      nominal_width: 1.1
+      nominal_height: 2.1
