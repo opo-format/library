@@ -92,9 +92,9 @@ rules:
       note: "Connection stubs drawn at high detail: a list of {from, to, d} (start point, end point, outside diameter). Classes give one per port."
   checks:
     fits_storey:
-      expr: "top <= level.height"
+      expr: "mount = \"floor\" or top <= level.height"
       severity: "warning"
-      message: "The body reaches above the storey height."
+      message: "The body reaches above the storey height (wall and ceiling mounting)."
   rulesets: {}
 recipe:
   body:
