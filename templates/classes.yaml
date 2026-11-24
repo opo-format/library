@@ -208,6 +208,72 @@ IfcBoiler:
   name: "Boiler (class template)"
   description: "Boiler as a cased body with its pipe and flue connections, wall-hung or floor-standing, with a service clearance zone."
   default_type: "WATER"
+  parameters:
+    symbol_code:
+      default: "BLR"
+    pipe_size:
+      type: "length"
+      default: 0.022
+      label: "Water connection outside diameter"
+      group: "Connections"
+      limits:
+        min: 0.008
+        max: 0.3
+    gas_size:
+      type: "length"
+      default: 0.015
+      label: "Gas connection outside diameter"
+      group: "Connections"
+      limits:
+        min: 0.008
+        max: 0.2
+    flue_size:
+      type: "length"
+      default: 0.1
+      label: "Flue diameter"
+      group: "Connections"
+      limits:
+        min: 0.04
+        max: 0.6
+  rules:
+    derived:
+      connections:
+        expr: "[{from: [-width / 2 + 0.07, depth / 2, bottom], to: [-width / 2 + 0.07, depth / 2, bottom - 0.05], d: pipe_size}, {from: [-width / 2 + 0.15, depth / 2, bottom], to: [-width / 2 + 0.15, depth / 2, bottom - 0.05], d: pipe_size}, {from: [width / 2 - 0.15, depth / 2, bottom], to: [width / 2 - 0.15, depth / 2, bottom - 0.05], d: gas_size}, {from: [0, depth / 2, top], to: [0, depth / 2, top + 0.1], d: flue_size}]"
+        note: "Flow, return and gas along the underside, flue on top. Typical layout."
+    checks:
+      ports_fit:
+        expr: "width >= 0.3"
+        severity: "warning"
+        message: "The body is narrower than the default connection layout; set port positions from maker data."
+  ports:
+    - name: "heating_flow"
+      system_type: "HEATING"
+      flow_direction: "SOURCE"
+      port_type: "PIPE"
+      nominal_size: "pipe_size"
+      position: "connections[1].to"
+      direction: "[0, 0, -1]"
+    - name: "heating_return"
+      system_type: "HEATING"
+      flow_direction: "SINK"
+      port_type: "PIPE"
+      nominal_size: "pipe_size"
+      position: "connections[2].to"
+      direction: "[0, 0, -1]"
+    - name: "gas"
+      system_type: "GAS"
+      flow_direction: "SINK"
+      port_type: "PIPE"
+      nominal_size: "gas_size"
+      position: "connections[3].to"
+      direction: "[0, 0, -1]"
+    - name: "flue"
+      system_type: "EXHAUST"
+      flow_direction: "SOURCE"
+      port_type: "DUCT"
+      nominal_size: "flue_size"
+      position: "connections[4].to"
+      direction: "[0, 0, 1]"
 IfcPipeFitting:
   archetype: "fitting"
   name: "Pipe fitting (class template)"

@@ -2,7 +2,7 @@
 # Class template sources (proposal 0002 §4). `opo generate` builds the templates from these files,
 # the per-class table (classes.yaml) and the IFC data in ifc/. Licence: CC0-1.0.
 archetype: "point"
-description: "Placed equipment or component: insertion point and orientation, optional host and mounting mode."
+description: "Placed equipment or component: a body with a mounting mode, service clearances, a plan code and optional connections. Classes set sizes, connections and ports."
 parameters:
   mount:
     type: "choice"
@@ -12,6 +12,7 @@ parameters:
     options:
       - "wall"
       - "floor"
+      - "ceiling"
   width:
     type: "length"
     default: 0.45
@@ -20,7 +21,7 @@ parameters:
     limits:
       min: 0.1
       max: 5
-    description: "Typical wall-hung size; replace with maker data."
+    description: "Illustrative default; replace with maker data."
   depth:
     type: "length"
     default: 0.35
@@ -42,7 +43,7 @@ parameters:
     default: 1.2
     label: "Underside above floor"
     group: "Placement"
-    visible: "mount = \"wall\""
+    visible: "mount != \"floor\""
     limits:
       min: 0
       max: 5
@@ -63,54 +64,33 @@ parameters:
     limits:
       min: 0
       max: 1
-  pipe_size:
-    type: "length"
-    default: 0.022
-    label: "Water connection outside diameter"
-    group: "Connections"
-    limits:
-      min: 0.008
-      max: 0.3
-  gas_size:
-    type: "length"
-    default: 0.015
-    label: "Gas connection outside diameter"
-    group: "Connections"
-    limits:
-      min: 0.008
-      max: 0.2
-  flue_size:
-    type: "length"
-    default: 0.1
-    label: "Flue diameter"
-    group: "Connections"
-    limits:
-      min: 0.04
-      max: 0.6
   symbol_code:
     type: "text"
-    default: "BLR"
+    default: ""
     label: "Plan symbol code"
     group: "Drawing"
   casing_material:
     type: "material"
     default: "sheet_metal"
-    label: "Casing"
+    label: "Body"
     group: "Materials"
     options: "materials"
+  connection_material:
+    type: "material"
+    default: "copper"
+    label: "Connections"
+    group: "Materials"
+    options: "materials"
+    visible: "count(connections) > 0"
 slots: {}
 rules:
   derived:
-    bottom: "if mount = \"wall\" then mount_height else 0"
+    bottom: "if mount = \"floor\" then 0 else mount_height"
     top: "bottom + height"
-    port_x:
-      expr: "[-width / 2 + 0.07, -width / 2 + 0.15, width / 2 - 0.15]"
-      note: "Pipe connections along the underside (flow, return, gas). Typical layout."
-  checks:
-    ports_fit:
-      expr: "width >= 0.3"
-      severity: "warning"
-      message: "The body is narrower than the default connection layout; set port positions from maker data."
+    connections:
+      expr: "[]"
+      note: "Connection stubs drawn at high detail: a list of {from, to, d} (start point, end point, outside diameter). Classes give one per port."
+  checks: {}
   rulesets: {}
 recipe:
   body:
@@ -119,9 +99,12 @@ recipe:
       min: "[-width / 2, 0, bottom]"
       max: "[width / 2, depth, top]"
   stubs:
-    op: "union"
+    op: "for_each"
+    when: "count(connections) > 0"
     args:
-      items: "[cylinder([port_x[1], depth / 2, bottom], [port_x[1], depth / 2, bottom - 0.05], pipe_size / 2), cylinder([port_x[2], depth / 2, bottom], [port_x[2], depth / 2, bottom - 0.05], pipe_size / 2), cylinder([port_x[3], depth / 2, bottom], [port_x[3], depth / 2, bottom - 0.05], gas_size / 2), cylinder([0, depth / 2, top], [0, depth / 2, top + 0.1], flue_size / 2)]"
+      items: "connections"
+      as: "c"
+      do: "cylinder(c.from, c.to, c.d / 2)"
   plan_body:
     op: "rectangle"
     plane: "xy"
@@ -137,6 +120,7 @@ recipe:
   plan_code:
     op: "text"
     plane: "xy"
+    when: "symbol_code != \"\""
     args:
       at: "[0, depth / 2]"
       value: "symbol_code"
@@ -180,7 +164,7 @@ representations:
       - geometry: "body"
         material: "casing_material"
       - geometry: "stubs"
-        material: "\"copper\""
+        material: "connection_material"
         part: "Connections"
   plan.low:
     context: "plan"
@@ -255,40 +239,13 @@ host:
   mounting:
     wall: "on_face: back of the body on the wall face"
     floor: "free: on the floor"
+    ceiling: "free: below the ceiling, underside at mount_height"
   insertion:
     point: "[0, 0, 0]"
     description: "Centre of the back edge at floor level; y points away from the wall."
   clearance: "plan_clearance (annotation zone, used for clash checks; not exported as geometry)"
 handles: []
-ports:
-  - name: "heating_flow"
-    system_type: "HEATING"
-    flow_direction: "SOURCE"
-    port_type: "PIPE"
-    nominal_size: "pipe_size"
-    position: "[port_x[1], depth / 2, bottom - 0.05]"
-    direction: "[0, 0, -1]"
-  - name: "heating_return"
-    system_type: "HEATING"
-    flow_direction: "SINK"
-    port_type: "PIPE"
-    nominal_size: "pipe_size"
-    position: "[port_x[2], depth / 2, bottom - 0.05]"
-    direction: "[0, 0, -1]"
-  - name: "gas"
-    system_type: "GAS"
-    flow_direction: "SINK"
-    port_type: "PIPE"
-    nominal_size: "gas_size"
-    position: "[port_x[3], depth / 2, bottom - 0.05]"
-    direction: "[0, 0, -1]"
-  - name: "flue"
-    system_type: "EXHAUST"
-    flow_direction: "SOURCE"
-    port_type: "DUCT"
-    nominal_size: "flue_size"
-    position: "[0, depth / 2, top + 0.1]"
-    direction: "[0, 0, 1]"
+ports: []
 materials:
   - "copper"
   - "sheet_metal"

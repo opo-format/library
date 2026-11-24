@@ -42,7 +42,9 @@ check: build
 
 # Regression guard: the generated templates equal the frozen fixtures of the conformance suite
 # in the standard repository (checked out at the commit in opo-spec-version into ./opo-spec).
-# Remove a template from the comparison when it changes on purpose.
+# Templates that changed on purpose are listed in golden_changed and no longer compared.
+golden_changed := "IfcBoiler"
+
 golden:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -50,6 +52,7 @@ golden:
     if [ ! -d opo-spec ]; then echo "golden: ./opo-spec not present, skipped"; exit 0; fi
     for d in build/library/templates/*/; do
         t=$(basename "$d")
+        if [[ " {{golden_changed}} " == *" $t "* ]]; then echo "$t: changed on purpose, not compared"; continue; fi
         f=opo-spec/conformance/fixtures/library/templates/$t
         if [ -d "$f" ]; then {{opo}} compare "$d" "$f" --ignore-generator; fi
     done
