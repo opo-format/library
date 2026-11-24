@@ -2,7 +2,7 @@
 # Class template sources (proposal 0002 §4). `opo generate` builds the templates from these files,
 # the per-class table (classes.yaml) and the IFC data in ifc/. Licence: CC0-1.0.
 archetype: "fitting"
-description: "Joins the ends of distribution segments: bends, junctions, transitions."
+description: "Joins the ends of distribution segments: bends, junctions, transitions. Classes set the port type and the ports."
 parameters:
   outer_diameter:
     type: "length"
@@ -294,30 +294,7 @@ host:
     point: "[0, 0, 0]"
     description: "Port 1 (inlet) at the origin, pointing along -x."
 handles: []
-ports:
-  - name: "port_1"
-    system_type: "NOTDEFINED"
-    flow_direction: "SOURCEANDSINK"
-    port_type: "PIPE"
-    nominal_size: "outer_diameter"
-    position: "[0, 0, 0]"
-    direction: "[-1, 0, 0]"
-  - name: "port_2"
-    system_type: "NOTDEFINED"
-    flow_direction: "SOURCEANDSINK"
-    port_type: "PIPE"
-    nominal_size: "if is_transition then outer_diameter_2 else outer_diameter"
-    when: "not(is_cap) and predefined_type != \"ENTRY\" and predefined_type != \"EXIT\""
-    position: "if is_bend then bend_end else [length, 0, 0]"
-    direction: "if is_bend then [cos(bend_angle), sin(bend_angle), 0] else [1, 0, 0]"
-  - name: "branch"
-    system_type: "NOTDEFINED"
-    flow_direction: "SOURCEANDSINK"
-    port_type: "PIPE"
-    nominal_size: "branch_diameter"
-    when: "is_junction"
-    position: "[run_length / 2, run_length / 2, 0]"
-    direction: "[0, 1, 0]"
+ports: []
 materials:
   - "copper"
 ifc:
