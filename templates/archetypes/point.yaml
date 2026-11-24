@@ -90,7 +90,11 @@ rules:
     connections:
       expr: "[]"
       note: "Connection stubs drawn at high detail: a list of {from, to, d} (start point, end point, outside diameter). Classes give one per port."
-  checks: {}
+  checks:
+    fits_storey:
+      expr: "top <= level.height"
+      severity: "warning"
+      message: "The body reaches above the storey height."
   rulesets: {}
 recipe:
   body:

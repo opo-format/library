@@ -1,3 +1,11 @@
+aluminium:
+  label: "Aluminium"
+  category: "metal"
+  colour: "#c9ccd0"
+  cut:
+    hatch: "solid_dark"
+  density: 2700
+  ifc_name: "Aluminium"
 brick_masonry:
   label: "Brick masonry"
   category: "masonry"
@@ -35,6 +43,14 @@ copper:
   cut:
     hatch: "solid_dark"
   ifc_name: "Copper"
+glass:
+  label: "Glass"
+  category: "glass"
+  colour: "#cfe3ea"
+  cut:
+    hatch: "solid_light"
+  density: 2500
+  ifc_name: "Glass"
 mineral_wool:
   label: "Mineral wool insulation"
   category: "insulation"
@@ -63,6 +79,13 @@ plasterboard:
   cut:
     hatch: "solid_light"
   ifc_name: "Plasterboard"
+plastic:
+  label: "Plastic"
+  category: "plastic"
+  colour: "#ececea"
+  cut:
+    hatch: "solid_light"
+  ifc_name: "Plastic"
 reinforced_concrete:
   label: "Reinforced concrete"
   category: "concrete"
@@ -114,3 +137,10 @@ timber:
   cut:
     hatch: "timber"
   ifc_name: "Timber"
+vitreous_china:
+  label: "Vitreous china"
+  category: "other"
+  colour: "#f4f4f2"
+  cut:
+    hatch: "solid_light"
+  ifc_name: "Vitreous china"
