@@ -30,7 +30,7 @@ sheet:
   ifc: "IfcStair · CURVED_RUN_STAIR or matching …_WINDING_STAIR type (derived from the walkline)"
   based_on: "— · spec §4.14 script step · `stairs` rule set (winder rules)."
   inputs: "Slot `walkline` (flat curve; per-segment flags flight | landing; per-corner flags landing | winders) · width either side of the walkline (`inner_width`, `outer_width`) · levels."
-  parameters: "Rise, maximum riser, width left and right of the walkline, corners (landings | winders), winders per corner, nosing, waist, material. Planned: per-corner choice, `balancing`, `min_inner_going`."
+  parameters: "Rise, maximum riser, width left and right of the walkline, corners (landings | winders), winders per corner, nosing, waist, material. Each of the first four corners can be set on its own. Planned: `balancing`, `min_inner_going`."
   rules: "All C-01 rules at the walkline; winder going at narrow end ≥ min; even tread depth along the walkline."
   lod: "Plan: treads below the cut, treads above dashed, walkline and arrow. 3D: solid blocks per step (all LODs). Planned: handrails, waist slab, timber treads."
 parameters:
@@ -91,13 +91,68 @@ parameters:
     option_labels:
       landings: "Landing at every corner"
       winders: "Winders at every corner"
-    description: "Applies to every corner of the walkline. Per-corner choice is planned."
+    description: "Applies to every corner unless a corner below is set on its own."
+  corner_1:
+    type: "choice"
+    default: "same"
+    label: "Corner 1"
+    group: "Corners"
+    options:
+      - "same"
+      - "landing"
+      - "winders"
+    option_labels:
+      same: "As set for all corners"
+      landing: "Landing"
+      winders: "Winders"
+    description: "Corners count from the bottom of the walkline; corners after the fourth follow the setting for all corners."
+  corner_2:
+    type: "choice"
+    default: "same"
+    label: "Corner 2"
+    group: "Corners"
+    options:
+      - "same"
+      - "landing"
+      - "winders"
+    option_labels:
+      same: "As set for all corners"
+      landing: "Landing"
+      winders: "Winders"
+    description: "Corners count from the bottom of the walkline; corners after the fourth follow the setting for all corners."
+  corner_3:
+    type: "choice"
+    default: "same"
+    label: "Corner 3"
+    group: "Corners"
+    options:
+      - "same"
+      - "landing"
+      - "winders"
+    option_labels:
+      same: "As set for all corners"
+      landing: "Landing"
+      winders: "Winders"
+    description: "Corners count from the bottom of the walkline; corners after the fourth follow the setting for all corners."
+  corner_4:
+    type: "choice"
+    default: "same"
+    label: "Corner 4"
+    group: "Corners"
+    options:
+      - "same"
+      - "landing"
+      - "winders"
+    option_labels:
+      same: "As set for all corners"
+      landing: "Landing"
+      winders: "Winders"
+    description: "Corners count from the bottom of the walkline; corners after the fourth follow the setting for all corners."
   winders:
     type: "integer"
     default: 3
     label: "Winders per corner"
     group: "Corners"
-    visible: "corners = \"winders\""
     limits:
       min: 2
       max: 6
@@ -355,10 +410,13 @@ rules:
     fl:
       expr: "for i in 1..nseg return sl[i] - fe0[i] - fe1[i]"
       note: "Flight lengths along the walkline, between the corners."
+    ckind:
+      expr: "for c in cidx return if c <= 4 and [corner_1, corner_2, corner_3, corner_4][c] != \"same\" then [corner_1, corner_2, corner_3, corner_4][c] else (if corners = \"landings\" then \"landing\" else \"winders\")"
+      note: "Landing or winders at each corner."
     cu:
-      expr: "if corners = \"landings\" then 1 else winders"
+      expr: "for c in cidx return if ckind[c] = \"landing\" then 1 else winders"
       note: "Treads used by each corner (a landing counts as one)."
-    nflight_treads: "treads - nc * cu"
+    nflight_treads: "treads - sum(cu)"
     fcum: "for i in 1..nseg return sum(for j in 1..i return max(fl[j], 0))"
     nf:
       expr: "for i in 1..nseg return round(nflight_treads * fcum[i] / fcum[nseg]) - (if i = 1 then 0 else round(nflight_treads * fcum[i - 1] / fcum[nseg]))"
@@ -373,13 +431,13 @@ rules:
     step_rule:
       expr: "2 * riser + going"
       note: "Shown for information; checked by a rule set."
-    fbase: "for i in 1..nseg return sum(for j in 1..i return if j < i then nf[j] else 0) + (i - 1) * cu"
-    cbase: "for c in cidx return sum(for j in 1..c return nf[j]) + (c - 1) * cu"
+    fbase: "for i in 1..nseg return sum(for j in 1..i return if j < i then nf[j] + cu[j] else 0)"
+    cbase: "for c in cidx return sum(for j in 1..c return nf[j] + (if j < c then cu[j] else 0))"
     flight_treads:
       expr: "flatten(for i in 1..nseg return if nf[i] < 1 then [] else for t in 1..nf[i] return {n: fbase[i] + t, pts: [{x: (walkline[i][1] + (fe0[i] * sd[i][1])) + ((t - 1) * fg[i] * sd[i][1]) + (left_width * sn[i][1]), y: (walkline[i][2] + (fe0[i] * sd[i][2])) + ((t - 1) * fg[i] * sd[i][2]) + (left_width * sn[i][2])}, {x: (walkline[i][1] + (fe0[i] * sd[i][1])) + ((t - 1) * fg[i] * sd[i][1]) + (-right_width * sn[i][1]), y: (walkline[i][2] + (fe0[i] * sd[i][2])) + ((t - 1) * fg[i] * sd[i][2]) + (-right_width * sn[i][2])}, {x: (walkline[i][1] + (fe0[i] * sd[i][1])) + (t * fg[i] * sd[i][1]) + (-right_width * sn[i][1]), y: (walkline[i][2] + (fe0[i] * sd[i][2])) + (t * fg[i] * sd[i][2]) + (-right_width * sn[i][2])}, {x: (walkline[i][1] + (fe0[i] * sd[i][1])) + (t * fg[i] * sd[i][1]) + (left_width * sn[i][1]), y: (walkline[i][2] + (fe0[i] * sd[i][2])) + (t * fg[i] * sd[i][2]) + (left_width * sn[i][2])}]})"
       note: "Plan outline and number of every flight tread."
     corner_treads:
-      expr: "flatten(for c in cidx return if corners = \"landings\" then [{n: cbase[c] + 1, pts: [{x: c_end_left[c][1], y: c_end_left[c][2]}, {x: c_end_right[c][1], y: c_end_right[c][2]}, {x: c_right[c][1], y: c_right[c][2]}, {x: c_start_right[c][1], y: c_start_right[c][2]}, {x: c_start_left[c][1], y: c_start_left[c][2]}, {x: c_left[c][1], y: c_left[c][2]}]}] else for j in 1..winders return {n: cbase[c] + j, pts: flatten([if j = 1 then [{x: c_end_inner[c][1], y: c_end_inner[c][2]}] else [], [{x: (if ((j - 1) * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][1] + (c_outer[c][1] - c_end_outer[c][1]) * ((j - 1) * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][1] + (c_start_outer[c][1] - c_outer[c][1]) * (((j - 1) * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9)), y: (if ((j - 1) * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][2] + (c_outer[c][2] - c_end_outer[c][2]) * ((j - 1) * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][2] + (c_start_outer[c][2] - c_outer[c][2]) * (((j - 1) * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9))}], if ((j - 1) * (cl1[c] + cl2[c]) / winders) < cl1[c] and (j * (cl1[c] + cl2[c]) / winders) > cl1[c] then [{x: c_outer[c][1], y: c_outer[c][2]}] else [], [{x: (if (j * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][1] + (c_outer[c][1] - c_end_outer[c][1]) * (j * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][1] + (c_start_outer[c][1] - c_outer[c][1]) * ((j * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9)), y: (if (j * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][2] + (c_outer[c][2] - c_end_outer[c][2]) * (j * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][2] + (c_start_outer[c][2] - c_outer[c][2]) * ((j * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9))}], if j = winders then [{x: c_start_inner[c][1], y: c_start_inner[c][2]}] else [], [{x: c_inner[c][1], y: c_inner[c][2]}]])})"
+      expr: "flatten(for c in cidx return if ckind[c] = \"landing\" then [{n: cbase[c] + 1, pts: [{x: c_end_left[c][1], y: c_end_left[c][2]}, {x: c_end_right[c][1], y: c_end_right[c][2]}, {x: c_right[c][1], y: c_right[c][2]}, {x: c_start_right[c][1], y: c_start_right[c][2]}, {x: c_start_left[c][1], y: c_start_left[c][2]}, {x: c_left[c][1], y: c_left[c][2]}]}] else for j in 1..winders return {n: cbase[c] + j, pts: flatten([if j = 1 then [{x: c_end_inner[c][1], y: c_end_inner[c][2]}] else [], [{x: (if ((j - 1) * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][1] + (c_outer[c][1] - c_end_outer[c][1]) * ((j - 1) * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][1] + (c_start_outer[c][1] - c_outer[c][1]) * (((j - 1) * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9)), y: (if ((j - 1) * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][2] + (c_outer[c][2] - c_end_outer[c][2]) * ((j - 1) * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][2] + (c_start_outer[c][2] - c_outer[c][2]) * (((j - 1) * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9))}], if ((j - 1) * (cl1[c] + cl2[c]) / winders) < cl1[c] and (j * (cl1[c] + cl2[c]) / winders) > cl1[c] then [{x: c_outer[c][1], y: c_outer[c][2]}] else [], [{x: (if (j * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][1] + (c_outer[c][1] - c_end_outer[c][1]) * (j * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][1] + (c_start_outer[c][1] - c_outer[c][1]) * ((j * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9)), y: (if (j * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][2] + (c_outer[c][2] - c_end_outer[c][2]) * (j * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][2] + (c_start_outer[c][2] - c_outer[c][2]) * ((j * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9))}], if j = winders then [{x: c_start_inner[c][1], y: c_start_inner[c][2]}] else [], [{x: c_inner[c][1], y: c_inner[c][2]}]])})"
       note: "Landings (one hexagon) or winders, split evenly along the outer edge and fanned from the inner corner."
     all_treads:
       expr: "for s in concatenate(flight_treads, corner_treads) return {n: s.n, pts: for k in 1..count(s.pts) return if abs(s.pts[k].x - s.pts[modulo(k - 2 + count(s.pts), count(s.pts)) + 1].x) + abs(s.pts[k].y - s.pts[modulo(k - 2 + count(s.pts), count(s.pts)) + 1].y) > 1e-6 then [s.pts[k].x, s.pts[k].y] else null}"
@@ -621,7 +679,7 @@ materials:
   - "steel"
 ifc:
   class: "IfcStair"
-  predefinedType: "if nc = 0 then \"STRAIGHT_RUN_STAIR\" else if corners = \"winders\" then (if nc = 1 then \"QUARTER_WINDING_STAIR\" else if nc = 2 then \"TWO_QUARTER_WINDING_STAIR\" else if nc = 3 then \"THREE_QUARTER_WINDING_STAIR\" else \"CURVED_RUN_STAIR\") else (if nc = 1 then \"QUARTER_TURN_STAIR\" else if nc = 2 then \"TWO_QUARTER_TURN_STAIR\" else if nc = 3 then \"THREE_QUARTER_TURN_STAIR\" else \"CURVED_RUN_STAIR\")"
+  predefinedType: "if nc = 0 then \"STRAIGHT_RUN_STAIR\" else if count(index_of(ckind, \"landing\")) = 0 then (if nc = 1 then \"QUARTER_WINDING_STAIR\" else if nc = 2 then \"TWO_QUARTER_WINDING_STAIR\" else if nc = 3 then \"THREE_QUARTER_WINDING_STAIR\" else \"CURVED_RUN_STAIR\") else if count(index_of(ckind, \"winders\")) = 0 then (if nc = 1 then \"QUARTER_TURN_STAIR\" else if nc = 2 then \"TWO_QUARTER_TURN_STAIR\" else if nc = 3 then \"THREE_QUARTER_TURN_STAIR\" else \"CURVED_RUN_STAIR\") else \"USERDEFINED\""
   property_sets: "all parameters of type property_set, with the values set by `value` formulas"
   properties:
     Pset_StairCommon.NumberOfRiser: "risers"
