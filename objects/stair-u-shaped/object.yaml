@@ -147,12 +147,38 @@ parameters:
     default: true
     label: "Handrail on the outer side"
     group: "Railings"
-    description: "A nested IfcRailing along both flights and round the landing."
+    description: "A nested railing along both flights and round the landing; the top rail is the handrail."
+  railing_outer_fixing:
+    type: "choice"
+    default: "stair"
+    label: "Fixing"
+    group: "Railings"
+    options:
+      - "stair"
+      - "wall"
+    visible: "railing_outer"
+    option_labels:
+      stair: "Balustrade standing on the stair"
+      wall: "Handrail on wall brackets"
+    description: "On the stair: posts set into the steps along the nosing line, balusters, top rail as the handrail. On a wall: the handrail alone, on brackets to a wall along the stair edge."
   railing_inner:
     type: "boolean"
     default: false
     label: "Handrail on the inner side"
     group: "Railings"
+  railing_inner_fixing:
+    type: "choice"
+    default: "stair"
+    label: "Fixing"
+    group: "Railings"
+    options:
+      - "stair"
+      - "wall"
+    visible: "railing_inner"
+    option_labels:
+      stair: "Balustrade standing on the stair"
+      wall: "Handrail on wall brackets"
+    description: "On the stair: posts set into the steps along the nosing line, balusters, top rail as the handrail. On a wall: the handrail alone, on brackets to a wall along the stair edge."
   handrail_height:
     type: "length"
     default: 0.9
@@ -373,7 +399,11 @@ rules:
     steps1: "for i in 1..2 * (k - 1) return if modulo(i, 2) = 1 then [(i - 1) / 2 * going, (i + 1) / 2 * riser] else [i / 2 * going, i / 2 * riser]"
     steps2: "for i in 1..2 * (n2 - 1) return if modulo(i, 2) = 1 then [(i - 1) / 2 * going, z_land + (i + 1) / 2 * riser] else [i / 2 * going, z_land + i / 2 * riser]"
     ua: "(waist_v - waist_thickness) * going / riser"
-    profile1_points: "if structure = \"waist\" then concatenate([[0, 0]], steps1, [[run1, z_land], [run1, z_land - riser - waist_v], [under_x0, under_z0]]) else concatenate([[0, 0]], steps1, [[run1, z_land], [run1, 0]])"
+    has_landing: "true"
+    x_m:
+      expr: "min(under_x0 + (z_land - waist_thickness) * going / riser, run1 + land_len)"
+      note: "Where the underside of flight 1 meets the underside of the landing, so the two read as one slab."
+    profile1_points: "if structure = \"waist\" then concatenate([[0, 0]], steps1, [[run1, z_land]], if has_landing then [[x_m, z_land], [x_m, z_land - waist_thickness]] else [[run1, z_land - riser - waist_v]], [[under_x0, under_z0]]) else concatenate([[0, 0]], steps1, [[run1, z_land], [run1, 0]])"
     profile2_points: "if structure = \"waist\" then concatenate([[0, z_land]], steps2, [[run2, total_rise], [run2, total_rise - riser - waist_v]], if ua >= 0 then [[ua, z_land - waist_thickness], [0, z_land - waist_thickness]] else [[0, z_land + riser - waist_v]]) else concatenate([[0, z_land]], steps2, [[run2, total_rise], [run2, 0], [0, 0]])"
     mirror_y:
       expr: "turn = \"right\""
@@ -571,16 +601,18 @@ recipe:
     op: "instance"
     when: "railing_outer"
     args:
-      object: "\"opo-format.org/library/templates/IfcRailing\""
-      values: "{predefined_type: \"HANDRAIL\", width: 0.042}"
-      inputs: "{path: rail_outer_m}"
+      object: "\"opo-format.org/library/objects/railing-guard\""
+      values: "if railing_outer_fixing = \"wall\" then {predefined_type: \"HANDRAIL\", height: handrail_height, mount: \"wall\", outside: if mirror_y then \"left\" else \"right\", wall_distance: 0.05, top_is_handrail: true} else {predefined_type: \"BALUSTRADE\", height: handrail_height, mount: \"embedded\", embed_depth: if structure = \"waist\" then min(riser + 0.05, waist_thickness - 0.01) else riser + 0.05, top_is_handrail: true}"
+      inputs: "{path: for p in rail_outer_m return [p[1], p[2], p[3] - handrail_height]}"
+    note: "The guard follows the nosing line; its posts go down into the steps (up to one riser plus 0.05 m, no deeper than the slab) so they stand on every tread."
   railing_inner_obj:
     op: "instance"
     when: "railing_inner"
     args:
-      object: "\"opo-format.org/library/templates/IfcRailing\""
-      values: "{predefined_type: \"HANDRAIL\", width: 0.042}"
-      inputs: "{path: rail_inner_m}"
+      object: "\"opo-format.org/library/objects/railing-guard\""
+      values: "if railing_inner_fixing = \"wall\" then {predefined_type: \"HANDRAIL\", height: handrail_height, mount: \"wall\", outside: if mirror_y then \"right\" else \"left\", wall_distance: 0.05, top_is_handrail: true} else {predefined_type: \"BALUSTRADE\", height: handrail_height, mount: \"embedded\", embed_depth: if structure = \"waist\" then min(riser + 0.05, waist_thickness - 0.01) else riser + 0.05, top_is_handrail: true}"
+      inputs: "{path: for p in rail_inner_m return [p[1], p[2], p[3] - handrail_height]}"
+    note: "The guard follows the nosing line; its posts go down into the steps (up to one riser plus 0.05 m, no deeper than the slab) so they stand on every tread."
   plan_below:
     op: "union"
     plane: "xy"
@@ -761,8 +793,8 @@ host:
     note: "The application cuts the upper slab over flight 2 and the landing plus headroom."
   nested:
     objects:
-      - "opo-format.org/library/templates/IfcRailing"
-    note: "Handrails are nested IfcRailing class templates."
+      - "opo-format.org/library/objects/railing-guard"
+    note: "Railings are nested railing-guard objects along the nosing line (on the stair) or along the stair edge (on wall brackets)."
 handles:
   - parameter: "width"
     view:
