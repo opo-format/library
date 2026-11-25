@@ -7,15 +7,15 @@ values:
   height_min:
     value: "inch(42)"
     source: "us-ibc"
-    status: "to_verify"
-    note: "1015: minimum guard height."
+    status: "norm"
+    note: "IBC 2021 1015.3: guards at least 42 in (1067 mm) high above the walking surface or the tread nosings. Checked against the code text as adopted and quoted by state and city codes and ICC material."
   opening_max:
     value: "inch(4)"
     source: "us-ibc"
-    status: "to_verify"
-    note: "1015: sphere that must not pass, up to 36 in."
+    status: "norm"
+    note: "IBC 2021 1015.4: a 4 in (102 mm) sphere must not pass, from the walking surface up to the required guard height. Checked against the code text as adopted and quoted by state and city codes and ICC material."
   opening_upper_max:
     value: "inch(4.375)"
     source: "us-ibc"
-    status: "to_verify"
-    note: "1015: sphere that must not pass, 36 to 42 in."
+    status: "norm"
+    note: "IBC 2021 1015.4 exception 1: from 36 in (914 mm) to 42 in (1067 mm), a 4 3/8 in (111 mm) sphere must not pass. Checked against the code text as adopted and quoted by state and city codes and ICC material."
