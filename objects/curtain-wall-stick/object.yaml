@@ -184,9 +184,10 @@ parameters:
       head: "opo-format.org/library/objects/curtain-wall-mullion"
       sill: "opo-format.org/library/objects/curtain-wall-mullion"
       corner: "opo-format.org/library/objects/curtain-wall-mullion"
+      corner_inside: "opo-format.org/library/objects/curtain-wall-mullion"
       boundary: "opo-format.org/library/objects/curtain-wall-mullion"
       default: "opo-format.org/library/objects/curtain-wall-mullion"
-    description: "One object per edge condition: mullion, transom, jamb (wall ends), head (top), sill (bottom) and corner (where the baseline turns)."
+    description: "One object per edge condition: mullion, transom, jamb (wall ends), head (top), sill (bottom) corner (outside, where the baseline turns left) and corner_inside (where it turns right)."
   panel_classes:
     type: "component"
     interface: "panel"
@@ -214,6 +215,9 @@ rules:
     base: "surface.base"
     top: "surface.top"
     height: "top - base"
+    corner_turns:
+      expr: "if count(surface.baseline) < 3 then [] else for k in 2..count(surface.baseline) - 1 return {x: surface.baseline[k][1], y: surface.baseline[k][2], left: (surface.baseline[k][1] - surface.baseline[k - 1][1]) * (surface.baseline[k + 1][2] - surface.baseline[k][2]) - (surface.baseline[k][2] - surface.baseline[k - 1][2]) * (surface.baseline[k + 1][1] - surface.baseline[k][1]) > 0}"
+      note: "Each baseline corner and whether the baseline turns left there (an outside corner, the front being to the right)."
     floors:
       expr: "for k in 1..max(1, ceiling(height / storey_height - 0.001)) return (k - 1) * storey_height"
       note: "Floor levels above the base inside the wall."
@@ -238,15 +242,15 @@ recipe:
       join: "join"
       overrides: "overrides"
       classes:
-        segment: "if segment.line_cls = \"corner\" then \"corner\" else if segment.line_cls = \"border\" then (if segment.direction = \"v\" then \"jamb\" else if segment.start[3] < surface.base + 0.001 then \"sill\" else \"head\") else if segment.direction = \"v\" then \"mullion\" else \"transom\""
-      widths: "{mullion: reported(component_for(frame_classes, \"mullion\"), \"face_width\", {profile_width: mullion_width}), jamb: reported(component_for(frame_classes, \"jamb\"), \"face_width\", {profile_width: mullion_width}), head: reported(component_for(frame_classes, \"head\"), \"face_width\", {profile_width: transom_width}), sill: reported(component_for(frame_classes, \"sill\"), \"face_width\", {profile_width: transom_width}), corner: reported(component_for(frame_classes, \"corner\"), \"face_width\", {profile_width: mullion_width, profile_depth: mullion_depth, glass_offset: glass_offset, glass_thickness: glass_thickness, shape: \"corner\"}), transom: reported(component_for(frame_classes, \"transom\"), \"face_width\", {profile_width: transom_width})}"
+        segment: "if segment.line_cls = \"corner\" then (if flatten(for t in corner_turns return if abs(t.x - segment.start[1]) + abs(t.y - segment.start[2]) < 0.001 then [t.left] else [])[1] = false then \"corner_inside\" else \"corner\") else if segment.line_cls = \"border\" then (if segment.direction = \"v\" then \"jamb\" else if segment.start[3] < surface.base + 0.001 then \"sill\" else \"head\") else if segment.direction = \"v\" then \"mullion\" else \"transom\""
+      widths: "{mullion: reported(component_for(frame_classes, \"mullion\"), \"face_width\", {profile_width: mullion_width}), jamb: reported(component_for(frame_classes, \"jamb\"), \"face_width\", {profile_width: mullion_width}), head: reported(component_for(frame_classes, \"head\"), \"face_width\", {profile_width: transom_width}), sill: reported(component_for(frame_classes, \"sill\"), \"face_width\", {profile_width: transom_width}), corner: reported(component_for(frame_classes, \"corner\"), \"face_width\", {profile_width: mullion_width, profile_depth: mullion_depth, glass_offset: glass_offset, glass_thickness: glass_thickness, shape: \"corner_outside\"}), corner_inside: reported(component_for(frame_classes, \"corner_inside\"), \"face_width\", {profile_width: mullion_width, shape: \"corner_inside\"}), transom: reported(component_for(frame_classes, \"transom\"), \"face_width\", {profile_width: transom_width})}"
     note: "Mullions on the module, a spandrel and a vision zone in every storey."
   frames:
     op: "for_each"
     args:
       items: "g.segments"
       as: "s"
-      do: "instance(if s.component != null then s.component else component_for(frame_classes, s.cls), if s.values != null then s.values else {profile_width: if s.direction = \"v\" then mullion_width else transom_width, profile_depth: if s.direction = \"v\" then mullion_depth else transom_depth, joint: if s.direction = \"v\" then joint_vertical else joint_horizontal, cap_depth: cap_depth, glass_thickness: glass_thickness, glass_offset: glass_offset, shape: if s.cls = \"corner\" then \"corner\" else \"straight\"}, {path: s.path, normal: s.normal, trim_start: s.trim_start, trim_end: s.trim_end, left_cell: (if s.cls = \"corner\" then flatten(for c in g.cells return if c.id = s.cells[1] then [c] else [])[1] else null), right_cell: (if s.cls = \"corner\" then flatten(for c in g.cells return if c.id = s.cells[2] then [c] else [])[1] else null)})"
+      do: "instance(if s.component != null then s.component else component_for(frame_classes, s.cls), if s.values != null then s.values else {profile_width: if s.direction = \"v\" then mullion_width else transom_width, profile_depth: if s.direction = \"v\" then mullion_depth else transom_depth, joint: if s.direction = \"v\" then joint_vertical else joint_horizontal, cap_depth: cap_depth, glass_thickness: glass_thickness, glass_offset: glass_offset, shape: if s.cls = \"corner\" then \"corner_outside\" else if s.cls = \"corner_inside\" then \"corner_inside\" else \"straight\"}, {path: s.path, normal: s.normal, trim_start: s.trim_start, trim_end: s.trim_end, left_cell: (if s.cls = \"corner\" or s.cls = \"corner_inside\" then flatten(for c in g.cells return if c.id = s.cells[1] then [c] else [])[1] else null), right_cell: (if s.cls = \"corner\" or s.cls = \"corner_inside\" then flatten(for c in g.cells return if c.id = s.cells[2] then [c] else [])[1] else null)})"
   panels:
     op: "for_each"
     args:
@@ -274,7 +278,7 @@ recipe:
     args:
       items: "for s in g.segments return if s.direction = \"v\" and s.start[3] < base + 0.001 then s else null"
       as: "s"
-      do: "if s = null then null else instance(component_for(frame_classes, s.cls), {profile_width: if s.direction = \"v\" then mullion_width else transom_width, profile_depth: if s.direction = \"v\" then mullion_depth else transom_depth, joint: if s.direction = \"v\" then joint_vertical else joint_horizontal, cap_depth: cap_depth, glass_thickness: glass_thickness, glass_offset: glass_offset, shape: if s.cls = \"corner\" then \"corner\" else \"straight\"}, {path: s.path, normal: s.normal, trim_start: 0, trim_end: 0, left_cell: (if s.cls = \"corner\" then flatten(for c in g.cells return if c.id = s.cells[1] then [c] else [])[1] else null), right_cell: (if s.cls = \"corner\" then flatten(for c in g.cells return if c.id = s.cells[2] then [c] else [])[1] else null)}, \"plan.medium\")"
+      do: "if s = null then null else instance(component_for(frame_classes, s.cls), {profile_width: if s.direction = \"v\" then mullion_width else transom_width, profile_depth: if s.direction = \"v\" then mullion_depth else transom_depth, joint: if s.direction = \"v\" then joint_vertical else joint_horizontal, cap_depth: cap_depth, glass_thickness: glass_thickness, glass_offset: glass_offset, shape: if s.cls = \"corner\" then \"corner_outside\" else if s.cls = \"corner_inside\" then \"corner_inside\" else \"straight\"}, {path: s.path, normal: s.normal, trim_start: 0, trim_end: 0, left_cell: (if s.cls = \"corner\" or s.cls = \"corner_inside\" then flatten(for c in g.cells return if c.id = s.cells[1] then [c] else [])[1] else null), right_cell: (if s.cls = \"corner\" or s.cls = \"corner_inside\" then flatten(for c in g.cells return if c.id = s.cells[2] then [c] else [])[1] else null)}, \"plan.medium\")"
   plan_glass:
     op: "for_each"
     plane: "xy"
