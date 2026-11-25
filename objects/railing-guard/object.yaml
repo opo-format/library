@@ -1,10 +1,26 @@
 id: "railing-guard"
 name: "Railing / guard"
-status: "planned"
+version: "0.1.0"
+status: "draft"
 priority: "P1"
 catalogue_id: "C-07"
-ifc:
-  class: "IfcRailing"
+description: "Guard or balustrade along a 3D path (a balcony edge, a landing or a stair pitch line): posts at the corners and evenly between them, a round top rail, and an infill of balusters, horizontal rails, a glass panel or a mesh panel. Defaults are illustrative design values, not norm values; the shared guards and handrails rule sets check height and infill openings."
+tags:
+  - "railing"
+  - "guard"
+  - "balustrade"
+  - "circulation"
+template: "IfcRailing"
+references:
+  - ref: "ifc-4.3-add2-ifcrailing"
+    role: "IFC parameters"
+    used: "Class, predefined types, Pset_RailingCommon (Height, Diameter, IsExternal)."
+  - ref: "us-ibc"
+    role: "rules"
+    used: "Guard height and openings through the shared rule sets."
+  - ref: "us-irc"
+    role: "rules"
+    used: "Guard height and openings through the shared rule sets."
 sheet:
   scope: "Guard along a path: on a stair (follows the pitch line), a landing, a balcony edge or a void. Infill types: balusters, horizontal rails, glass panel, mesh/sheet; posts; top rail; optional handrail on posts. Nested by stairs and ramps."
   ifc: "IfcRailing · GUARDRAIL / BALUSTRADE · `Pset_RailingCommon` (Height, Diameter, IsExternal)"
@@ -13,3 +29,376 @@ sheet:
   parameters: "`height` (default from rule set: 42\" IBC / 36\" IRC; EU no EN/ISO value, default 1.0 m (project value)) · `infill` balusters | rails | glass | mesh · `baluster_spacing` (max clear gap from rule set: 4\" US, 0.1 m UK where required; EU project value, default 0.1 m) · `post_spacing` (default 1.2 m / 4') · profiles: top rail, posts, balusters (preset sections) · `mount` top | side (fascia) · `glass_thickness`, `clamp_type`."
   rules: "Height ≥ rule set (on stairs measured from the pitch line) · clear gap ≤ rule set (computed from spacing and baluster width) · if top rail is the handrail: height within handrail range."
   lod: "3D: low panel · medium posts, top rail, balusters/panel · high + fixings, end returns. Plan: line + posts (medium). Elevation: infill pattern."
+parameters:
+  predefined_type:
+    type: "choice"
+    default: "GUARDRAIL"
+    label: "Predefined type"
+    group: "IFC"
+    options:
+      - "GUARDRAIL"
+      - "BALUSTRADE"
+      - "FENCE"
+  height:
+    type: "length"
+    default: 1.0
+    label: "Height"
+    group: "Size"
+    limits:
+      min: 0.6
+      max: 2.5
+    description: "Top of the top rail above the path (on stairs: above the pitch line). Illustrative default; the guards rule sets give minimums."
+  infill:
+    type: "choice"
+    default: "balusters"
+    label: "Infill"
+    group: "Infill"
+    options:
+      - "balusters"
+      - "rails"
+      - "glass"
+      - "mesh"
+    option_labels:
+      balusters: "Vertical balusters"
+      rails: "Horizontal rails"
+      glass: "Glass panel"
+      mesh: "Mesh or sheet panel"
+  clear_gap:
+    type: "length"
+    default: 0.1
+    label: "Clear gap of the infill"
+    group: "Infill"
+    visible: "infill = \"balusters\" or infill = \"rails\""
+    limits:
+      min: 0.03
+      max: 0.3
+    description: "Clear space between balusters or rails. Illustrative default; the guards rule sets give maximums."
+  bottom_gap:
+    type: "length"
+    default: 0.05
+    label: "Gap under the infill"
+    group: "Infill"
+    limits:
+      min: 0.0
+      max: 0.2
+  post_spacing:
+    type: "length"
+    default: 1.2
+    label: "Maximum post spacing"
+    group: "Posts"
+    limits:
+      min: 0.3
+      max: 3.0
+    description: "Posts at the path corners and evenly between them."
+  post_size:
+    type: "length"
+    default: 0.05
+    label: "Post size (square)"
+    group: "Posts"
+    limits:
+      min: 0.02
+      max: 0.15
+  top_rail_diameter:
+    type: "length"
+    default: 0.05
+    label: "Top rail diameter"
+    group: "Top rail"
+    limits:
+      min: 0.02
+      max: 0.1
+  infill_diameter:
+    type: "length"
+    default: 0.016
+    label: "Baluster or rail diameter"
+    group: "Infill"
+    visible: "infill = \"balusters\" or infill = \"rails\""
+    limits:
+      min: 0.008
+      max: 0.05
+  panel_thickness:
+    type: "length"
+    default: 0.012
+    label: "Panel thickness"
+    group: "Infill"
+    visible: "infill = \"glass\" or infill = \"mesh\""
+    limits:
+      min: 0.004
+      max: 0.04
+  top_is_handrail:
+    type: "boolean"
+    default: false
+    label: "Top rail is the handrail"
+    group: "Top rail"
+    description: "Then the handrails rule sets check its height."
+  is_external:
+    type: "boolean"
+    default: false
+    label: "External"
+    group: "Data"
+  material:
+    type: "material"
+    default: "steel"
+    label: "Posts and rails"
+    group: "Materials"
+    options: "materials"
+slots:
+  path:
+    type: "polyline3"
+    default: [[0.0, 0.0, 0.0], [3.0, 0.0, 0.0], [3.0, 2.0, 0.0]]
+    description: "Path of the guard; on stairs the host stair supplies the pitch line."
+rules:
+  derived:
+    n_seg: "count(path) - 1"
+    seg_len: "for i in 1..n_seg return sqrt((path[i + 1][1] - path[i][1]) ** 2 + (path[i + 1][2] - path[i][2]) ** 2 + (path[i + 1][3] - path[i][3]) ** 2)"
+    length: "sum(seg_len)"
+    post_points:
+      expr: "concatenate(flatten(for i in 1..n_seg return for m in 0..max(1, ceiling(seg_len[i] / post_spacing)) - 1 return {x: path[i][1] + (path[i + 1][1] - path[i][1]) * m / max(1, ceiling(seg_len[i] / post_spacing)), y: path[i][2] + (path[i + 1][2] - path[i][2]) * m / max(1, ceiling(seg_len[i] / post_spacing)), z: path[i][3] + (path[i + 1][3] - path[i][3]) * m / max(1, ceiling(seg_len[i] / post_spacing))}), [{x: path[n_seg + 1][1], y: path[n_seg + 1][2], z: path[n_seg + 1][3]}])"
+      note: "Posts at the corners and evenly between them."
+    infill_top: "height - top_rail_diameter"
+    baluster_points:
+      expr: "flatten(for i in 1..n_seg return for m in 0..max(1, ceiling(seg_len[i] / (clear_gap + infill_diameter))) - 1 return {x: path[i][1] + (path[i + 1][1] - path[i][1]) * m / max(1, ceiling(seg_len[i] / (clear_gap + infill_diameter))), y: path[i][2] + (path[i + 1][2] - path[i][2]) * m / max(1, ceiling(seg_len[i] / (clear_gap + infill_diameter))), z: path[i][3] + (path[i + 1][3] - path[i][3]) * m / max(1, ceiling(seg_len[i] / (clear_gap + infill_diameter)))})"
+      note: "Balusters at most clear gap + diameter apart, centre to centre."
+    rail_levels: "for r in 0..max(0, floor((infill_top - bottom_gap) / (clear_gap + infill_diameter)) - 1) return bottom_gap + infill_diameter / 2 + r * (clear_gap + infill_diameter)"
+    gap:
+      expr: "if infill = \"balusters\" then (if count(baluster_points) > 0 then min(for i in 1..n_seg return seg_len[i] / max(1, ceiling(seg_len[i] / (clear_gap + infill_diameter)))) - infill_diameter else clear_gap) else if infill = \"rails\" then max(infill_top - bottom_gap - count(rail_levels) * infill_diameter - (count(rail_levels) - 1) * clear_gap, clear_gap) else 0"
+      note: "Largest clear opening of the infill (glass and mesh: none)."
+    rail_path: "for p in path return [p[1], p[2], p[3] + height - top_rail_diameter / 2]"
+    plan_path: "for p in path return [p[1], p[2]]"
+  checks:
+    path_points:
+      expr: "count(path) >= 2"
+      severity: "error"
+      message: "The path needs at least two points."
+    height_min:
+      expr: "rules.guards = null or rules.guards.height_min = null or height >= rules.guards.height_min"
+      severity: "warning"
+      message: "The guard is lower than the active rule set requires."
+    gap_max:
+      expr: "rules.guards = null or rules.guards.opening_max = null or gap <= rules.guards.opening_max"
+      severity: "warning"
+      message: "The infill opening is larger than the active rule set allows."
+    handrail_range:
+      expr: "not(top_is_handrail) or rules.handrails = null or (height >= rules.handrails.height_min and height <= rules.handrails.height_max)"
+      severity: "warning"
+      message: "As a handrail, the top rail height is outside the active rule set."
+    infill_fits:
+      expr: "infill_top > bottom_gap"
+      severity: "error"
+      message: "The gap under the infill leaves no room for it."
+  rulesets:
+    guards:
+      default: null
+      note: "Off by default. Shared variants (library rulesets/guards); no EN/ISO guard height exists."
+      fields:
+        height_min: "length"
+        opening_max: "length"
+    handrails:
+      default: null
+      note: "Off by default. Shared variants (library rulesets/handrails)."
+      fields:
+        height_min: "length"
+        height_max: "length"
+recipe:
+  post_bodies:
+    op: "for_each"
+    args:
+      items: "post_points"
+      as: "q"
+      do: "box([q.x - post_size / 2, q.y - post_size / 2, q.z], [q.x + post_size / 2, q.y + post_size / 2, q.z + infill_top])"
+  rail_profile:
+    op: "circle"
+    plane: "profile"
+    args:
+      center: "[0, 0]"
+      radius: "top_rail_diameter / 2"
+  top_rail:
+    op: "sweep"
+    args:
+      profile: "rail_profile"
+      path: "rail_path"
+  balusters:
+    op: "for_each"
+    when: "infill = \"balusters\""
+    args:
+      items: "baluster_points"
+      as: "q"
+      do: "cylinder([q.x, q.y, q.z + bottom_gap], [q.x, q.y, q.z + infill_top], infill_diameter / 2)"
+  infill_profile:
+    op: "circle"
+    plane: "profile"
+    when: "infill = \"rails\""
+    args:
+      center: "[0, 0]"
+      radius: "infill_diameter / 2"
+  rails:
+    op: "for_each"
+    when: "infill = \"rails\""
+    args:
+      items: "rail_levels"
+      as: "z"
+      do: "sweep(infill_profile, for p in path return [p[1], p[2], p[3] + z])"
+  panel_profile:
+    op: "rectangle"
+    plane: "profile"
+    when: "infill = \"glass\" or infill = \"mesh\""
+    args:
+      min: "[-panel_thickness / 2, 0]"
+      max: "[panel_thickness / 2, infill_top - bottom_gap]"
+  panel:
+    op: "sweep"
+    when: "infill = \"glass\" or infill = \"mesh\""
+    args:
+      profile: "panel_profile"
+      path: "for p in path return [p[1], p[2], p[3] + bottom_gap]"
+  plan_line:
+    op: "polyline"
+    plane: "xy"
+    args:
+      points: "plan_path"
+  plan_posts:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "post_points"
+      as: "q"
+      do: "rectangle([q.x - post_size / 2, q.y - post_size / 2], [q.x + post_size / 2, q.y + post_size / 2])"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "panel"
+        material: "\"glass\""
+      - geometry: "top_rail"
+        material: "material"
+      - geometry: "post_bodies"
+        material: "material"
+  model.medium:
+    context: "model"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "post_bodies"
+        material: "material"
+        part: "Posts"
+      - geometry: "top_rail"
+        material: "material"
+        part: "Top rail"
+      - geometry: "balusters"
+        material: "material"
+        part: "Infill"
+      - geometry: "rails"
+        material: "material"
+        part: "Infill"
+      - geometry: "panel"
+        material: "if infill = \"glass\" then \"glass\" else \"sheet_metal\""
+        part: "Infill"
+  model.high:
+    context: "model"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "post_bodies"
+        material: "material"
+        part: "Posts"
+      - geometry: "top_rail"
+        material: "material"
+        part: "Top rail"
+      - geometry: "balusters"
+        material: "material"
+        part: "Infill"
+      - geometry: "rails"
+        material: "material"
+        part: "Infill"
+      - geometry: "panel"
+        material: "if infill = \"glass\" then \"glass\" else \"sheet_metal\""
+        part: "Infill"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_line"
+        class: "projected"
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_line"
+        class: "projected"
+      - geometry: "plan_posts"
+        class: "projected"
+  plan.high:
+    context: "plan"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "derived"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    derive:
+      from: "model.high"
+      method: "cut_or_project"
+  elevation:
+    context: "elevation"
+    lod: "all"
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "ELEVATION_VIEW"
+    derive:
+      from: "model.{lod}"
+      method: "project"
+host:
+  is_host: false
+  level: "Path z relative to the storey; on stairs, nested by the stair along its pitch line."
+handles:
+  - parameter: "height"
+    view:
+      - "elevation"
+      - "model"
+    at: "[path[1][1], path[1][2], path[1][3] + height]"
+    axis: "z"
+materials:
+  - "steel"
+  - "glass"
+  - "sheet_metal"
+ifc:
+  class: "IfcRailing"
+  predefinedType: "predefined_type"
+  properties:
+    Pset_RailingCommon.Height: "height"
+    Pset_RailingCommon.Diameter: "top_rail_diameter"
+    Pset_RailingCommon.IsExternal: "is_external"
+  quantities: {}
+  parameter_pset: "OPO_Parameters"
