@@ -180,9 +180,13 @@ parameters:
     classes:
       mullion: "opo-format.org/library/objects/curtain-wall-mullion"
       transom: "opo-format.org/library/objects/curtain-wall-mullion"
-      boundary: "opo-format.org/library/objects/curtain-wall-mullion"
+      jamb: "opo-format.org/library/objects/curtain-wall-mullion"
+      head: "opo-format.org/library/objects/curtain-wall-mullion"
+      sill: "opo-format.org/library/objects/curtain-wall-mullion"
       corner: "opo-format.org/library/objects/curtain-wall-mullion"
+      boundary: "opo-format.org/library/objects/curtain-wall-mullion"
       default: "opo-format.org/library/objects/curtain-wall-mullion"
+    description: "One object per edge condition: mullion, transom, jamb (wall ends), head (top), sill (bottom) and corner (where the baseline turns)."
   panel_classes:
     type: "component"
     interface: "panel"
@@ -233,14 +237,16 @@ recipe:
       v: "{pattern: v_pattern, distribution: \"best_division\", within: flatten(for f in levels_within return if f = null then [] else [f])}"
       join: "join"
       overrides: "overrides"
-      widths: "{mullion: reported(component_for(frame_classes, \"mullion\"), \"face_width\", {profile_width: mullion_width}), boundary: reported(component_for(frame_classes, \"boundary\"), \"face_width\", {profile_width: mullion_width}), corner: reported(component_for(frame_classes, \"corner\"), \"face_width\", {profile_width: mullion_width}), transom: reported(component_for(frame_classes, \"transom\"), \"face_width\", {profile_width: transom_width})}"
+      classes:
+        segment: "if segment.line_cls = \"corner\" then \"corner\" else if segment.line_cls = \"border\" then (if segment.direction = \"v\" then \"jamb\" else if segment.start[3] < surface.base + 0.001 then \"sill\" else \"head\") else if segment.direction = \"v\" then \"mullion\" else \"transom\""
+      widths: "{mullion: reported(component_for(frame_classes, \"mullion\"), \"face_width\", {profile_width: mullion_width}), jamb: reported(component_for(frame_classes, \"jamb\"), \"face_width\", {profile_width: mullion_width}), head: reported(component_for(frame_classes, \"head\"), \"face_width\", {profile_width: transom_width}), sill: reported(component_for(frame_classes, \"sill\"), \"face_width\", {profile_width: transom_width}), corner: reported(component_for(frame_classes, \"corner\"), \"face_width\", {profile_width: mullion_width, profile_depth: mullion_depth, glass_offset: glass_offset, glass_thickness: glass_thickness, shape: \"corner\"}), transom: reported(component_for(frame_classes, \"transom\"), \"face_width\", {profile_width: transom_width})}"
     note: "Mullions on the module, a spandrel and a vision zone in every storey."
   frames:
     op: "for_each"
     args:
       items: "g.segments"
       as: "s"
-      do: "instance(if s.component != null then s.component else component_for(frame_classes, s.cls), if s.values != null then s.values else {profile_width: if s.direction = \"v\" then mullion_width else transom_width, profile_depth: if s.direction = \"v\" then mullion_depth else transom_depth, joint: if s.direction = \"v\" then joint_vertical else joint_horizontal, cap_depth: cap_depth, glass_thickness: glass_thickness, glass_offset: glass_offset}, {path: s.path, normal: s.normal, trim_start: s.trim_start, trim_end: s.trim_end, left_cell: null, right_cell: null})"
+      do: "instance(if s.component != null then s.component else component_for(frame_classes, s.cls), if s.values != null then s.values else {profile_width: if s.direction = \"v\" then mullion_width else transom_width, profile_depth: if s.direction = \"v\" then mullion_depth else transom_depth, joint: if s.direction = \"v\" then joint_vertical else joint_horizontal, cap_depth: cap_depth, glass_thickness: glass_thickness, glass_offset: glass_offset, shape: if s.cls = \"corner\" then \"corner\" else \"straight\"}, {path: s.path, normal: s.normal, trim_start: s.trim_start, trim_end: s.trim_end, left_cell: (if s.cls = \"corner\" then flatten(for c in g.cells return if c.id = s.cells[1] then [c] else [])[1] else null), right_cell: (if s.cls = \"corner\" then flatten(for c in g.cells return if c.id = s.cells[2] then [c] else [])[1] else null)})"
   panels:
     op: "for_each"
     args:
@@ -268,7 +274,7 @@ recipe:
     args:
       items: "for s in g.segments return if s.direction = \"v\" and s.start[3] < base + 0.001 then s else null"
       as: "s"
-      do: "if s = null then null else instance(component_for(frame_classes, s.cls), {profile_width: if s.direction = \"v\" then mullion_width else transom_width, profile_depth: if s.direction = \"v\" then mullion_depth else transom_depth, joint: if s.direction = \"v\" then joint_vertical else joint_horizontal, cap_depth: cap_depth, glass_thickness: glass_thickness, glass_offset: glass_offset}, {path: s.path, normal: s.normal, trim_start: 0, trim_end: 0, left_cell: null, right_cell: null}, \"plan.medium\")"
+      do: "if s = null then null else instance(component_for(frame_classes, s.cls), {profile_width: if s.direction = \"v\" then mullion_width else transom_width, profile_depth: if s.direction = \"v\" then mullion_depth else transom_depth, joint: if s.direction = \"v\" then joint_vertical else joint_horizontal, cap_depth: cap_depth, glass_thickness: glass_thickness, glass_offset: glass_offset, shape: if s.cls = \"corner\" then \"corner\" else \"straight\"}, {path: s.path, normal: s.normal, trim_start: 0, trim_end: 0, left_cell: (if s.cls = \"corner\" then flatten(for c in g.cells return if c.id = s.cells[1] then [c] else [])[1] else null), right_cell: (if s.cls = \"corner\" then flatten(for c in g.cells return if c.id = s.cells[2] then [c] else [])[1] else null)}, \"plan.medium\")"
   plan_glass:
     op: "for_each"
     plane: "xy"
