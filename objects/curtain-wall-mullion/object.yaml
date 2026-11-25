@@ -1,0 +1,259 @@
+id: "curtain-wall-mullion"
+name: "Curtain wall mullion or transom"
+version: "0.1.0"
+status: "draft"
+priority: "P1"
+description: "A stick curtain wall member along one grid segment: a box profile behind the glass and, for captured glazing, a pressure plate and cap in front. Fills the frame interface; trims and the front come from the curtain wall. Defaults are illustrative design values."
+tags:
+  - "curtain wall"
+  - "mullion"
+  - "transom"
+  - "component"
+template: "IfcMember"
+references:
+  - ref: "ifc-4.3-add2-ifcmember"
+    role: "IFC parameters"
+    used: "Class and the MULLION predefined type."
+sheet:
+  scope: "Member of a stick curtain wall (mullion, transom, boundary or corner) placed by O-16 on each grid segment."
+  ifc: "IfcMember · MULLION"
+  parameters: "Face width, depth behind the glass, joint (captured | butt_joint | ssg), cap depth, glass pocket, trims (from the parent)."
+parameters:
+  profile_width:
+    type: "length"
+    default: 0.05
+    label: "Face width"
+    group: "Profile"
+    limits:
+      min: 0.02
+      max: 0.2
+    description: "Visible width of the member."
+  profile_depth:
+    type: "length"
+    default: 0.15
+    label: "Depth behind the glass"
+    group: "Profile"
+    limits:
+      min: 0.03
+      max: 0.6
+  joint:
+    type: "choice"
+    default: "captured"
+    label: "Glazing joint"
+    group: "Profile"
+    options:
+      - "captured"
+      - "butt_joint"
+      - "ssg"
+    option_labels:
+      captured: "Captured (pressure plate and cap)"
+      butt_joint: "Butt joint (silicone, no cap)"
+      ssg: "Structural silicone glazing (flush)"
+  cap_depth:
+    type: "length"
+    default: 0.02
+    label: "Cap depth"
+    group: "Profile"
+    visible: "joint = \"captured\""
+    limits:
+      min: 0.005
+      max: 0.1
+  glass_thickness:
+    type: "length"
+    default: 0.032
+    label: "Glass pocket (glass thickness)"
+    group: "Profile"
+    limits:
+      min: 0.006
+      max: 0.08
+  trim_start:
+    type: "length"
+    default: 0.0
+    label: "Trim at the start"
+    group: "Placement"
+    limits:
+      min: 0.0
+      max: 1.0
+    description: "Passed by the curtain wall: half the width of the member it stops at."
+  trim_end:
+    type: "length"
+    default: 0.0
+    label: "Trim at the end"
+    group: "Placement"
+    limits:
+      min: 0.0
+      max: 1.0
+  material:
+    type: "material"
+    default: "aluminium"
+    label: "Material"
+    group: "Material"
+    options: "materials"
+slots:
+  path:
+    type: "polyline3"
+    default: [[0.0, 0.0, 0.0], [0.0, 0.0, 3.0]]
+    description: "The grid segment the member runs along (frame interface)."
+  normal:
+    type: "point"
+    default: [0.0, -1.0, 0.0]
+    description: "Front of the façade (frame interface)."
+interface:
+  name: "frame"
+  inputs:
+    - "path"
+    - "normal"
+    - "trim_start"
+    - "trim_end"
+    - "left_cell"
+    - "right_cell"
+  reports:
+    - "face_width"
+    - "depth"
+    - "offset"
+rules:
+  derived:
+    length: "sqrt((path[2][1] - path[1][1]) * (path[2][1] - path[1][1]) + (path[2][2] - path[1][2]) * (path[2][2] - path[1][2]) + (path[2][3] - path[1][3]) * (path[2][3] - path[1][3]))"
+    dir: "for k in 1..3 return (path[2][k] - path[1][k]) / length"
+    p_start: "for k in 1..3 return path[1][k] + dir[k] * trim_start"
+    p_end: "for k in 1..3 return path[2][k] - dir[k] * trim_end"
+    side: "[dir[2] * normal[3] - dir[3] * normal[2], dir[3] * normal[1] - dir[1] * normal[3], dir[1] * normal[2] - dir[2] * normal[1]]"
+    up_ref: "if abs(dir[3]) < 0.99 then [0, 0, 1] else [1, 0, 0]"
+    across_raw: "[up_ref[2] * dir[3] - up_ref[3] * dir[2], up_ref[3] * dir[1] - up_ref[1] * dir[3], up_ref[1] * dir[2] - up_ref[2] * dir[1]]"
+    across: "for k in 1..3 return across_raw[k] / sqrt(across_raw[1] * across_raw[1] + across_raw[2] * across_raw[2] + across_raw[3] * across_raw[3])"
+    vert: "[dir[2] * across[3] - dir[3] * across[2], dir[3] * across[1] - dir[1] * across[3], dir[1] * across[2] - dir[2] * across[1]]"
+    roll:
+      expr: "atan2(normal[1] * vert[1] + normal[2] * vert[2] + normal[3] * vert[3], normal[1] * across[1] + normal[2] * across[2] + normal[3] * across[3])"
+      note: "Turns the profile so its u axis points to the front (the normal)."
+    face_width:
+      expr: "profile_width"
+      note: "Reported to the curtain wall (frame interface)."
+    depth:
+      expr: "profile_depth + glass_thickness / 2 + (if joint = \"captured\" then cap_depth else 0)"
+      note: "Reported: overall depth."
+    offset:
+      expr: "if joint = \"captured\" then glass_thickness / 2 + cap_depth else glass_thickness / 2"
+      note: "Reported: from the glass plane to the front face."
+    vertical: "abs(dir[3]) > 0.99"
+    cut_pts:
+      expr: "for c in [[-1, -profile_depth - glass_thickness / 2], [1, -profile_depth - glass_thickness / 2], [1, offset], [-1, offset]] return [path[1][1] + side[1] * c[1] * profile_width / 2 + normal[1] * c[2], path[1][2] + side[2] * c[1] * profile_width / 2 + normal[2] * c[2]]"
+      note: "Plan cut through a vertical member."
+  checks:
+    length_positive:
+      expr: "length - trim_start - trim_end > 0.001"
+      severity: "error"
+      message: "The member is shorter than its trims."
+recipe:
+  body_profile:
+    op: "rectangle"
+    plane: "profile"
+    args:
+      min: "[-profile_depth - glass_thickness / 2, -profile_width / 2]"
+      max: "[-glass_thickness / 2, profile_width / 2]"
+  cap_profile:
+    op: "rectangle"
+    plane: "profile"
+    when: "joint = \"captured\""
+    args:
+      min: "[glass_thickness / 2, -profile_width / 2]"
+      max: "[glass_thickness / 2 + cap_depth, profile_width / 2]"
+  body:
+    op: "sweep"
+    args:
+      profile: "body_profile"
+      path: "[p_start, p_end]"
+      roll: "roll"
+  cap:
+    op: "sweep"
+    when: "joint = \"captured\""
+    args:
+      profile: "cap_profile"
+      path: "[p_start, p_end]"
+      roll: "roll"
+  plan_cut:
+    op: "polygon"
+    plane: "xy"
+    when: "vertical"
+    args:
+      points: "cut_pts"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+        part: "Mullion"
+      - geometry: "cap"
+        material: "material"
+        part: "Cap"
+  model.medium:
+    context: "model"
+    lod: "medium"
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+        part: "Mullion"
+      - geometry: "cap"
+        material: "material"
+        part: "Cap"
+  model.high:
+    context: "model"
+    lod: "high"
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+        part: "Mullion"
+      - geometry: "cap"
+        material: "material"
+        part: "Cap"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_cut"
+        class: "cut"
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_cut"
+        class: "cut"
+  plan.high:
+    context: "plan"
+    lod: "high"
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_cut"
+        class: "cut"
+materials:
+  - "aluminium"
+  - "steel"
+  - "timber"
+ifc:
+  class: "IfcMember"
+  predefinedType: "\"MULLION\""
+  parameter_pset: "OPO_Parameters"
