@@ -643,7 +643,8 @@ recipe:
     op: "polyline"
     plane: "xz"
     args:
-      points: "[[leaf_width / 2, bottom_gap], [-leaf_width / 2, bottom_gap + leaf_height / 2], [leaf_width / 2, bottom_gap + leaf_height]]"
+      points: "[[-leaf_width / 2, bottom_gap], [leaf_width / 2, bottom_gap + leaf_height / 2], [-leaf_width / 2, bottom_gap + leaf_height]]"
+    note: "Two corners on the hinge side, the point on the opening (handle) side."
 representations:
   model.low:
     context: "model"
