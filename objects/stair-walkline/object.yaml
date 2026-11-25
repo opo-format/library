@@ -1,15 +1,635 @@
 id: "stair-walkline"
-name: "Stair on a walkline (winders)"
-status: "planned"
+name: "Stair on a walkline"
+version: "0.1.0"
+status: "draft"
 priority: "P1"
 catalogue_id: "C-04"
-ifc:
-  class: "IfcStair"
+description: "Stair along a drawn walkline with any number of straight segments; each corner is a landing or a set of winders. Treads are shared out between flights by length, so every flight has an even going. Winders are not balanced in this version. Defaults are illustrative; the stairs rule sets add regional limits."
+tags:
+  - "stair"
+  - "walkline"
+  - "winders"
+  - "landing"
+  - "circulation"
+template: "IfcStair"
+references:
+  - ref: "uk-approved-document-k"
+    role: "rules"
+    used: "Stair and handrail limits through the shared rule sets."
+  - ref: "us-irc"
+    role: "rules"
+    used: "Stair and handrail limits through the shared rule sets."
+  - ref: "us-ibc"
+    role: "rules"
+    used: "Stair limits through the shared rule sets."
+  - ref: "ifc-4.3-add2-ifcstair"
+    role: "IFC parameters"
+    used: "Class, the winding and turn stair predefined types, Pset_StairCommon property names."
 sheet:
-  scope: "Stair defined by a drawn walkline (polyline/curve) with segments marked flight or landing and corners marked landing or winders; balanced winders computed by a **sandboxed WASM script step** that outputs an ordinary recipe. Free-form stairs, any number of turns."
+  scope: "Stair defined by a drawn walkline (straight segments) whose corners are landings or winders. Winders are split evenly along the outer edge (no balancing yet; balanced winders wait for a script step proposal, maintainer decision 25 Nov 2026). Free-form stairs, any number of turns."
   ifc: "IfcStair · CURVED_RUN_STAIR or matching …_WINDING_STAIR type (derived from the walkline)"
   based_on: "— · spec §4.14 script step · `stairs` rule set (winder rules)."
   inputs: "Slot `walkline` (flat curve; per-segment flags flight | landing; per-corner flags landing | winders) · width either side of the walkline (`inner_width`, `outer_width`) · levels."
-  parameters: "as C-01 + `balancing` none | balanced (WASM) · `min_inner_going`."
+  parameters: "Rise, maximum riser, width left and right of the walkline, corners (landings | winders), winders per corner, nosing, waist, material. Planned: per-corner choice, `balancing`, `min_inner_going`."
   rules: "All C-01 rules at the walkline; winder going at narrow end ≥ min; even tread depth along the walkline."
-  lod: "As C-01; baked fallback contains the computed treads so tools without WASM can show it."
+  lod: "Plan: treads below the cut, treads above dashed, walkline and arrow. 3D: solid blocks per step (all LODs). Planned: handrails, waist slab, timber treads."
+parameters:
+  rise_mode:
+    type: "choice"
+    default: "storey"
+    label: "Total rise"
+    group: "Rise"
+    options:
+      - "storey"
+      - "value"
+    option_labels:
+      storey: "Storey height"
+      value: "Value"
+  rise_value:
+    type: "length"
+    default: 3.0
+    label: "Total rise"
+    group: "Rise"
+    visible: "rise_mode = \"value\""
+    limits:
+      min: 0.1
+      max: 10
+  max_riser:
+    type: "length"
+    default: 0.18
+    label: "Maximum riser"
+    group: "Steps"
+    limits:
+      min: 0.05
+      max: 0.3
+    description: "Generic default (no EN/ISO stair geometry norm); the stairs rule sets set regional limits."
+  left_width:
+    type: "length"
+    default: 0.45
+    label: "Width left of the walkline"
+    group: "Plan"
+    limits:
+      min: 0.2
+      max: 2.0
+    description: "Measured square to the walkline, looking up the stair."
+  right_width:
+    type: "length"
+    default: 0.45
+    label: "Width right of the walkline"
+    group: "Plan"
+    limits:
+      min: 0.2
+      max: 2.0
+  corners:
+    type: "choice"
+    default: "winders"
+    label: "Corners"
+    group: "Corners"
+    options:
+      - "landings"
+      - "winders"
+    option_labels:
+      landings: "Landing at every corner"
+      winders: "Winders at every corner"
+    description: "Applies to every corner of the walkline. Per-corner choice is planned."
+  winders:
+    type: "integer"
+    default: 3
+    label: "Winders per corner"
+    group: "Corners"
+    visible: "corners = \"winders\""
+    limits:
+      min: 2
+      max: 6
+  nosing:
+    type: "length"
+    default: 0.03
+    label: "Nosing"
+    group: "Treads"
+    limits:
+      min: 0.0
+      max: 0.06
+    description: "Tread overhang over the riser below."
+  waist_thickness:
+    type: "length"
+    default: 0.15
+    label: "Thickness under each step"
+    group: "Structure"
+    limits:
+      min: 0.04
+      max: 0.5
+    description: "Each step is a solid block this much deeper than one riser."
+  material:
+    type: "material"
+    default: "reinforced_concrete"
+    label: "Concrete or fill"
+    group: "Materials"
+    options: "materials"
+  arrow_label:
+    type: "text"
+    default: "UP"
+    label: "Walking line label"
+    group: "Drawing"
+  Pset_ConcreteElementGeneral:
+    type: "property_set"
+    default: {}
+    label: "Pset_ConcreteElementGeneral"
+    group: "IFC data"
+    properties:
+      - name: "AssemblyPlace"
+        measure: "IfcLabel"
+        enum:
+          - "FACTORY"
+          - "OFFSITE"
+          - "SITE"
+          - "OTHER"
+          - "NOTKNOWN"
+          - "UNSET"
+      - name: "CastingMethod"
+        measure: "IfcLabel"
+        enum:
+          - "INSITU"
+          - "MIXED"
+          - "PRECAST"
+          - "PRINTED"
+          - "OTHER"
+          - "NOTKNOWN"
+          - "UNSET"
+      - name: "StructuralClass"
+        measure: "IfcLabel"
+      - name: "StrengthClass"
+        measure: "IfcLabel"
+      - name: "ExposureClass"
+        measure: "IfcLabel"
+      - name: "ReinforcementVolumeRatio"
+        measure: "IfcMassDensityMeasure"
+      - name: "ReinforcementAreaRatio"
+        measure: "IfcAreaDensityMeasure"
+      - name: "DimensionalAccuracyClass"
+        measure: "IfcLabel"
+      - name: "ConstructionToleranceClass"
+        measure: "IfcLabel"
+      - name: "ConcreteCover"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "ConcreteCoverAtMainBars"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "ConcreteCoverAtLinks"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "ReinforcementStrengthClass"
+        measure: "IfcLabel"
+    optional: true
+  Pset_PrecastConcreteElementFabrication:
+    type: "property_set"
+    default: {}
+    label: "Pset_PrecastConcreteElementFabrication"
+    group: "IFC data"
+    properties:
+      - name: "TypeDesignation"
+        measure: "IfcLabel"
+      - name: "ProductionLotId"
+        measure: "IfcIdentifier"
+      - name: "SerialNumber"
+        measure: "IfcIdentifier"
+      - name: "PieceMark"
+        measure: "IfcLabel"
+      - name: "AsBuiltLocationNumber"
+        measure: "IfcLabel"
+      - name: "ActualProductionDate"
+        measure: "IfcDateTime"
+      - name: "ActualErectionDate"
+        measure: "IfcDateTime"
+    optional: true
+  Pset_PrecastConcreteElementGeneral:
+    type: "property_set"
+    default: {}
+    label: "Pset_PrecastConcreteElementGeneral"
+    group: "IFC data"
+    properties:
+      - name: "TypeDesignation"
+        measure: "IfcLabel"
+      - name: "CornerChamfer"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "ManufacturingToleranceClass"
+        measure: "IfcLabel"
+      - name: "FormStrippingStrength"
+        measure: "IfcPressureMeasure"
+      - name: "LiftingStrength"
+        measure: "IfcPressureMeasure"
+      - name: "ReleaseStrength"
+        measure: "IfcPressureMeasure"
+      - name: "MinimumAllowableSupportLength"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "InitialTension"
+        measure: "IfcPressureMeasure"
+      - name: "TendonRelaxation"
+        measure: "IfcPositiveRatioMeasure"
+      - name: "TransportationStrength"
+        measure: "IfcPressureMeasure"
+      - name: "SupportDuringTransportDescription"
+        measure: "IfcText"
+      - name: "SupportDuringTransportDocReference"
+        measure: "IfcExternalReference"
+      - name: "HollowCorePlugging"
+        measure: "IfcLabel"
+      - name: "CamberAtMidspan"
+        measure: "IfcRatioMeasure"
+      - name: "BatterAtStart"
+        measure: "IfcPlaneAngleMeasure"
+      - name: "BatterAtEnd"
+        measure: "IfcPlaneAngleMeasure"
+      - name: "Twisting"
+        measure: "IfcPlaneAngleMeasure"
+      - name: "Shortening"
+        measure: "IfcRatioMeasure"
+      - name: "PieceMark"
+        measure: "IfcLabel"
+      - name: "DesignLocationNumber"
+        measure: "IfcLabel"
+    optional: true
+  Pset_StairCommon:
+    type: "property_set"
+    default: {}
+    label: "Pset_StairCommon"
+    group: "IFC data"
+    properties:
+      - name: "Reference"
+        measure: "IfcIdentifier"
+      - name: "Status"
+        measure: "IfcLabel"
+        enum:
+          - "DEMOLISH"
+          - "EXISTING"
+          - "NEW"
+          - "TEMPORARY"
+          - "OTHER"
+          - "NOTKNOWN"
+          - "UNSET"
+      - name: "NumberOfRiser"
+        measure: "IfcCountMeasure"
+        value: "risers"
+      - name: "NumberOfTreads"
+        measure: "IfcCountMeasure"
+        value: "treads"
+      - name: "RiserHeight"
+        measure: "IfcPositiveLengthMeasure"
+        value: "riser"
+      - name: "TreadLength"
+        measure: "IfcPositiveLengthMeasure"
+        value: "going"
+      - name: "NosingLength"
+        measure: "IfcLengthMeasure"
+      - name: "WalkingLineOffset"
+        measure: "IfcPositiveLengthMeasure"
+        value: "min(left_width, right_width)"
+      - name: "TreadLengthAtOffset"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "TreadLengthAtInnerSide"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "WaistThickness"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "RequiredHeadroom"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "HandicapAccessible"
+        measure: "IfcBoolean"
+      - name: "HasNonSkidSurface"
+        measure: "IfcBoolean"
+      - name: "IsExternal"
+        measure: "IfcBoolean"
+      - name: "ThermalTransmittance"
+        measure: "IfcThermalTransmittanceMeasure"
+      - name: "LoadBearing"
+        measure: "IfcBoolean"
+      - name: "FireRating"
+        measure: "IfcLabel"
+      - name: "FireExit"
+        measure: "IfcBoolean"
+    optional: false
+slots:
+  walkline:
+    type: "polyline"
+    plane: "xy"
+    default: [[0.0, 0.0], [2.4, 0.0], [2.4, 1.8], [1.2, 1.8]]
+    description: "The walkline, drawn up the stair from the first riser to the top. Straight segments; each corner becomes a landing or winders."
+rules:
+  derived:
+    total_rise: "if rise_mode = \"storey\" then level.height else rise_value"
+    risers: "ceiling(total_rise / max_riser)"
+    riser: "total_rise / risers"
+    treads: "risers - 1"
+    nseg: "count(walkline) - 1"
+    nc: "nseg - 1"
+    sl:
+      expr: "for i in 1..nseg return sqrt((walkline[i + 1][1] - walkline[i][1]) * (walkline[i + 1][1] - walkline[i][1]) + (walkline[i + 1][2] - walkline[i][2]) * (walkline[i + 1][2] - walkline[i][2]))"
+      note: "Segment lengths."
+    sd:
+      expr: "for i in 1..nseg return [(walkline[i + 1][1] - walkline[i][1]) / sl[i], (walkline[i + 1][2] - walkline[i][2]) / sl[i]]"
+      note: "Segment directions (unit)."
+    sn:
+      expr: "for d in sd return [-d[2], d[1]]"
+      note: "Left normals."
+    cidx: "if nc > 0 then for c in 1..nc return c else []"
+    ccos: "for c in cidx return sd[c][1] * sd[c + 1][1] + sd[c][2] * sd[c + 1][2]"
+    cleft:
+      expr: "for c in cidx return sd[c][1] * sd[c + 1][2] - sd[c][2] * sd[c + 1][1] > 0"
+      note: "The stair turns left at this corner (the inner side is the left)."
+    ce:
+      expr: "for c in cidx return max(left_width, right_width) * sqrt(max(0, (1 - ccos[c]) / (1 + ccos[c])))"
+      note: "How far each flight stops short of the corner point."
+    cbis: "for c in cidx return [(sn[c][1] + sn[c + 1][1]) / (1 + ccos[c]), (sn[c][2] + sn[c + 1][2]) / (1 + ccos[c])]"
+    c_left: "for c in cidx return [(walkline[c + 1][1]) + (left_width * cbis[c][1]), (walkline[c + 1][2]) + (left_width * cbis[c][2])]"
+    c_right: "for c in cidx return [(walkline[c + 1][1]) + (-right_width * cbis[c][1]), (walkline[c + 1][2]) + (-right_width * cbis[c][2])]"
+    c_end_left: "for c in cidx return [(walkline[c + 1][1]) + (-ce[c] * sd[c][1]) + (left_width * sn[c][1]), (walkline[c + 1][2]) + (-ce[c] * sd[c][2]) + (left_width * sn[c][2])]"
+    c_end_right: "for c in cidx return [(walkline[c + 1][1]) + (-ce[c] * sd[c][1]) + (-right_width * sn[c][1]), (walkline[c + 1][2]) + (-ce[c] * sd[c][2]) + (-right_width * sn[c][2])]"
+    c_start_left: "for c in cidx return [(walkline[c + 1][1]) + (ce[c] * (sd[c + 1][1])) + (left_width * (sn[c + 1][1])), (walkline[c + 1][2]) + (ce[c] * (sd[c + 1][2])) + (left_width * (sn[c + 1][2]))]"
+    c_start_right: "for c in cidx return [(walkline[c + 1][1]) + (ce[c] * (sd[c + 1][1])) + (-right_width * (sn[c + 1][1])), (walkline[c + 1][2]) + (ce[c] * (sd[c + 1][2])) + (-right_width * (sn[c + 1][2]))]"
+    c_inner: "for c in cidx return if cleft[c] then c_left[c] else c_right[c]"
+    c_outer: "for c in cidx return if cleft[c] then c_right[c] else c_left[c]"
+    c_end_inner: "for c in cidx return if cleft[c] then c_end_left[c] else c_end_right[c]"
+    c_end_outer: "for c in cidx return if cleft[c] then c_end_right[c] else c_end_left[c]"
+    c_start_inner: "for c in cidx return if cleft[c] then c_start_left[c] else c_start_right[c]"
+    c_start_outer: "for c in cidx return if cleft[c] then c_start_right[c] else c_start_left[c]"
+    cl1: "for c in cidx return sqrt((c_outer[c][1] - c_end_outer[c][1]) * (c_outer[c][1] - c_end_outer[c][1]) + (c_outer[c][2] - c_end_outer[c][2]) * (c_outer[c][2] - c_end_outer[c][2]))"
+    cl2: "for c in cidx return sqrt((c_start_outer[c][1] - c_outer[c][1]) * (c_start_outer[c][1] - c_outer[c][1]) + (c_start_outer[c][2] - c_outer[c][2]) * (c_start_outer[c][2] - c_outer[c][2]))"
+    fe0: "for i in 1..nseg return if i = 1 then 0 else ce[i - 1]"
+    fe1: "for i in 1..nseg return if i = nseg then 0 else ce[i]"
+    fl:
+      expr: "for i in 1..nseg return sl[i] - fe0[i] - fe1[i]"
+      note: "Flight lengths along the walkline, between the corners."
+    cu:
+      expr: "if corners = \"landings\" then 1 else winders"
+      note: "Treads used by each corner (a landing counts as one)."
+    nflight_treads: "treads - nc * cu"
+    fcum: "for i in 1..nseg return sum(for j in 1..i return max(fl[j], 0))"
+    nf:
+      expr: "for i in 1..nseg return round(nflight_treads * fcum[i] / fcum[nseg]) - (if i = 1 then 0 else round(nflight_treads * fcum[i - 1] / fcum[nseg]))"
+      note: "Treads per flight, shared out by flight length."
+    fg:
+      expr: "for i in 1..nseg return if nf[i] > 0 then fl[i] / nf[i] else 0"
+      note: "Going of each flight at the walkline."
+    going:
+      expr: "sum(fl) / max(1, sum(nf))"
+      note: "Mean flight going at the walkline (reported to IFC)."
+    pitch: "atan2(riser, going)"
+    step_rule:
+      expr: "2 * riser + going"
+      note: "Shown for information; checked by a rule set."
+    fbase: "for i in 1..nseg return sum(for j in 1..i return if j < i then nf[j] else 0) + (i - 1) * cu"
+    cbase: "for c in cidx return sum(for j in 1..c return nf[j]) + (c - 1) * cu"
+    flight_treads:
+      expr: "flatten(for i in 1..nseg return if nf[i] < 1 then [] else for t in 1..nf[i] return {n: fbase[i] + t, pts: [{x: (walkline[i][1] + (fe0[i] * sd[i][1])) + ((t - 1) * fg[i] * sd[i][1]) + (left_width * sn[i][1]), y: (walkline[i][2] + (fe0[i] * sd[i][2])) + ((t - 1) * fg[i] * sd[i][2]) + (left_width * sn[i][2])}, {x: (walkline[i][1] + (fe0[i] * sd[i][1])) + ((t - 1) * fg[i] * sd[i][1]) + (-right_width * sn[i][1]), y: (walkline[i][2] + (fe0[i] * sd[i][2])) + ((t - 1) * fg[i] * sd[i][2]) + (-right_width * sn[i][2])}, {x: (walkline[i][1] + (fe0[i] * sd[i][1])) + (t * fg[i] * sd[i][1]) + (-right_width * sn[i][1]), y: (walkline[i][2] + (fe0[i] * sd[i][2])) + (t * fg[i] * sd[i][2]) + (-right_width * sn[i][2])}, {x: (walkline[i][1] + (fe0[i] * sd[i][1])) + (t * fg[i] * sd[i][1]) + (left_width * sn[i][1]), y: (walkline[i][2] + (fe0[i] * sd[i][2])) + (t * fg[i] * sd[i][2]) + (left_width * sn[i][2])}]})"
+      note: "Plan outline and number of every flight tread."
+    corner_treads:
+      expr: "flatten(for c in cidx return if corners = \"landings\" then [{n: cbase[c] + 1, pts: [{x: c_end_left[c][1], y: c_end_left[c][2]}, {x: c_end_right[c][1], y: c_end_right[c][2]}, {x: c_right[c][1], y: c_right[c][2]}, {x: c_start_right[c][1], y: c_start_right[c][2]}, {x: c_start_left[c][1], y: c_start_left[c][2]}, {x: c_left[c][1], y: c_left[c][2]}]}] else for j in 1..winders return {n: cbase[c] + j, pts: flatten([if j = 1 then [{x: c_end_inner[c][1], y: c_end_inner[c][2]}] else [], [{x: (if ((j - 1) * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][1] + (c_outer[c][1] - c_end_outer[c][1]) * ((j - 1) * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][1] + (c_start_outer[c][1] - c_outer[c][1]) * (((j - 1) * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9)), y: (if ((j - 1) * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][2] + (c_outer[c][2] - c_end_outer[c][2]) * ((j - 1) * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][2] + (c_start_outer[c][2] - c_outer[c][2]) * (((j - 1) * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9))}], if ((j - 1) * (cl1[c] + cl2[c]) / winders) < cl1[c] and (j * (cl1[c] + cl2[c]) / winders) > cl1[c] then [{x: c_outer[c][1], y: c_outer[c][2]}] else [], [{x: (if (j * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][1] + (c_outer[c][1] - c_end_outer[c][1]) * (j * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][1] + (c_start_outer[c][1] - c_outer[c][1]) * ((j * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9)), y: (if (j * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][2] + (c_outer[c][2] - c_end_outer[c][2]) * (j * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][2] + (c_start_outer[c][2] - c_outer[c][2]) * ((j * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9))}], if j = winders then [{x: c_start_inner[c][1], y: c_start_inner[c][2]}] else [], [{x: c_inner[c][1], y: c_inner[c][2]}]])})"
+      note: "Landings (one hexagon) or winders, split evenly along the outer edge and fanned from the inner corner."
+    all_treads:
+      expr: "for s in concatenate(flight_treads, corner_treads) return {n: s.n, pts: for k in 1..count(s.pts) return if abs(s.pts[k].x - s.pts[modulo(k - 2 + count(s.pts), count(s.pts)) + 1].x) + abs(s.pts[k].y - s.pts[modulo(k - 2 + count(s.pts), count(s.pts)) + 1].y) > 1e-6 then [s.pts[k].x, s.pts[k].y] else null}"
+      note: "Every tread as a list of points; repeated points come out as null and are dropped below."
+    tread_list:
+      expr: "for s in all_treads return {n: s.n, pts: flatten(for p in s.pts return if p = null then [] else [{x: p[1], y: p[2]}])}"
+      note: "Null points removed."
+    treads_xy: "for s in tread_list return {n: s.n, z: s.n * riser, poly: for p in s.pts return [p.x, p.y]}"
+    j_cut: "floor(view.cut_height / riser)"
+    start_pt: "walkline[1]"
+    end_pt: "walkline[count(walkline)]"
+    end_dir: "sd[nseg]"
+    first_line: "[[walkline[1][1] + (left_width * sn[1][1]), walkline[1][2] + (left_width * sn[1][2])], [walkline[1][1] + (-right_width * sn[1][1]), walkline[1][2] + (-right_width * sn[1][2])]]"
+    top_line: "[[end_pt[1] + (left_width * sn[nseg][1]), end_pt[2] + (left_width * sn[nseg][2])], [end_pt[1] + (-right_width * sn[nseg][1]), end_pt[2] + (-right_width * sn[nseg][2])]]"
+    walk_points: "concatenate([walkline[1]], for i in 2..count(walkline) return walkline[i])"
+  checks:
+    min_risers:
+      expr: "risers >= 2"
+      severity: "error"
+      message: "A stair needs at least two risers."
+    walkline_points:
+      expr: "count(walkline) >= 2"
+      severity: "error"
+      message: "The walkline needs at least two points."
+    corner_angles:
+      expr: "nc = 0 or min(ccos) > -0.5"
+      severity: "error"
+      message: "A walkline corner turns by more than 120°: split a U-turn into two corners."
+    flights_fit:
+      expr: "min(fl) > 0"
+      severity: "error"
+      message: "A walkline segment is too short for the corners at its ends."
+    flight_treads:
+      expr: "min(nf) >= 1"
+      severity: "error"
+      message: "A flight gets no tread: the walkline is too long for the number of risers, or the corners use too many treads."
+    riser_range:
+      expr: "rules.stairs = null or (riser >= rules.stairs.riser_min and riser <= rules.stairs.riser_max)"
+      severity: "warning"
+      message: "Riser is outside the active rule set."
+    going_range:
+      expr: "rules.stairs = null or (min(for g in fg return g) >= rules.stairs.going_min and max(for g in fg return g) <= rules.stairs.going_max)"
+      severity: "warning"
+      message: "A flight going is outside the active rule set."
+    step_rule_range:
+      expr: "rules.stairs = null or rules.stairs.rule_min = null or (step_rule >= rules.stairs.rule_min and step_rule <= rules.stairs.rule_max)"
+      severity: "warning"
+      message: "2R + G is outside the active rule set."
+    width_min:
+      expr: "rules.stairs = null or rules.stairs.width_min = null or left_width + right_width >= rules.stairs.width_min"
+      severity: "warning"
+      message: "Width is below the active rule set."
+    pitch_range:
+      expr: "rules.stairs = null or rules.stairs.pitch_max = null or pitch <= rules.stairs.pitch_max"
+      severity: "warning"
+      message: "The pitch is steeper than the active rule set allows."
+  rulesets:
+    stairs:
+      default: null
+      note: "Off by default. Shared variants (library rulesets/stairs) give UK and US limits; there is no EN/ISO stair geometry norm."
+      fields:
+        riser_min: "length"
+        riser_max: "length"
+        going_min: "length"
+        going_max: "length"
+        rule_min: "length"
+        rule_max: "length"
+        width_min: "length"
+        pitch_max: "number"
+recipe:
+  steps:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "treads_xy"
+      as: "s"
+      do: "extrude(polygon(s.poly), max(0, s.z - riser - waist_thickness), s.z)"
+    note: "Each tread is a solid block from one riser plus the waist below its top."
+  treads_below:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "treads_xy"
+      as: "s"
+      do: "if s.n <= j_cut then polygon(s.poly) else null"
+  treads_above:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "treads_xy"
+      as: "s"
+      do: "if s.n > j_cut then polygon(s.poly) else null"
+  start_line:
+    op: "line"
+    plane: "xy"
+    args:
+      start: "first_line[1]"
+      end: "first_line[2]"
+  walk_line:
+    op: "polyline"
+    plane: "xy"
+    args:
+      points: "walkline"
+  arrow:
+    op: "polyline"
+    plane: "xy"
+    args:
+      points: "[[end_pt[1] + (-0.15 * end_dir[1]) + (0.075 * sn[nseg][1]), end_pt[2] + (-0.15 * end_dir[2]) + (0.075 * sn[nseg][2])], [end_pt[1], end_pt[2]], [end_pt[1] + (-0.15 * end_dir[1]) + (-0.075 * sn[nseg][1]), end_pt[2] + (-0.15 * end_dir[2]) + (-0.075 * sn[nseg][2])]]"
+  label:
+    op: "text"
+    plane: "xy"
+    args:
+      at: "[walkline[1][1] + (0.15 * sd[1][1]) + (-0.12 * sn[1][1]), walkline[1][2] + (0.15 * sd[1][2]) + (-0.12 * sn[1][2])]"
+      value: "arrow_label"
+      height: "0.0025"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "steps"
+        material: "material"
+        part: "Steps"
+  model.medium:
+    context: "model"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "steps"
+        material: "material"
+        part: "Steps"
+  model.high:
+    context: "model"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "steps"
+        material: "material"
+        part: "Steps"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "treads_below"
+        class: "projected"
+      - geometry: "treads_above"
+        class: "overhead"
+      - geometry: "walk_line"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "arrow"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "label"
+        class: "annotation"
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "treads_below"
+        class: "projected"
+      - geometry: "treads_above"
+        class: "overhead"
+      - geometry: "walk_line"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "arrow"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "label"
+        class: "annotation"
+    note: "Treads below the cut drawn, above it dashed; break line at the cut; walking line with arrow and label."
+  plan.high:
+    context: "plan"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "treads_below"
+        class: "projected"
+      - geometry: "treads_above"
+        class: "overhead"
+      - geometry: "walk_line"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "arrow"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "label"
+        class: "annotation"
+host:
+  is_host: false
+  level: "Base on a storey, top at the next storey (or a set rise)."
+  slab_opening:
+    note: "The application cuts the upper slab over the run plus headroom; the stairs rule set headroom value is the target."
+handles:
+  - parameter: "left_width"
+    view:
+      - "plan"
+    at: "[walkline[1][1] + (left_width * sn[1][1]), walkline[1][2] + (left_width * sn[1][2])]"
+    axis: "y"
+materials:
+  - "reinforced_concrete"
+  - "timber"
+  - "steel"
+ifc:
+  class: "IfcStair"
+  predefinedType: "if nc = 0 then \"STRAIGHT_RUN_STAIR\" else if corners = \"winders\" then (if nc = 1 then \"QUARTER_WINDING_STAIR\" else if nc = 2 then \"TWO_QUARTER_WINDING_STAIR\" else if nc = 3 then \"THREE_QUARTER_WINDING_STAIR\" else \"CURVED_RUN_STAIR\") else (if nc = 1 then \"QUARTER_TURN_STAIR\" else if nc = 2 then \"TWO_QUARTER_TURN_STAIR\" else if nc = 3 then \"THREE_QUARTER_TURN_STAIR\" else \"CURVED_RUN_STAIR\")"
+  property_sets: "all parameters of type property_set, with the values set by `value` formulas"
+  properties:
+    Pset_StairCommon.NumberOfRiser: "risers"
+    Pset_StairCommon.NumberOfTreads: "treads"
+    Pset_StairCommon.RiserHeight: "riser"
+    Pset_StairCommon.TreadLength: "going"
+    Pset_StairCommon.NosingLength: "nosing"
+    Pset_StairCommon.WalkingLineOffset: "min(left_width, right_width)"
+  quantities: {}
+  parameter_pset: "OPO_Parameters"
+  decomposition: "IfcStair aggregating one IfcStairFlight per flight and per run of winders, and each landing as IfcSlab LANDING."
