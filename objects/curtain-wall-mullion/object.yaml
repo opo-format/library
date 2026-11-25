@@ -66,6 +66,15 @@ parameters:
     limits:
       min: 0.006
       max: 0.08
+  glass_offset:
+    type: "length"
+    default: 0.0
+    label: "Gap from the glass to the mullion face"
+    group: "Profile"
+    limits:
+      min: 0.0
+      max: 0.05
+    description: "Gasket or pressure space between the back of the glass and the front of the member."
   trim_start:
     type: "length"
     default: 0.0
@@ -129,14 +138,14 @@ rules:
       expr: "profile_width"
       note: "Reported to the curtain wall (frame interface)."
     depth:
-      expr: "profile_depth + glass_thickness / 2 + (if joint = \"captured\" then cap_depth else 0)"
+      expr: "profile_depth + glass_offset + glass_thickness / 2 + (if joint = \"captured\" then cap_depth else 0)"
       note: "Reported: overall depth."
     offset:
       expr: "if joint = \"captured\" then glass_thickness / 2 + cap_depth else glass_thickness / 2"
       note: "Reported: from the glass plane to the front face."
     vertical: "abs(dir[3]) > 0.99"
     cut_pts:
-      expr: "for c in [[-1, -profile_depth - glass_thickness / 2], [1, -profile_depth - glass_thickness / 2], [1, offset], [-1, offset]] return [path[1][1] + side[1] * c[1] * profile_width / 2 + normal[1] * c[2], path[1][2] + side[2] * c[1] * profile_width / 2 + normal[2] * c[2]]"
+      expr: "for c in [[-1, -profile_depth - glass_offset - glass_thickness / 2], [1, -profile_depth - glass_offset - glass_thickness / 2], [1, offset], [-1, offset]] return [path[1][1] + side[1] * c[1] * profile_width / 2 + normal[1] * c[2], path[1][2] + side[2] * c[1] * profile_width / 2 + normal[2] * c[2]]"
       note: "Plan cut through a vertical member."
   checks:
     length_positive:
@@ -148,8 +157,8 @@ recipe:
     op: "rectangle"
     plane: "profile"
     args:
-      min: "[-profile_depth - glass_thickness / 2, -profile_width / 2]"
-      max: "[-glass_thickness / 2, profile_width / 2]"
+      min: "[-profile_depth - glass_offset - glass_thickness / 2, -profile_width / 2]"
+      max: "[-glass_offset - glass_thickness / 2, profile_width / 2]"
   cap_profile:
     op: "rectangle"
     plane: "profile"
