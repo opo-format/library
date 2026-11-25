@@ -112,6 +112,10 @@ parameters:
       - "side_right"
       - "tilt_turn_left"
       - "tilt_turn_right"
+      - "tilt"
+      - "top_hung"
+      - "sliding_left"
+      - "sliding_right"
     visible: "outline_mode = \"rectangle\" and panels >= 1"
     option_labels:
       fixed: "Fixed"
@@ -119,6 +123,10 @@ parameters:
       side_right: "Side-hung, hinges right"
       tilt_turn_left: "Tilt-turn, hinges left"
       tilt_turn_right: "Tilt-turn, hinges right"
+      tilt: "Bottom-hung, tilts in (basculante)"
+      top_hung: "Top-hung, projects out"
+      sliding_left: "Sliding, opens to the left"
+      sliding_right: "Sliding, opens to the right"
   panel_2_operation:
     type: "choice"
     default: "tilt_turn_right"
@@ -130,6 +138,10 @@ parameters:
       - "side_right"
       - "tilt_turn_left"
       - "tilt_turn_right"
+      - "tilt"
+      - "top_hung"
+      - "sliding_left"
+      - "sliding_right"
     visible: "outline_mode = \"rectangle\" and panels >= 2"
     option_labels:
       fixed: "Fixed"
@@ -137,6 +149,10 @@ parameters:
       side_right: "Side-hung, hinges right"
       tilt_turn_left: "Tilt-turn, hinges left"
       tilt_turn_right: "Tilt-turn, hinges right"
+      tilt: "Bottom-hung, tilts in (basculante)"
+      top_hung: "Top-hung, projects out"
+      sliding_left: "Sliding, opens to the left"
+      sliding_right: "Sliding, opens to the right"
   panel_3_operation:
     type: "choice"
     default: "fixed"
@@ -148,6 +164,10 @@ parameters:
       - "side_right"
       - "tilt_turn_left"
       - "tilt_turn_right"
+      - "tilt"
+      - "top_hung"
+      - "sliding_left"
+      - "sliding_right"
     visible: "outline_mode = \"rectangle\" and panels >= 3"
     option_labels:
       fixed: "Fixed"
@@ -155,6 +175,10 @@ parameters:
       side_right: "Side-hung, hinges right"
       tilt_turn_left: "Tilt-turn, hinges left"
       tilt_turn_right: "Tilt-turn, hinges right"
+      tilt: "Bottom-hung, tilts in (basculante)"
+      top_hung: "Top-hung, projects out"
+      sliding_left: "Sliding, opens to the left"
+      sliding_right: "Sliding, opens to the right"
   transom:
     type: "boolean"
     default: false
@@ -285,6 +309,37 @@ parameters:
     label: "Frame"
     group: "Materials"
     options: "materials"
+  lintel:
+    type: "boolean"
+    default: false
+    label: "Lintel over the opening"
+    group: "Lintel"
+    description: "A nested IfcBeam (LINTEL) the width of the wall, bearing on each side of the opening."
+  lintel_height:
+    type: "length"
+    default: 0.2
+    label: "Lintel height"
+    group: "Lintel"
+    visible: "lintel"
+    limits:
+      min: 0.05
+      max: 1.0
+  lintel_bearing:
+    type: "length"
+    default: 0.15
+    label: "Bearing on each side"
+    group: "Lintel"
+    visible: "lintel"
+    limits:
+      min: 0.05
+      max: 0.5
+  lintel_material:
+    type: "material"
+    default: "reinforced_concrete"
+    label: "Lintel material"
+    group: "Lintel"
+    options: "materials"
+    visible: "lintel"
   Pset_DoorWindowGlazingType:
     type: "property_set"
     default: {}
@@ -533,7 +588,15 @@ rules:
     sy:
       expr: "if opening_direction = \"in\" then fy - fd2 + sash_depth / 2 else fy + fd2 - sash_depth / 2"
       note: "Sash centre, on the opening side of the frame."
-    hinge_left: "for o in ops return o = \"side_left\" or o = \"tilt_turn_left\""
+    hinge_left:
+      expr: "for o in ops return o = \"side_left\" or o = \"tilt_turn_left\" or o = \"sliding_left\""
+      note: "Side-hung with hinges on the left (or sliding to the left): the handle is on the right."
+    side_hung: "for o in ops return o = \"side_left\" or o = \"side_right\" or o = \"tilt_turn_left\" or o = \"tilt_turn_right\""
+    sliding: "for o in ops return o = \"sliding_left\" or o = \"sliding_right\""
+    sy_p:
+      expr: "for i in 1..n return if sliding[i] then fy + (if modulo(i, 2) = 1 then -1 else 1) * sash_depth / 2 else sy"
+      note: "Sash centre of each panel; sliding sashes run on two tracks."
+    zm: "(z0 + frame_width + zi1) / 2"
     opens: "for o in ops return o != \"fixed\""
     sash_inner_w: "pw - 2 * sash_width"
     sash_inner_h: "zi1 - (z0 + frame_width) - 2 * sash_width"
@@ -640,14 +703,14 @@ recipe:
     args:
       items: "for i in 1..n return i"
       as: "i"
-      do: "if opens[i] then union([box([px[i], sy - sash_depth / 2, z0 + frame_width], [px[i] + sash_width, sy + sash_depth / 2, zi1]), box([px[i] + pw - sash_width, sy - sash_depth / 2, z0 + frame_width], [px[i] + pw, sy + sash_depth / 2, zi1]), box([px[i] + sash_width, sy - sash_depth / 2, zi1 - sash_width], [px[i] + pw - sash_width, sy + sash_depth / 2, zi1]), box([px[i] + sash_width, sy - sash_depth / 2, z0 + frame_width], [px[i] + pw - sash_width, sy + sash_depth / 2, z0 + frame_width + sash_width])]) else null"
+      do: "if opens[i] then union([box([px[i], sy_p[i] - sash_depth / 2, z0 + frame_width], [px[i] + sash_width, sy_p[i] + sash_depth / 2, zi1]), box([px[i] + pw - sash_width, sy_p[i] - sash_depth / 2, z0 + frame_width], [px[i] + pw, sy_p[i] + sash_depth / 2, zi1]), box([px[i] + sash_width, sy_p[i] - sash_depth / 2, zi1 - sash_width], [px[i] + pw - sash_width, sy_p[i] + sash_depth / 2, zi1]), box([px[i] + sash_width, sy_p[i] - sash_depth / 2, z0 + frame_width], [px[i] + pw - sash_width, sy_p[i] + sash_depth / 2, z0 + frame_width + sash_width])]) else null"
   panes:
     op: "for_each"
     when: "rect"
     args:
       items: "for i in 1..n return i"
       as: "i"
-      do: "if opens[i] then box([px[i] + sash_width, sy - glass_thickness / 2, z0 + frame_width + sash_width], [px[i] + pw - sash_width, sy + glass_thickness / 2, zi1 - sash_width]) else box([px[i], fy - glass_thickness / 2, z0 + frame_width], [px[i] + pw, fy + glass_thickness / 2, zi1])"
+      do: "if opens[i] then box([px[i] + sash_width, sy_p[i] - glass_thickness / 2, z0 + frame_width + sash_width], [px[i] + pw - sash_width, sy_p[i] + glass_thickness / 2, zi1 - sash_width]) else box([px[i], fy - glass_thickness / 2, z0 + frame_width], [px[i] + pw, fy + glass_thickness / 2, zi1])"
   bars:
     op: "for_each"
     when: "rect and (bar_rows > 0 or bar_columns > 0)"
@@ -662,7 +725,7 @@ recipe:
     args:
       items: "for i in 1..n return i"
       as: "i"
-      do: "if opens[i] then box([(if hinge_left[i] then px[i] + pw - sash_width / 2 else px[i] + sash_width / 2) - 0.015, (if opening_direction = \"in\" then sy - sash_depth / 2 - 0.05 else sy + sash_depth / 2), (if handle_height > 0 then z0 + frame_width + handle_height else (z0 + frame_width + zi1) / 2) - 0.07], [(if hinge_left[i] then px[i] + pw - sash_width / 2 else px[i] + sash_width / 2) + 0.015, (if opening_direction = \"in\" then sy - sash_depth / 2 else sy + sash_depth / 2 + 0.05), (if handle_height > 0 then z0 + frame_width + handle_height else (z0 + frame_width + zi1) / 2) + 0.07]) else null"
+      do: "if opens[i] then box([(if not(side_hung[i] or sliding[i]) then px[i] + pw / 2 else if hinge_left[i] then px[i] + pw - sash_width / 2 else px[i] + sash_width / 2) - 0.015, (if opening_direction = \"in\" then sy_p[i] - sash_depth / 2 - 0.05 else sy_p[i] + sash_depth / 2), (if ops[i] = \"tilt\" then zi1 - sash_width / 2 else if ops[i] = \"top_hung\" then z0 + frame_width + sash_width / 2 else if handle_height > 0 then z0 + frame_width + handle_height else zm) - 0.07], [(if not(side_hung[i] or sliding[i]) then px[i] + pw / 2 else if hinge_left[i] then px[i] + pw - sash_width / 2 else px[i] + sash_width / 2) + 0.015, (if opening_direction = \"in\" then sy_p[i] - sash_depth / 2 else sy_p[i] + sash_depth / 2 + 0.05), (if ops[i] = \"tilt\" then zi1 - sash_width / 2 else if ops[i] = \"top_hung\" then z0 + frame_width + sash_width / 2 else if handle_height > 0 then z0 + frame_width + handle_height else zm) + 0.07]) else null"
   frame_ring_2d:
     op: "band"
     plane: "xz"
@@ -738,7 +801,33 @@ recipe:
     args:
       items: "for i in 1..n return i"
       as: "i"
-      do: "if opens[i] then union([if hinge_left[i] then polyline([[px[i] + pw, z0 + frame_width], [px[i], (z0 + frame_width + zi1) / 2], [px[i] + pw, zi1]]) else polyline([[px[i], z0 + frame_width], [px[i] + pw, (z0 + frame_width + zi1) / 2], [px[i], zi1]]), if ops[i] = \"tilt_turn_left\" or ops[i] = \"tilt_turn_right\" then polyline([[px[i], zi1], [px[i] + pw / 2, z0 + frame_width], [px[i] + pw, zi1]]) else null]) else null"
+      do: "if not(opens[i]) then null else union([if side_hung[i] and hinge_left[i] then polyline([[px[i], z0 + frame_width], [px[i] + pw, zm], [px[i], zi1]]) else null, if side_hung[i] and not(hinge_left[i]) then polyline([[px[i] + pw, z0 + frame_width], [px[i], zm], [px[i] + pw, zi1]]) else null, if ops[i] = \"tilt\" or ops[i] = \"tilt_turn_left\" or ops[i] = \"tilt_turn_right\" then polyline([[px[i], z0 + frame_width], [px[i] + pw / 2, zi1], [px[i] + pw, z0 + frame_width]]) else null, if ops[i] = \"top_hung\" then polyline([[px[i], zi1], [px[i] + pw / 2, z0 + frame_width], [px[i] + pw, zi1]]) else null, if sliding[i] then union([line([px[i] + pw * 0.2, zm], [px[i] + pw * 0.8, zm]), if ops[i] = \"sliding_left\" then polyline([[px[i] + pw * 0.2 + 0.08, zm + 0.05], [px[i] + pw * 0.2, zm], [px[i] + pw * 0.2 + 0.08, zm - 0.05]]) else polyline([[px[i] + pw * 0.8 - 0.08, zm + 0.05], [px[i] + pw * 0.8, zm], [px[i] + pw * 0.8 - 0.08, zm - 0.05]])]) else null])"
+    note: "Dashed in drawings (role opening). Lines meet on the opening side; tilt draws the bottom hinge; sliding draws an arrow."
+  plan_swings:
+    op: "for_each"
+    plane: "xy"
+    when: "rect"
+    args:
+      items: "for i in 1..n return i"
+      as: "i"
+      do: "if not(side_hung[i]) then null else union([line([if hinge_left[i] then px[i] else px[i] + pw, sy_p[i]], [if hinge_left[i] then px[i] else px[i] + pw, sy_p[i] + (if opening_direction = \"in\" then -pw else pw)]), polyline(for a in 0..9 return [(if hinge_left[i] then px[i] + pw * cos(a * 10) else px[i] + pw - pw * cos(a * 10)), sy_p[i] + (if opening_direction = \"in\" then -1 else 1) * pw * sin(a * 10)])])"
+    note: "The open sash and its swing, dashed in drawings (role opening)."
+  plan_slides:
+    op: "for_each"
+    plane: "xy"
+    when: "rect"
+    args:
+      items: "for i in 1..n return i"
+      as: "i"
+      do: "if not(sliding[i]) then null else union([line([px[i] + pw * 0.2, sy_p[i] - 0.06], [px[i] + pw * 0.8, sy_p[i] - 0.06]), if ops[i] = \"sliding_left\" then polyline([[px[i] + pw * 0.2 + 0.06, sy_p[i] - 0.03], [px[i] + pw * 0.2, sy_p[i] - 0.06], [px[i] + pw * 0.2 + 0.06, sy_p[i] - 0.09]]) else polyline([[px[i] + pw * 0.8 - 0.06, sy_p[i] - 0.03], [px[i] + pw * 0.8, sy_p[i] - 0.06], [px[i] + pw * 0.8 - 0.06, sy_p[i] - 0.09]])])"
+  lintel_obj:
+    op: "instance"
+    when: "lintel"
+    args:
+      object: "\"opo-format.org/library/templates/IfcBeam\""
+      values: "{predefined_type: \"LINTEL\", ow: host.thickness, depth: lintel_height, justification_v: \"bottom\", material: lintel_material}"
+      inputs: "{path: [[x0 - fitting_gap - lintel_bearing, (host.y_min + host.y_max) / 2, z1 + fitting_gap], [x1 + fitting_gap + lintel_bearing, (host.y_min + host.y_max) / 2, z1 + fitting_gap]]}"
+    note: "Optional: the lintel belongs to the wall, but placing it with the window keeps it sized to the opening."
 representations:
   model.low:
     context: "model"
@@ -803,6 +892,8 @@ representations:
       - geometry: "sill_outside"
         material: "\"aluminium\""
         part: "Sill"
+      - geometry: "lintel_obj"
+        part: "Lintel"
   model.high:
     context: "model"
     lod: "high"
@@ -848,6 +939,8 @@ representations:
       - geometry: "sill_outside"
         material: "\"aluminium\""
         part: "Sill"
+      - geometry: "lintel_obj"
+        part: "Lintel"
       - geometry: "handles"
         material: "\"aluminium\""
         part: "Hardware"
@@ -869,6 +962,12 @@ representations:
         class: "cut"
       - geometry: "plan_sills"
         class: "projected"
+      - geometry: "plan_swings"
+        class: "annotation"
+        role: "opening"
+      - geometry: "plan_slides"
+        class: "annotation"
+        role: "opening"
   plan.medium:
     context: "plan"
     lod: "medium"
@@ -888,6 +987,12 @@ representations:
         class: "cut"
       - geometry: "plan_sills"
         class: "projected"
+      - geometry: "plan_swings"
+        class: "annotation"
+        role: "opening"
+      - geometry: "plan_slides"
+        class: "annotation"
+        role: "opening"
     note: "Wall openings below the cut show as a gap in the host's cut; openings above the cut are drawn dashed with a cross. Slab openings: outline with a cross."
   plan.high:
     context: "plan"
@@ -907,6 +1012,12 @@ representations:
         class: "cut"
       - geometry: "plan_sills"
         class: "projected"
+      - geometry: "plan_swings"
+        class: "annotation"
+        role: "opening"
+      - geometry: "plan_slides"
+        class: "annotation"
+        role: "opening"
   elevation:
     context: "elevation"
     lod: "all"
@@ -915,10 +1026,9 @@ representations:
       context: "Profile"
       targetView: "ELEVATION_VIEW"
     items:
-      - geometry: "elev_outline"
-        class: "projected"
       - geometry: "elev_symbols"
         class: "annotation"
+        role: "opening"
 host:
   hosts:
     - "IfcWall"
