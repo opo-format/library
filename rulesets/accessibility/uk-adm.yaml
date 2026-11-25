@@ -8,5 +8,5 @@ values:
   ramp_gradient_max:
     value: "1 / 20"
     source: "uk-approved-document-m"
-    status: "to_verify"
-    note: "Ramp gradient for a going up to 10 m (500 mm rise); steeper gradients for shorter goings per the AD M table."
+    status: "norm"
+    note: "Approved Document M Volume 2 (2015 edition), Diagram 3 (relationship of ramp gradient to the going of a flight): 1:20 for a going of 10 m (500 mm rise); 1:15 at 5 m and 1:12 at 2 m. Checked against published summaries of AD M (Designing Buildings Wiki and others)."
