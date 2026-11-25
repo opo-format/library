@@ -25,16 +25,16 @@ references:
     role: "rules"
     used: "Stair limits through the shared rule sets."
 sheet:
-  scope: "One straight flight between two levels; optional landings part-way (makes TWO_STRAIGHT_RUN_STAIR). Treads, risers, stringers or concrete waist, nosing, nested railing(s) and handrail(s)."
+  based_on: "Bonsai stair generator (reference: types CONCRETE / WOOD-STEEL / GENERIC, tread and riser parameters) · IFC `Pset_StairFlightCommon` · AD K, IRC/IBC (via `stairs`; no EN/ISO stair norm exists)."
+  ifc: "IfcStair · STRAIGHT_RUN_STAIR · 1 IfcStairFlight"
+  inputs: "Bottom and top level (or `total_rise`) · host slab for the opening · optional `start_point` + direction (placement)."
+  lod: "3D: low solid wedge per flight · medium treads, risers, stringers/waist, landing, simple railing · high + nosing profile, railing details. Plan: low outline + walkline + arrow · medium treads, cut line, overhead dashed, walkline, UP/DN · high + nosings, handrails. Section: cut from 3D (all LODs)."
   not_in_scope:
     - "structural design of stringers"
-  ifc: "IfcStair · STRAIGHT_RUN_STAIR · 1 IfcStairFlight"
-  based_on: "Bonsai stair generator (reference: types CONCRETE / WOOD-STEEL / GENERIC, tread and riser parameters) · IFC `Pset_StairFlightCommon` · AD K, IRC/IBC (via `stairs`; no EN/ISO stair norm exists)."
-  inputs: "Bottom and top level (or `total_rise`) · host slab for the opening · optional `start_point` + direction (placement)."
   parameters: "`total_rise` · `max_riser` (from rule set; default 0.18 m / 7½\") · `target_step` (2R+G; default 0.63 m / 25\") · `going` (derived, overridable) · `width` (default 1.0 m / 36\") · `nosing` (default 0.03 m / 1\") · `riser_type` closed | open · `structure` timber_stringers | steel_stringers | concrete · `tread_thickness`, `stringer_width` / `waist_thickness` · `landing_after` (riser number or none) + `landing_depth` · `railing_left/right` (none | guard | handrail; nested C-07 / C-08) · `first_riser_offset`, `last_tread_flush` (bool)."
   rules: "Riser within rule set min/max · going within min/max · step rule · pitch ≤ max · width ≥ min · headroom ≥ min (checked against the slab opening edge: opening length derived so headroom is met) · uniform risers (computed) · landing depth ≥ min (from rule set) · guard required where fall height > threshold."
+  scope: "One straight flight between two levels; optional landings part-way (makes TWO_STRAIGHT_RUN_STAIR). Treads, risers, stringers or concrete waist, nosing, nested railing(s) and handrail(s)."
   sizes: "None (rise-driven). Presets per market: EU generic 175/280 mm, 1.0 m wide (not a norm); UK private 200/250 mm, 0.9 m; US residential 7½\"/10½\", 36\"."
-  lod: "3D: low solid wedge per flight · medium treads, risers, stringers/waist, landing, simple railing · high + nosing profile, railing details. Plan: low outline + walkline + arrow · medium treads, cut line, overhead dashed, walkline, UP/DN · high + nosings, handrails. Section: cut from 3D (all LODs)."
 parameters:
   rise_mode:
     type: "choice"
@@ -68,11 +68,12 @@ parameters:
   going:
     type: "length"
     default: 0.28
-    label: "Going"
+    label: "Going (when set)"
     group: "Steps"
     limits:
       min: 0.1
       max: 0.6
+    visible: "going_mode = \"fixed\""
   width:
     type: "length"
     default: 1.0
@@ -81,6 +82,36 @@ parameters:
     limits:
       min: 0.4
       max: 10
+  going_mode:
+    type: "choice"
+    default: "step_rule"
+    label: "Going"
+    group: "Geometry"
+    options:
+      - "step_rule"
+      - "fixed"
+    option_labels:
+      step_rule: "From the step rule (2R + G = target)"
+      fixed: "Set the going"
+  target_step:
+    type: "length"
+    default: 0.63
+    label: "Target step (2R + G)"
+    group: "Geometry"
+    visible: "going_mode = \"step_rule\""
+    limits:
+      min: 0.55
+      max: 0.7
+    description: "The classic step formula value; not a norm value. The stairs rule sets check the result."
+  first_riser_offset:
+    type: "length"
+    default: 0.0
+    label: "First riser offset"
+    group: "Placement"
+    limits:
+      min: -2.0
+      max: 2.0
+    description: "Distance from the placement point to the first riser, along the run."
   nosing:
     type: "length"
     default: 0.03
@@ -375,7 +406,7 @@ parameters:
         value: "riser"
       - name: "TreadLength"
         measure: "IfcPositiveLengthMeasure"
-        value: "going"
+        value: "tread_going"
       - name: "NosingLength"
         measure: "IfcLengthMeasure"
       - name: "WalkingLineOffset"
@@ -411,27 +442,30 @@ rules:
     risers: "ceiling(total_rise / max_riser)"
     riser: "total_rise / risers"
     treads: "risers - 1"
+    tread_going:
+      expr: "if going_mode = \"step_rule\" then target_step - 2 * riser else going"
+      note: "Going of every tread."
     k:
       expr: "if landing then min(max(landing_after, 2), risers - 2) else risers"
       note: "Risers below the landing (all risers without one)."
     tread_x:
-      expr: "for j in 1..treads return (if landing and j > k then (k - 1) * going + landing_depth + (j - k - 1) * going else (j - 1) * going)"
+      expr: "for j in 1..treads return (if landing and j > k then (k - 1) * tread_going + landing_depth + (j - k - 1) * tread_going else (j - 1) * tread_going)"
       note: "Front (nosing line) of each tread; the landing takes the place of tread k."
-    tread_d: "for j in 1..treads return (if landing and j = k then landing_depth else going)"
+    tread_d: "for j in 1..treads return (if landing and j = k then landing_depth else tread_going)"
     run: "tread_x[treads] + tread_d[treads]"
-    pitch: "atan2(riser, going)"
+    pitch: "atan2(riser, tread_going)"
     step_rule:
-      expr: "2 * riser + going"
+      expr: "2 * riser + tread_going"
       note: "Shown for information (2R + G); checked only by a rule set."
     waist_v:
       expr: "waist_thickness / cos(pitch)"
       note: "Waist thickness measured vertically."
     z_land: "k * riser"
     land_end: "if landing then tread_x[k] + landing_depth else 0"
-    under_x0: "max(0, (waist_v - riser) * going / riser)"
+    under_x0: "max(0, (waist_v - riser) * tread_going / riser)"
     under_z0: "max(0, riser - waist_v)"
-    xa: "max(tread_x[min(k, treads)], land_end + (waist_v - waist_thickness - riser) * going / riser)"
-    xb: "min(land_end, ((k - 1) * riser - waist_thickness + waist_v) * going / riser)"
+    xa: "max(tread_x[min(k, treads)], land_end + (waist_v - waist_thickness - riser) * tread_going / riser)"
+    xb: "min(land_end, ((k - 1) * riser - waist_thickness + waist_v) * tread_going / riser)"
     steps:
       expr: "for i in 1..2 * treads return if modulo(i, 2) = 1 then [tread_x[(i + 1) / 2], (i + 1) / 2 * riser] else [tread_x[i / 2] + tread_d[i / 2], i / 2 * riser]"
       note: "Front and back of each tread and of the landing."
@@ -457,7 +491,7 @@ rules:
       severity: "warning"
       message: "Riser is outside the active rule set."
     going_range:
-      expr: "rules.stairs = null or (going >= rules.stairs.going_min and going <= rules.stairs.going_max)"
+      expr: "rules.stairs = null or (tread_going >= rules.stairs.going_min and tread_going <= rules.stairs.going_max)"
       severity: "warning"
       message: "Going is outside the active rule set."
     step_rule_range:
@@ -477,9 +511,9 @@ rules:
       severity: "warning"
       message: "The pitch is steeper than the active rule set allows."
     nosing_fits:
-      expr: "nosing < going / 2"
+      expr: "nosing < tread_going / 2"
       severity: "error"
-      message: "The nosing is too deep for the going."
+      message: "The nosing is too deep for the tread_going."
     handrail_range:
       expr: "rules.handrails = null or (handrail_height >= rules.handrails.height_min and handrail_height <= rules.handrails.height_max)"
       severity: "warning"
@@ -557,7 +591,7 @@ recipe:
     op: "polyline"
     plane: "xy"
     args:
-      points: "[[going / 2, 0], [run, 0]]"
+      points: "[[tread_going / 2, 0], [run, 0]]"
   arrow:
     op: "polyline"
     plane: "xy"
@@ -567,7 +601,7 @@ recipe:
     op: "text"
     plane: "xy"
     args:
-      at: "[going / 2, -0.12]"
+      at: "[tread_going / 2, -0.12]"
       value: "arrow_label"
       height: "0.0025"
   tread_boards:
@@ -635,6 +669,118 @@ recipe:
     plane: "xy"
     args:
       items: "[if railing_left then line([0, hw - 0.05], [run, hw - 0.05]) else null, if railing_right then line([0, -hw + 0.05], [run, -hw + 0.05]) else null]"
+  arrow_placed:
+    op: "move"
+    plane: "xy"
+    when: "arrow != null"
+    args:
+      geometry: "arrow"
+      by: "[first_riser_offset, 0]"
+  body_placed:
+    op: "move"
+    when: "body != null"
+    args:
+      geometry: "body"
+      by: "[first_riser_offset, 0, 0]"
+  cut_line_placed:
+    op: "move"
+    plane: "xy"
+    when: "cut_line != null"
+    args:
+      geometry: "cut_line"
+      by: "[first_riser_offset, 0]"
+  label_placed:
+    op: "move"
+    plane: "xy"
+    when: "label != null"
+    args:
+      geometry: "label"
+      by: "[first_riser_offset, 0]"
+  landing_slab_placed:
+    op: "move"
+    when: "landing_slab != null"
+    args:
+      geometry: "landing_slab"
+      by: "[first_riser_offset, 0, 0]"
+  nosings_placed:
+    op: "move"
+    plane: "xy"
+    when: "nosings != null"
+    args:
+      geometry: "nosings"
+      by: "[first_riser_offset, 0]"
+  outline_above_placed:
+    op: "move"
+    plane: "xy"
+    when: "outline_above != null"
+    args:
+      geometry: "outline_above"
+      by: "[first_riser_offset, 0]"
+  outline_below_placed:
+    op: "move"
+    plane: "xy"
+    when: "outline_below != null"
+    args:
+      geometry: "outline_below"
+      by: "[first_riser_offset, 0]"
+  plan_rails_placed:
+    op: "move"
+    plane: "xy"
+    when: "plan_rails != null"
+    args:
+      geometry: "plan_rails"
+      by: "[first_riser_offset, 0]"
+  railing_left_obj_placed:
+    op: "move"
+    when: "railing_left_obj != null"
+    args:
+      geometry: "railing_left_obj"
+      by: "[first_riser_offset, 0, 0]"
+  railing_right_obj_placed:
+    op: "move"
+    when: "railing_right_obj != null"
+    args:
+      geometry: "railing_right_obj"
+      by: "[first_riser_offset, 0, 0]"
+  risers_boards_placed:
+    op: "move"
+    when: "risers_boards != null"
+    args:
+      geometry: "risers_boards"
+      by: "[first_riser_offset, 0, 0]"
+  stringers_placed:
+    op: "move"
+    when: "stringers != null"
+    args:
+      geometry: "stringers"
+      by: "[first_riser_offset, 0, 0]"
+  tread_boards_placed:
+    op: "move"
+    when: "tread_boards != null"
+    args:
+      geometry: "tread_boards"
+      by: "[first_riser_offset, 0, 0]"
+  treads_above_placed:
+    op: "move"
+    plane: "xy"
+    when: "treads_above != null"
+    args:
+      geometry: "treads_above"
+      by: "[first_riser_offset, 0]"
+  treads_below_placed:
+    op: "move"
+    plane: "xy"
+    when: "treads_below != null"
+    args:
+      geometry: "treads_below"
+      by: "[first_riser_offset, 0]"
+  walk_line_placed:
+    op: "move"
+    plane: "xy"
+    when: "walk_line != null"
+    args:
+      geometry: "walk_line"
+      by: "[first_riser_offset, 0]"
 representations:
   model.low:
     context: "model"
@@ -646,11 +792,11 @@ representations:
       context: "Body"
       targetView: "MODEL_VIEW"
     items:
-      - geometry: "body"
+      - geometry: "body_placed"
         material: "material"
-      - geometry: "stringers"
+      - geometry: "stringers_placed"
         material: "if structure = \"steel_stringers\" then \"steel\" else stringer_material"
-      - geometry: "tread_boards"
+      - geometry: "tread_boards_placed"
         material: "tread_material"
   model.medium:
     context: "model"
@@ -663,23 +809,23 @@ representations:
       context: "Body"
       targetView: "MODEL_VIEW"
     items:
-      - geometry: "body"
+      - geometry: "body_placed"
         material: "material"
-      - geometry: "tread_boards"
+      - geometry: "tread_boards_placed"
         material: "tread_material"
         part: "Treads"
-      - geometry: "risers_boards"
+      - geometry: "risers_boards_placed"
         material: "tread_material"
         part: "Risers"
-      - geometry: "stringers"
+      - geometry: "stringers_placed"
         material: "if structure = \"steel_stringers\" then \"steel\" else stringer_material"
         part: "Stringers"
-      - geometry: "landing_slab"
+      - geometry: "landing_slab_placed"
         material: "tread_material"
         part: "Landing"
-      - geometry: "railing_left_obj"
+      - geometry: "railing_left_obj_placed"
         part: "Railing"
-      - geometry: "railing_right_obj"
+      - geometry: "railing_right_obj_placed"
         part: "Railing"
   model.high:
     context: "model"
@@ -691,23 +837,23 @@ representations:
       context: "Body"
       targetView: "MODEL_VIEW"
     items:
-      - geometry: "body"
+      - geometry: "body_placed"
         material: "material"
-      - geometry: "tread_boards"
+      - geometry: "tread_boards_placed"
         material: "tread_material"
         part: "Treads"
-      - geometry: "risers_boards"
+      - geometry: "risers_boards_placed"
         material: "tread_material"
         part: "Risers"
-      - geometry: "stringers"
+      - geometry: "stringers_placed"
         material: "if structure = \"steel_stringers\" then \"steel\" else stringer_material"
         part: "Stringers"
-      - geometry: "landing_slab"
+      - geometry: "landing_slab_placed"
         material: "tread_material"
         part: "Landing"
-      - geometry: "railing_left_obj"
+      - geometry: "railing_left_obj_placed"
         part: "Railing"
-      - geometry: "railing_right_obj"
+      - geometry: "railing_right_obj_placed"
         part: "Railing"
   plan.low:
     context: "plan"
@@ -719,19 +865,19 @@ representations:
       context: "Plan"
       targetView: "PLAN_VIEW"
     items:
-      - geometry: "outline_below"
+      - geometry: "outline_below_placed"
         class: "projected"
-      - geometry: "outline_above"
+      - geometry: "outline_above_placed"
         class: "overhead"
-      - geometry: "cut_line"
+      - geometry: "cut_line_placed"
         class: "cut"
-      - geometry: "walk_line"
+      - geometry: "walk_line_placed"
         class: "annotation"
         role: "walking_line"
-      - geometry: "arrow"
+      - geometry: "arrow_placed"
         class: "annotation"
         role: "walking_line"
-      - geometry: "label"
+      - geometry: "label_placed"
         class: "annotation"
   plan.medium:
     context: "plan"
@@ -744,25 +890,25 @@ representations:
       context: "Plan"
       targetView: "PLAN_VIEW"
     items:
-      - geometry: "outline_below"
+      - geometry: "outline_below_placed"
         class: "projected"
-      - geometry: "treads_below"
+      - geometry: "treads_below_placed"
         class: "projected"
-      - geometry: "outline_above"
+      - geometry: "outline_above_placed"
         class: "overhead"
-      - geometry: "treads_above"
+      - geometry: "treads_above_placed"
         class: "overhead"
-      - geometry: "cut_line"
+      - geometry: "cut_line_placed"
         class: "cut"
-      - geometry: "walk_line"
+      - geometry: "walk_line_placed"
         class: "annotation"
         role: "walking_line"
-      - geometry: "arrow"
+      - geometry: "arrow_placed"
         class: "annotation"
         role: "walking_line"
-      - geometry: "label"
+      - geometry: "label_placed"
         class: "annotation"
-      - geometry: "plan_rails"
+      - geometry: "plan_rails_placed"
         class: "projected"
     note: "Treads below the cut drawn, above it dashed; break line at the cut; walking line with arrow and label."
   plan.high:
@@ -775,27 +921,27 @@ representations:
       context: "Plan"
       targetView: "PLAN_VIEW"
     items:
-      - geometry: "outline_below"
+      - geometry: "outline_below_placed"
         class: "projected"
-      - geometry: "treads_below"
+      - geometry: "treads_below_placed"
         class: "projected"
-      - geometry: "outline_above"
+      - geometry: "outline_above_placed"
         class: "overhead"
-      - geometry: "treads_above"
+      - geometry: "treads_above_placed"
         class: "overhead"
-      - geometry: "cut_line"
+      - geometry: "cut_line_placed"
         class: "cut"
-      - geometry: "walk_line"
+      - geometry: "walk_line_placed"
         class: "annotation"
         role: "walking_line"
-      - geometry: "arrow"
+      - geometry: "arrow_placed"
         class: "annotation"
         role: "walking_line"
-      - geometry: "label"
+      - geometry: "label_placed"
         class: "annotation"
-      - geometry: "nosings"
+      - geometry: "nosings_placed"
         class: "hidden"
-      - geometry: "plan_rails"
+      - geometry: "plan_rails_placed"
         class: "projected"
   section:
     context: "section"
@@ -830,7 +976,7 @@ handles:
   - parameter: "width"
     view:
       - "plan"
-    at: "[run / 2, hw, 0]"
+    at: "[first_riser_offset + run / 2, hw, 0]"
     axis: "y"
 materials:
   - "reinforced_concrete"
@@ -844,7 +990,7 @@ ifc:
     Pset_StairCommon.NumberOfRiser: "risers"
     Pset_StairCommon.NumberOfTreads: "treads"
     Pset_StairCommon.RiserHeight: "riser"
-    Pset_StairCommon.TreadLength: "going"
+    Pset_StairCommon.TreadLength: "tread_going"
     Pset_StairCommon.NosingLength: "nosing"
     Pset_StairCommon.WaistThickness: "if structure = \"waist\" then waist_thickness else null"
   quantities: {}
