@@ -1,0 +1,21 @@
+kind: "ruleset"
+id: "handrails"
+label: "UK Approved Document K"
+uri: "https://opo-format.org/rulesets/handrails/uk-adk@0.1"
+source: "Approved Document K (England): handrail height and sides."
+values:
+  height_min:
+    value: "mm(900)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Handrail height above pitch line or floor, lowest."
+  height_max:
+    value: "mm(1000)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Handrail height, highest."
+  both_sides_width:
+    value: "mm(1000)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Handrails on both sides when the stair is at least this wide."

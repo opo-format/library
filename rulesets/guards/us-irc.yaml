@@ -1,0 +1,21 @@
+kind: "ruleset"
+id: "guards"
+label: "US International Residential Code, R312"
+uri: "https://opo-format.org/rulesets/guards/us-irc@0.1"
+source: "IRC R312: guard height and openings."
+values:
+  height_min:
+    value: "inch(36)"
+    source: "us-irc"
+    status: "to_verify"
+    note: "R312: minimum guard height."
+  opening_max:
+    value: "inch(4)"
+    source: "us-irc"
+    status: "to_verify"
+    note: "R312: sphere that must not pass."
+  stair_side_opening_max:
+    value: "inch(4.375)"
+    source: "us-irc"
+    status: "to_verify"
+    note: "R312: sphere on the open sides of stairs."

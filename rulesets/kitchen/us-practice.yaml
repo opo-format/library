@@ -1,0 +1,26 @@
+kind: "ruleset"
+id: "kitchen"
+label: "US kitchen cabinet practice"
+uri: "https://opo-format.org/rulesets/kitchen/us-practice@0.1"
+source: "US kitchen cabinet sizes: industry practice, not a code."
+values:
+  worktop_heights:
+    value: "[inch(36)]"
+    source: "us-kitchen-cabinet-practice"
+    status: "to_verify"
+    note: "Finished worktop height."
+  base_depth_min:
+    value: "inch(24)"
+    source: "us-kitchen-cabinet-practice"
+    status: "to_verify"
+    note: "Base cabinet depth."
+  wall_depth_min:
+    value: "inch(12)"
+    source: "us-kitchen-cabinet-practice"
+    status: "to_verify"
+    note: "Wall cabinet depth."
+  wall_unit_gap_min:
+    value: "inch(18)"
+    source: "us-kitchen-cabinet-practice"
+    status: "to_verify"
+    note: "Worktop to wall cabinet."

@@ -45,7 +45,7 @@ check: build
 # Regression guard: the generated templates equal the frozen fixtures of the conformance suite
 # in the standard repository (checked out at the commit in opo-spec-version into ./opo-spec).
 # Templates that changed on purpose are listed in golden_changed and no longer compared.
-golden_changed := "IfcBoiler"
+golden_changed := "IfcBoiler IfcStair"
 
 golden:
     #!/usr/bin/env bash

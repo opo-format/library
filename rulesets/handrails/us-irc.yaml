@@ -1,0 +1,26 @@
+kind: "ruleset"
+id: "handrails"
+label: "US International Residential Code, R311.7.8"
+uri: "https://opo-format.org/rulesets/handrails/us-irc@0.1"
+source: "IRC R311.7: handrail height and grip size."
+values:
+  height_min:
+    value: "inch(34)"
+    source: "us-irc"
+    status: "to_verify"
+    note: "Handrail height above the nosing line, lowest."
+  height_max:
+    value: "inch(38)"
+    source: "us-irc"
+    status: "to_verify"
+    note: "Handrail height, highest."
+  grip_min:
+    value: "inch(1.25)"
+    source: "us-irc"
+    status: "to_verify"
+    note: "Round handrail, smallest diameter."
+  grip_max:
+    value: "inch(2)"
+    source: "us-irc"
+    status: "to_verify"
+    note: "Round handrail, largest diameter."
