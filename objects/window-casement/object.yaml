@@ -71,6 +71,19 @@ parameters:
     limits:
       min: -5
       max: 50
+  nominal_reference:
+    type: "choice"
+    default: "opening"
+    label: "Width and height refer to"
+    group: "Size"
+    options:
+      - "opening"
+      - "frame_outside"
+      - "rough_opening"
+    option_labels:
+      opening: "Wall opening"
+      frame_outside: "Frame outside"
+      rough_opening: "Rough opening (US framing; the same as the wall opening here)"
   fitting_gap:
     type: "length"
     default: 0.01
@@ -479,20 +492,26 @@ slots:
     description: "Custom outline in the host plane (custom outline mode)."
 rules:
   derived:
+    ow:
+      expr: "if nominal_reference = \"frame_outside\" then width + 2 * fitting_gap else width"
+      note: "Width of the wall opening."
+    oh:
+      expr: "if nominal_reference = \"frame_outside\" then height + 2 * fitting_gap else height"
+      note: "Height of the wall opening."
     is_recess: "false"
     y_from: "host.y_min - 0.01"
     y_to: "host.y_max + 0.01"
     z_from: "host.bottom - 0.01"
     z_to: "host.top + 0.01"
     depth: "host.thickness"
-    profile_points: "if outline_mode = \"custom\" and outline != null then outline else [[-width / 2, sill_height], [width / 2, sill_height], [width / 2, sill_height + height], [-width / 2, sill_height + height]]"
+    profile_points: "if outline_mode = \"custom\" and outline != null then outline else [[-ow / 2, sill_height], [ow / 2, sill_height], [ow / 2, sill_height + oh], [-ow / 2, sill_height + oh]]"
     open_width: "max(for p in profile_points return p[1]) - min(for p in profile_points return p[1])"
     open_height: "max(for p in profile_points return p[2]) - min(for p in profile_points return p[2])"
     area: "abs(sum(for i in 1..count(profile_points) return profile_points[i][1] * profile_points[modulo(i, count(profile_points)) + 1][2] - profile_points[modulo(i, count(profile_points)) + 1][1] * profile_points[i][2])) / 2"
     above_cut:
       expr: "min(for p in profile_points return p[2]) > view.cut_height"
       note: "Opening starts above the plan cut: drawn dashed."
-    top: "sill_height + height"
+    top: "sill_height + oh"
     rect: "outline_mode = \"rectangle\""
     n: "if rect then panels else 1"
     ops:
@@ -500,10 +519,10 @@ rules:
       note: "A custom outline has one fixed panel: sashes need straight hinge edges."
     fy: "reveal_offset"
     fd2: "frame_depth / 2"
-    x0: "-width / 2 + fitting_gap"
-    x1: "width / 2 - fitting_gap"
+    x0: "-ow / 2 + fitting_gap"
+    x1: "ow / 2 - fitting_gap"
     z0: "sill_height + fitting_gap"
-    z1: "sill_height + height - fitting_gap"
+    z1: "sill_height + oh - fitting_gap"
     zi1: "if transom then z1 - frame_width - top_light_height - frame_width else z1 - frame_width"
     pw:
       expr: "(x1 - x0 - 2 * frame_width - (n - 1) * frame_width) / n"
@@ -534,7 +553,7 @@ rules:
       severity: "error"
       message: "Custom outline mode needs an outline."
     glass_positive:
-      expr: "width > 2 * frame_width and height > 2 * frame_width"
+      expr: "ow > 2 * frame_width and oh > 2 * frame_width"
       severity: "error"
       message: "The frame is wider than the opening."
     panels_fit:
@@ -938,14 +957,14 @@ handles:
     view:
       - "elevation"
       - "model"
-    at: "[width / 2, 0, sill_height + height / 2]"
+    at: "[ow / 2, 0, sill_height + oh / 2]"
     axis: "x"
     symmetric: true
   - parameter: "height"
     view:
       - "elevation"
       - "model"
-    at: "[0, 0, sill_height + height]"
+    at: "[0, 0, sill_height + oh]"
     axis: "z"
   - slot: "outline"
     kind: "points"
