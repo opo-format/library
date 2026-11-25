@@ -91,7 +91,7 @@ parameters:
     limits:
       min: 2
       max: 40
-  well:
+  well_width:
     type: "length"
     default: 0.2
     label: "Stairwell gap between the flights"
@@ -361,9 +361,9 @@ rules:
     waist_v: "waist_thickness / cos(pitch)"
     hw: "width / 2"
     land_len: "landing_depth"
-    land_w: "2 * width + well"
+    land_w: "2 * width + well_width"
     origin2:
-      expr: "[run1, width + well, 0]"
+      expr: "[run1, width + well_width, 0]"
       note: "Where flight 2 starts, in the frame of flight 1 (turning left)."
     turn2: "180"
     under_x0: "max(0, (waist_v - riser) * going / riser)"
@@ -420,6 +420,10 @@ rules:
       expr: "rules.handrails = null or (handrail_height >= rules.handrails.height_min and handrail_height <= rules.handrails.height_max)"
       severity: "warning"
       message: "The handrail height is outside the active rule set."
+    well_guard:
+      expr: "rules.guards = null or rules.guards.opening_max = null or well_width <= rules.guards.opening_max or railing_inner"
+      severity: "warning"
+      message: "The stairwell is wider than the active guards rule set allows as an opening: guard the inner side."
   rulesets:
     stairs:
       default: null
@@ -439,6 +443,11 @@ rules:
       fields:
         height_min: "length"
         height_max: "length"
+    guards:
+      default: null
+      note: "Off by default. Shared variants (library rulesets/guards)."
+      fields:
+        opening_max: "length"
 recipe:
   profile1:
     op: "polygon"
@@ -543,12 +552,12 @@ recipe:
     op: "polyline"
     plane: "xy"
     args:
-      points: "[[going / 2, 0], [run1 + land_len / 2, 0], [run1 + land_len / 2, width + well], [run1 - run2, width + well]]"
+      points: "[[going / 2, 0], [run1 + land_len / 2, 0], [run1 + land_len / 2, width + well_width], [run1 - run2, width + well_width]]"
   arrow_l:
     op: "polyline"
     plane: "xy"
     args:
-      points: "[[run1 - run2 + 0.15, width + well - 0.075], [run1 - run2, width + well], [run1 - run2 + 0.15, width + well + 0.075]]"
+      points: "[[run1 - run2 + 0.15, width + well_width - 0.075], [run1 - run2, width + well_width], [run1 - run2 + 0.15, width + well_width + 0.075]]"
   label:
     op: "text"
     plane: "xy"
