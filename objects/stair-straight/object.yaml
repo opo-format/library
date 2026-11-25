@@ -246,13 +246,39 @@ parameters:
     default: true
     label: "Handrail on the left"
     group: "Railings"
-    description: "A nested IfcRailing along the flight at the handrail height."
+    description: "A nested railing along the flight; the top rail is the handrail."
+  railing_left_fixing:
+    type: "choice"
+    default: "stair"
+    label: "Fixing"
+    group: "Railings"
+    options:
+      - "stair"
+      - "wall"
+    visible: "railing_left"
+    option_labels:
+      stair: "Balustrade standing on the stair"
+      wall: "Handrail on wall brackets"
+    description: "On the stair: posts set into the steps along the nosing line, balusters, top rail as the handrail. On a wall: the handrail alone, on brackets to a wall along the stair edge."
   railing_right:
     type: "boolean"
     default: false
     label: "Handrail on the right"
     group: "Railings"
-    description: "A nested IfcRailing along the flight at the handrail height."
+    description: "A nested railing along the flight; the top rail is the handrail."
+  railing_right_fixing:
+    type: "choice"
+    default: "stair"
+    label: "Fixing"
+    group: "Railings"
+    options:
+      - "stair"
+      - "wall"
+    visible: "railing_right"
+    option_labels:
+      stair: "Balustrade standing on the stair"
+      wall: "Handrail on wall brackets"
+    description: "On the stair: posts set into the steps along the nosing line, balusters, top rail as the handrail. On a wall: the handrail alone, on brackets to a wall along the stair edge."
   handrail_height:
     type: "length"
     default: 0.9
@@ -664,16 +690,18 @@ recipe:
     op: "instance"
     when: "railing_left"
     args:
-      object: "\"opo-format.org/library/templates/IfcRailing\""
-      values: "{predefined_type: \"HANDRAIL\", width: 0.042}"
-      inputs: "{path: rail_path_left}"
+      object: "\"opo-format.org/library/objects/railing-guard\""
+      values: "if railing_left_fixing = \"wall\" then {predefined_type: \"HANDRAIL\", height: handrail_height, mount: \"wall\", outside: \"left\", wall_distance: 0.05, top_is_handrail: true} else {predefined_type: \"BALUSTRADE\", height: handrail_height, mount: \"embedded\", embed_depth: if structure = \"waist\" then min(riser + 0.05, waist_thickness - 0.01) else riser + 0.05, top_is_handrail: true}"
+      inputs: "{path: for p in rail_path_left return [p[1], p[2], p[3] - handrail_height]}"
+    note: "The guard follows the nosing line; its posts go down into the steps (up to one riser plus 0.05 m, no deeper than the slab) so they stand on every tread."
   railing_right_obj:
     op: "instance"
     when: "railing_right"
     args:
-      object: "\"opo-format.org/library/templates/IfcRailing\""
-      values: "{predefined_type: \"HANDRAIL\", width: 0.042}"
-      inputs: "{path: rail_path_right}"
+      object: "\"opo-format.org/library/objects/railing-guard\""
+      values: "if railing_right_fixing = \"wall\" then {predefined_type: \"HANDRAIL\", height: handrail_height, mount: \"wall\", outside: \"right\", wall_distance: 0.05, top_is_handrail: true} else {predefined_type: \"BALUSTRADE\", height: handrail_height, mount: \"embedded\", embed_depth: if structure = \"waist\" then min(riser + 0.05, waist_thickness - 0.01) else riser + 0.05, top_is_handrail: true}"
+      inputs: "{path: for p in rail_path_right return [p[1], p[2], p[3] - handrail_height]}"
+    note: "The guard follows the nosing line; its posts go down into the steps (up to one riser plus 0.05 m, no deeper than the slab) so they stand on every tread."
   plan_rails:
     op: "union"
     plane: "xy"
@@ -980,8 +1008,8 @@ host:
     note: "The application cuts the upper slab over the run plus headroom; the stairs rule set headroom value is the target."
   nested:
     objects:
-      - "opo-format.org/library/templates/IfcRailing"
-    note: "Handrails are nested IfcRailing class templates along the flight."
+      - "opo-format.org/library/objects/railing-guard"
+    note: "Railings are nested railing-guard objects along the nosing line (on the stair) or along the stair edge (on wall brackets)."
 handles:
   - parameter: "width"
     view:
