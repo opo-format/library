@@ -17,7 +17,7 @@ references:
 sheet:
   scope: "Member of a stick curtain wall (mullion, transom, boundary or corner) placed by O-16 on each grid segment."
   ifc: "IfcMember · MULLION"
-  parameters: "Face width, depth behind the glass, joint (captured | butt_joint | ssg), cap depth, glass pocket, trims (from the parent)."
+  parameters: "Face width, depth behind the glass, joint (captured | butt_joint | ssg), cap depth, glass pocket, shape (straight | corner post), trims and neighbouring cells (from the parent)."
 parameters:
   profile_width:
     type: "length"
@@ -75,6 +75,20 @@ parameters:
       min: 0.0
       max: 0.05
     description: "Gasket or pressure space between the back of the glass and the front of the member."
+  shape:
+    type: "choice"
+    default: "straight"
+    label: "Shape"
+    group: "Profile"
+    options:
+      - "straight"
+      - "corner_outside"
+      - "corner_inside"
+    option_labels:
+      straight: "Straight member"
+      corner_outside: "Outside corner post"
+      corner_inside: "Inside corner post"
+    description: "A corner post takes the directions of the two faces from the cells on either side and follows both glass planes. Outside corner: a post square to both faces, the glass stopping at it. Inside corner: an L-shaped post behind the meeting glass."
   trim_start:
     type: "length"
     default: 0.0
@@ -134,16 +148,49 @@ rules:
     roll:
       expr: "atan2(normal[1] * vert[1] + normal[2] * vert[2] + normal[3] * vert[3], normal[1] * across[1] + normal[2] * across[2] + normal[3] * across[3])"
       note: "Turns the profile so its u axis points to the front (the normal)."
+    vertical: "abs(dir[3]) > 0.99"
+    is_corner:
+      expr: "shape != \"straight\" and vertical and left_cell != null and right_cell != null"
+      note: "A corner post needs the cells on both sides."
+    ca:
+      expr: "if not(is_corner) then null else if (path[1][1] - left_cell.origin[1]) * left_cell.x_axis[1] + (path[1][2] - left_cell.origin[2]) * left_cell.x_axis[2] > 0.000001 then left_cell else right_cell"
+      note: "The cell before the corner along the baseline."
+    cb: "if not(is_corner) then null else if ca = left_cell then right_cell else left_cell"
+    da: "if is_corner then ca.x_axis else [1, 0, 0]"
+    db: "if is_corner then cb.x_axis else [1, 0, 0]"
+    na: "if is_corner then ca.normal else normal"
+    nb: "if is_corner then cb.normal else normal"
+    convex:
+      expr: "da[1] * db[2] - da[2] * db[1] > 0"
+      note: "The baseline turns left here: the front of the façade goes round the outside of the corner."
+    mden:
+      expr: "max(1 + na[1] * nb[1] + na[2] * nb[2], 0.01)"
+      note: "Mitre: a point offset o from both glass planes is the corner plus o (na + nb) / mden."
+    leg:
+      expr: "profile_depth + glass_offset + glass_thickness / 2"
+      note: "How far an outside corner post reaches along each face from the corner."
+    cap_leg:
+      expr: "if convex then leg else profile_width"
+      note: "Cap legs: to the end of the post outside, one face width inside."
+    q1: "[path[1][1] + (-(glass_offset + glass_thickness / 2)) * (na[1] + nb[1]) / mden, path[1][2] + (-(glass_offset + glass_thickness / 2)) * (na[2] + nb[2]) / mden]"
+    q3: "[path[1][1] + (-leg) * (na[1] + nb[1]) / mden, path[1][2] + (-leg) * (na[2] + nb[2]) / mden]"
+    la: "(q1[1] - q3[1]) * da[1] + (q1[2] - q3[2]) * da[2]"
+    lb: "(q3[1] - q1[1]) * db[1] + (q3[2] - q1[2]) * db[2]"
+    corner_body_pts:
+      expr: "if convex then [q1, [q1[1] + lb * db[1], q1[2] + lb * db[2]], q3, [q1[1] - la * da[1], q1[2] - la * da[2]]] else [[path[1][1] - profile_width * da[1] - (glass_offset + glass_thickness / 2) * na[1], path[1][2] - profile_width * da[2] - (glass_offset + glass_thickness / 2) * na[2]], q1, [path[1][1] + profile_width * db[1] - (glass_offset + glass_thickness / 2) * nb[1], path[1][2] + profile_width * db[2] - (glass_offset + glass_thickness / 2) * nb[2]], [path[1][1] + profile_width * db[1] - leg * nb[1], path[1][2] + profile_width * db[2] - leg * nb[2]], q3, [path[1][1] - profile_width * da[1] - leg * na[1], path[1][2] - profile_width * da[2] - leg * na[2]]]"
+      note: "Outside: a post behind the glass, its faces parallel and square to both glass planes. Inside: an L wrapped round the back of the corner, one face width under each pane."
+    corner_cap_pts:
+      expr: "[[path[1][1] - cap_leg * da[1] + glass_thickness / 2 * na[1], path[1][2] - cap_leg * da[2] + glass_thickness / 2 * na[2]], [path[1][1] + (glass_thickness / 2) * (na[1] + nb[1]) / mden, path[1][2] + (glass_thickness / 2) * (na[2] + nb[2]) / mden], [path[1][1] + cap_leg * db[1] + glass_thickness / 2 * nb[1], path[1][2] + cap_leg * db[2] + glass_thickness / 2 * nb[2]], [path[1][1] + cap_leg * db[1] + (glass_thickness / 2 + cap_depth) * nb[1], path[1][2] + cap_leg * db[2] + (glass_thickness / 2 + cap_depth) * nb[2]], [path[1][1] + (glass_thickness / 2 + cap_depth) * (na[1] + nb[1]) / mden, path[1][2] + (glass_thickness / 2 + cap_depth) * (na[2] + nb[2]) / mden], [path[1][1] - cap_leg * da[1] + (glass_thickness / 2 + cap_depth) * na[1], path[1][2] - cap_leg * da[2] + (glass_thickness / 2 + cap_depth) * na[2]]]"
+      note: "An L-shaped cap in front of the glass, mitred at the corner."
     face_width:
-      expr: "profile_width"
-      note: "Reported to the curtain wall (frame interface)."
+      expr: "if shape = \"corner_outside\" then 2 * (profile_depth + glass_offset + glass_thickness / 2) else if shape = \"corner_inside\" then 0 else profile_width"
+      note: "Reported to the curtain wall (frame interface). An outside corner post reaches one leg along each face, so the glass stops that far from the corner; at an inside corner the glass runs to the corner."
     depth:
       expr: "profile_depth + glass_offset + glass_thickness / 2 + (if joint = \"captured\" then cap_depth else 0)"
       note: "Reported: overall depth."
     offset:
       expr: "if joint = \"captured\" then glass_thickness / 2 + cap_depth else glass_thickness / 2"
       note: "Reported: from the glass plane to the front face."
-    vertical: "abs(dir[3]) > 0.99"
     cut_pts:
       expr: "for c in [[-1, -profile_depth - glass_offset - glass_thickness / 2], [1, -profile_depth - glass_offset - glass_thickness / 2], [1, offset], [-1, offset]] return [path[1][1] + side[1] * c[1] * profile_width / 2 + normal[1] * c[2], path[1][2] + side[2] * c[1] * profile_width / 2 + normal[2] * c[2]]"
       note: "Plan cut through a vertical member."
@@ -168,13 +215,14 @@ recipe:
       max: "[glass_thickness / 2 + cap_depth, profile_width / 2]"
   body:
     op: "sweep"
+    when: "not(is_corner)"
     args:
       profile: "body_profile"
       path: "[p_start, p_end]"
       roll: "roll"
   cap:
     op: "sweep"
-    when: "joint = \"captured\""
+    when: "joint = \"captured\" and not(is_corner)"
     args:
       profile: "cap_profile"
       path: "[p_start, p_end]"
@@ -182,9 +230,37 @@ recipe:
   plan_cut:
     op: "polygon"
     plane: "xy"
-    when: "vertical"
+    when: "vertical and not(is_corner)"
     args:
       points: "cut_pts"
+  corner_body_2d:
+    op: "polygon"
+    plane: "xy"
+    when: "is_corner"
+    args:
+      points: "corner_body_pts"
+  corner_cap_2d:
+    op: "polygon"
+    plane: "xy"
+    when: "is_corner and joint = \"captured\""
+    args:
+      points: "corner_cap_pts"
+  corner_body:
+    op: "extrude"
+    plane: "xy"
+    when: "is_corner"
+    args:
+      profile: "corner_body_2d"
+      from: "p_start[3]"
+      to: "p_end[3]"
+  corner_cap:
+    op: "extrude"
+    plane: "xy"
+    when: "is_corner and joint = \"captured\""
+    args:
+      profile: "corner_cap_2d"
+      from: "p_start[3]"
+      to: "p_end[3]"
 representations:
   model.low:
     context: "model"
@@ -198,6 +274,12 @@ representations:
         material: "material"
         part: "Mullion"
       - geometry: "cap"
+        material: "material"
+        part: "Cap"
+      - geometry: "corner_body"
+        material: "material"
+        part: "Mullion"
+      - geometry: "corner_cap"
         material: "material"
         part: "Cap"
   model.medium:
@@ -214,6 +296,12 @@ representations:
       - geometry: "cap"
         material: "material"
         part: "Cap"
+      - geometry: "corner_body"
+        material: "material"
+        part: "Mullion"
+      - geometry: "corner_cap"
+        material: "material"
+        part: "Cap"
   model.high:
     context: "model"
     lod: "high"
@@ -228,6 +316,12 @@ representations:
       - geometry: "cap"
         material: "material"
         part: "Cap"
+      - geometry: "corner_body"
+        material: "material"
+        part: "Mullion"
+      - geometry: "corner_cap"
+        material: "material"
+        part: "Cap"
   plan.low:
     context: "plan"
     lod: "low"
@@ -237,6 +331,10 @@ representations:
       targetView: "PLAN_VIEW"
     items:
       - geometry: "plan_cut"
+        class: "cut"
+      - geometry: "corner_body_2d"
+        class: "cut"
+      - geometry: "corner_cap_2d"
         class: "cut"
   plan.medium:
     context: "plan"
@@ -248,6 +346,10 @@ representations:
     items:
       - geometry: "plan_cut"
         class: "cut"
+      - geometry: "corner_body_2d"
+        class: "cut"
+      - geometry: "corner_cap_2d"
+        class: "cut"
   plan.high:
     context: "plan"
     lod: "high"
@@ -257,6 +359,10 @@ representations:
       targetView: "PLAN_VIEW"
     items:
       - geometry: "plan_cut"
+        class: "cut"
+      - geometry: "corner_body_2d"
+        class: "cut"
+      - geometry: "corner_cap_2d"
         class: "cut"
 materials:
   - "aluminium"
