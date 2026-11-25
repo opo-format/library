@@ -125,6 +125,30 @@ parameters:
     limits:
       min: 0.006
       max: 0.08
+  fire_stops:
+    type: "boolean"
+    default: true
+    label: "Fire stops at the slab edges"
+    group: "Slab edge"
+    description: "A strip of mineral wool closing the gap between the frame and each slab edge above the base."
+  slab_edge_gap:
+    type: "length"
+    default: 0.05
+    label: "Gap from the frame back to the slab edge"
+    group: "Slab edge"
+    visible: "fire_stops"
+    limits:
+      min: 0.0
+      max: 0.5
+  fire_stop_depth:
+    type: "length"
+    default: 0.15
+    label: "Fire stop depth (vertical)"
+    group: "Slab edge"
+    visible: "fire_stops"
+    limits:
+      min: 0.05
+      max: 0.5
   join:
     type: "choice"
     default: "u_continuous"
@@ -214,6 +238,21 @@ recipe:
       items: "g.cells"
       as: "c"
       do: "instance(if c.component != null then c.component else component_for(panel_classes, c.cls), if c.values != null then c.values else {kind: if c.cls = \"spandrel\" then \"spandrel\" else \"vision\", glass_thickness: glass_thickness}, {outline: c.panel_outline, normal: c.normal, insets: c.insets})"
+  fire_stop_profile:
+    op: "rectangle"
+    plane: "profile"
+    when: "fire_stops"
+    args:
+      min: "[glass_thickness / 2 + max(mullion_depth, transom_depth), -fire_stop_depth]"
+      max: "[glass_thickness / 2 + max(mullion_depth, transom_depth) + slab_edge_gap, 0]"
+  fire_stops_3d:
+    op: "for_each"
+    when: "fire_stops and slab_edge_gap > 0"
+    args:
+      items: "flatten(for f in levels_within return if f = null then [] else [f])"
+      as: "f"
+      do: "sweep(fire_stop_profile, for p in surface.baseline return [p[1], p[2], base + f])"
+    note: "Behind the frame, at each floor above the base; the profile u axis points to the back (left of the baseline)."
   plan_frames:
     op: "for_each"
     plane: "xy"
@@ -241,6 +280,9 @@ representations:
         part: "Frame members"
       - geometry: "panels"
         part: "Panels"
+      - geometry: "fire_stops_3d"
+        material: "\"mineral_wool\""
+        part: "Fire stops"
   model.medium:
     context: "model"
     lod: "medium"
@@ -253,6 +295,9 @@ representations:
         part: "Frame members"
       - geometry: "panels"
         part: "Panels"
+      - geometry: "fire_stops_3d"
+        material: "\"mineral_wool\""
+        part: "Fire stops"
   model.high:
     context: "model"
     lod: "high"
@@ -265,6 +310,9 @@ representations:
         part: "Frame members"
       - geometry: "panels"
         part: "Panels"
+      - geometry: "fire_stops_3d"
+        material: "\"mineral_wool\""
+        part: "Fire stops"
   plan.low:
     context: "plan"
     lod: "low"
