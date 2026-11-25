@@ -1,10 +1,29 @@
 id: "stair-l-shaped"
 name: "L-shaped stair"
-status: "planned"
+version: "0.1.0"
+status: "draft"
 priority: "P1"
 catalogue_id: "C-02"
-ifc:
-  class: "IfcStair"
+description: "Stair with two flights at right angles and a quarter landing, turning left or right: risers from the rise and the maximum riser, going, a concrete waist or solid fill, and nested handrails on the outer and inner sides. Defaults are illustrative design values, not norm values; the shared stairs and handrails rule sets give UK and US limits."
+tags:
+  - "stair"
+  - "l-shaped"
+  - "landing"
+  - "circulation"
+template: "IfcStair"
+references:
+  - ref: "ifc-4.3-add2-ifcstair"
+    role: "IFC parameters"
+    used: "Class, predefined type QUARTER_TURN_STAIR, Pset_StairCommon property names."
+  - ref: "uk-approved-document-k"
+    role: "rules"
+    used: "Stair and handrail limits through the shared rule sets."
+  - ref: "us-irc"
+    role: "rules"
+    used: "Stair and handrail limits through the shared rule sets."
+  - ref: "us-ibc"
+    role: "rules"
+    used: "Stair limits through the shared rule sets."
 sheet:
   scope: "Two flights at 90° with a quarter landing or winders at the corner; left or right turn."
   ifc: "IfcStair · QUARTER_TURN_STAIR (landing) / QUARTER_WINDING_STAIR (winders) · 2 IfcStairFlight + IfcSlab LANDING"
@@ -13,3 +32,732 @@ sheet:
   parameters: "(beyond C-01) `turn` left | right · `corner` landing | winders · `winders` (count, default 3) · `split_riser` (risers in first flight) · `walkline_offset`."
   rules: "as C-01 + winder going at walkline ≥ min and at narrow end ≥ min (`stairs.winders`)."
   lod: "Plan: winder lines radiating to the walkline geometry; walkline curved through the corner."
+parameters:
+  rise_mode:
+    type: "choice"
+    default: "storey"
+    label: "Total rise"
+    group: "Rise"
+    options:
+      - "storey"
+      - "value"
+    option_labels:
+      storey: "Storey height"
+      value: "Value"
+  rise_value:
+    type: "length"
+    default: 3.0
+    label: "Total rise"
+    group: "Rise"
+    visible: "rise_mode = \"value\""
+    limits:
+      min: 0.1
+      max: 10
+  max_riser:
+    type: "length"
+    default: 0.18
+    label: "Maximum riser"
+    group: "Steps"
+    limits:
+      min: 0.05
+      max: 0.3
+    description: "Generic default (no EN/ISO stair geometry norm); the stairs rule sets set regional limits."
+  going:
+    type: "length"
+    default: 0.28
+    label: "Going"
+    group: "Steps"
+    limits:
+      min: 0.1
+      max: 0.6
+  width:
+    type: "length"
+    default: 1.0
+    label: "Width"
+    group: "Size"
+    limits:
+      min: 0.4
+      max: 10
+  turn:
+    type: "choice"
+    default: "left"
+    label: "Turn"
+    group: "Plan"
+    options:
+      - "left"
+      - "right"
+  landing_after:
+    type: "integer"
+    default: 9
+    label: "Landing after riser"
+    group: "Landing"
+    limits:
+      min: 2
+      max: 40
+  nosing:
+    type: "length"
+    default: 0.03
+    label: "Nosing"
+    group: "Treads"
+    limits:
+      min: 0.0
+      max: 0.06
+    description: "Tread overhang over the riser below (drawn in plan)."
+  structure:
+    type: "choice"
+    default: "waist"
+    label: "Structure"
+    group: "Structure"
+    options:
+      - "waist"
+      - "solid"
+    option_labels:
+      waist: "Concrete waist slab"
+      solid: "Solid (on fill or masonry)"
+  waist_thickness:
+    type: "length"
+    default: 0.15
+    label: "Waist and landing thickness"
+    group: "Structure"
+    visible: "structure = \"waist\""
+    limits:
+      min: 0.06
+      max: 0.5
+  material:
+    type: "material"
+    default: "reinforced_concrete"
+    label: "Material"
+    group: "Materials"
+    options: "materials"
+  railing_outer:
+    type: "boolean"
+    default: true
+    label: "Handrail on the outer side"
+    group: "Railings"
+    description: "A nested IfcRailing along both flights and round the landing."
+  railing_inner:
+    type: "boolean"
+    default: false
+    label: "Handrail on the inner side"
+    group: "Railings"
+  handrail_height:
+    type: "length"
+    default: 0.9
+    label: "Handrail height above the pitch line"
+    group: "Railings"
+    limits:
+      min: 0.6
+      max: 1.2
+  arrow_label:
+    type: "text"
+    default: "UP"
+    label: "Walking line label"
+    group: "Drawing"
+  Pset_ConcreteElementGeneral:
+    type: "property_set"
+    default: {}
+    label: "Pset_ConcreteElementGeneral"
+    group: "IFC data"
+    properties:
+      - name: "AssemblyPlace"
+        measure: "IfcLabel"
+        enum:
+          - "FACTORY"
+          - "OFFSITE"
+          - "SITE"
+          - "OTHER"
+          - "NOTKNOWN"
+          - "UNSET"
+      - name: "CastingMethod"
+        measure: "IfcLabel"
+        enum:
+          - "INSITU"
+          - "MIXED"
+          - "PRECAST"
+          - "PRINTED"
+          - "OTHER"
+          - "NOTKNOWN"
+          - "UNSET"
+      - name: "StructuralClass"
+        measure: "IfcLabel"
+      - name: "StrengthClass"
+        measure: "IfcLabel"
+      - name: "ExposureClass"
+        measure: "IfcLabel"
+      - name: "ReinforcementVolumeRatio"
+        measure: "IfcMassDensityMeasure"
+      - name: "ReinforcementAreaRatio"
+        measure: "IfcAreaDensityMeasure"
+      - name: "DimensionalAccuracyClass"
+        measure: "IfcLabel"
+      - name: "ConstructionToleranceClass"
+        measure: "IfcLabel"
+      - name: "ConcreteCover"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "ConcreteCoverAtMainBars"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "ConcreteCoverAtLinks"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "ReinforcementStrengthClass"
+        measure: "IfcLabel"
+    optional: true
+  Pset_PrecastConcreteElementFabrication:
+    type: "property_set"
+    default: {}
+    label: "Pset_PrecastConcreteElementFabrication"
+    group: "IFC data"
+    properties:
+      - name: "TypeDesignation"
+        measure: "IfcLabel"
+      - name: "ProductionLotId"
+        measure: "IfcIdentifier"
+      - name: "SerialNumber"
+        measure: "IfcIdentifier"
+      - name: "PieceMark"
+        measure: "IfcLabel"
+      - name: "AsBuiltLocationNumber"
+        measure: "IfcLabel"
+      - name: "ActualProductionDate"
+        measure: "IfcDateTime"
+      - name: "ActualErectionDate"
+        measure: "IfcDateTime"
+    optional: true
+  Pset_PrecastConcreteElementGeneral:
+    type: "property_set"
+    default: {}
+    label: "Pset_PrecastConcreteElementGeneral"
+    group: "IFC data"
+    properties:
+      - name: "TypeDesignation"
+        measure: "IfcLabel"
+      - name: "CornerChamfer"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "ManufacturingToleranceClass"
+        measure: "IfcLabel"
+      - name: "FormStrippingStrength"
+        measure: "IfcPressureMeasure"
+      - name: "LiftingStrength"
+        measure: "IfcPressureMeasure"
+      - name: "ReleaseStrength"
+        measure: "IfcPressureMeasure"
+      - name: "MinimumAllowableSupportLength"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "InitialTension"
+        measure: "IfcPressureMeasure"
+      - name: "TendonRelaxation"
+        measure: "IfcPositiveRatioMeasure"
+      - name: "TransportationStrength"
+        measure: "IfcPressureMeasure"
+      - name: "SupportDuringTransportDescription"
+        measure: "IfcText"
+      - name: "SupportDuringTransportDocReference"
+        measure: "IfcExternalReference"
+      - name: "HollowCorePlugging"
+        measure: "IfcLabel"
+      - name: "CamberAtMidspan"
+        measure: "IfcRatioMeasure"
+      - name: "BatterAtStart"
+        measure: "IfcPlaneAngleMeasure"
+      - name: "BatterAtEnd"
+        measure: "IfcPlaneAngleMeasure"
+      - name: "Twisting"
+        measure: "IfcPlaneAngleMeasure"
+      - name: "Shortening"
+        measure: "IfcRatioMeasure"
+      - name: "PieceMark"
+        measure: "IfcLabel"
+      - name: "DesignLocationNumber"
+        measure: "IfcLabel"
+    optional: true
+  Pset_StairCommon:
+    type: "property_set"
+    default: {}
+    label: "Pset_StairCommon"
+    group: "IFC data"
+    properties:
+      - name: "Reference"
+        measure: "IfcIdentifier"
+      - name: "Status"
+        measure: "IfcLabel"
+        enum:
+          - "DEMOLISH"
+          - "EXISTING"
+          - "NEW"
+          - "TEMPORARY"
+          - "OTHER"
+          - "NOTKNOWN"
+          - "UNSET"
+      - name: "NumberOfRiser"
+        measure: "IfcCountMeasure"
+        value: "risers"
+      - name: "NumberOfTreads"
+        measure: "IfcCountMeasure"
+        value: "treads"
+      - name: "RiserHeight"
+        measure: "IfcPositiveLengthMeasure"
+        value: "riser"
+      - name: "TreadLength"
+        measure: "IfcPositiveLengthMeasure"
+        value: "going"
+      - name: "NosingLength"
+        measure: "IfcLengthMeasure"
+      - name: "WalkingLineOffset"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "TreadLengthAtOffset"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "TreadLengthAtInnerSide"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "WaistThickness"
+        measure: "IfcPositiveLengthMeasure"
+        value: "if structure = \"waist\" then waist_thickness else null"
+      - name: "RequiredHeadroom"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "HandicapAccessible"
+        measure: "IfcBoolean"
+      - name: "HasNonSkidSurface"
+        measure: "IfcBoolean"
+      - name: "IsExternal"
+        measure: "IfcBoolean"
+      - name: "ThermalTransmittance"
+        measure: "IfcThermalTransmittanceMeasure"
+      - name: "LoadBearing"
+        measure: "IfcBoolean"
+      - name: "FireRating"
+        measure: "IfcLabel"
+      - name: "FireExit"
+        measure: "IfcBoolean"
+    optional: false
+slots: {}
+rules:
+  derived:
+    total_rise: "if rise_mode = \"storey\" then level.height else rise_value"
+    risers: "ceiling(total_rise / max_riser)"
+    riser: "total_rise / risers"
+    treads: "risers - 1"
+    k:
+      expr: "min(max(landing_after, 2), risers - 2)"
+      note: "Risers of flight 1; flight 2 has the rest."
+    n2: "risers - k"
+    z_land: "k * riser"
+    run1: "(k - 1) * going"
+    run2: "(n2 - 1) * going"
+    pitch: "atan2(riser, going)"
+    step_rule:
+      expr: "2 * riser + going"
+      note: "Shown for information; checked by a rule set."
+    waist_v: "waist_thickness / cos(pitch)"
+    hw: "width / 2"
+    land_len: "width"
+    land_w: "width"
+    origin2:
+      expr: "[run1 + hw, hw, 0]"
+      note: "Where flight 2 starts, in the frame of flight 1 (turning left)."
+    turn2: "90"
+    under_x0: "max(0, (waist_v - riser) * going / riser)"
+    under_z0: "max(0, riser - waist_v)"
+    steps1: "for i in 1..2 * (k - 1) return if modulo(i, 2) = 1 then [(i - 1) / 2 * going, (i + 1) / 2 * riser] else [i / 2 * going, i / 2 * riser]"
+    steps2: "for i in 1..2 * (n2 - 1) return if modulo(i, 2) = 1 then [(i - 1) / 2 * going, z_land + (i + 1) / 2 * riser] else [i / 2 * going, z_land + i / 2 * riser]"
+    ua: "(waist_v - waist_thickness - riser) * going / riser"
+    profile1_points: "if structure = \"waist\" then concatenate([[0, 0]], steps1, [[run1, z_land], [run1, z_land - waist_v], [under_x0, under_z0]]) else concatenate([[0, 0]], steps1, [[run1, z_land], [run1, 0]])"
+    profile2_points: "if structure = \"waist\" then concatenate([[0, z_land]], steps2, [[run2, total_rise], [run2, total_rise - waist_v]], if ua >= 0 then [[ua, z_land - waist_thickness], [0, z_land - waist_thickness]] else [[0, z_land + riser - waist_v]]) else concatenate([[0, z_land]], steps2, [[run2, total_rise], [run2, 0], [0, 0]])"
+    mirror_y:
+      expr: "turn = \"right\""
+      note: "A right turn is the left turn mirrored across the axis of flight 1."
+    j_cut: "floor(view.cut_height / riser)"
+    cut_in_1: "j_cut < k"
+    x_cut1: "if j_cut < 1 then 0 else min(run1, (j_cut - 0.5) * going)"
+    u_cut2: "min(run2, max(0, (j_cut - k - 0.5) * going))"
+    rail_y: "hw - 0.05"
+    rail_outer:
+      expr: "concatenate(for j in 1..k - 1 return [(j - 1) * going, -rail_y, j * riser + handrail_height], [[run1, -rail_y, z_land + handrail_height], [run1 + width - 0.05, -rail_y, z_land + handrail_height], [run1 + width - 0.05, hw, z_land + handrail_height]], for j in 1..n2 - 1 return [run1 + width - 0.05, hw + (j - 1) * going, z_land + j * riser + handrail_height], [[run1 + width - 0.05, hw + run2, total_rise + handrail_height]])"
+      note: "Outer handrail: flight 1, round the landing, flight 2."
+    rail_inner: "concatenate(for j in 1..k - 1 return [(j - 1) * going, rail_y, j * riser + handrail_height], [[run1, rail_y, z_land + handrail_height]], for j in 1..n2 - 1 return [run1 + 0.05, hw + (j - 1) * going, z_land + j * riser + handrail_height], [[run1 + 0.05, hw + run2, total_rise + handrail_height]])"
+    rail_outer_m: "if mirror_y then for p in rail_outer return [p[1], -p[2], p[3]] else rail_outer"
+    rail_inner_m: "if mirror_y then for p in rail_inner return [p[1], -p[2], p[3]] else rail_inner"
+  checks:
+    min_risers:
+      expr: "risers >= 2"
+      severity: "error"
+      message: "A stair needs at least two risers."
+    riser_range:
+      expr: "rules.stairs = null or (riser >= rules.stairs.riser_min and riser <= rules.stairs.riser_max)"
+      severity: "warning"
+      message: "Riser is outside the active rule set."
+    going_range:
+      expr: "rules.stairs = null or (going >= rules.stairs.going_min and going <= rules.stairs.going_max)"
+      severity: "warning"
+      message: "Going is outside the active rule set."
+    step_rule_range:
+      expr: "rules.stairs = null or rules.stairs.rule_min = null or (step_rule >= rules.stairs.rule_min and step_rule <= rules.stairs.rule_max)"
+      severity: "warning"
+      message: "2R + G is outside the active rule set."
+    width_min:
+      expr: "rules.stairs = null or rules.stairs.width_min = null or width >= rules.stairs.width_min"
+      severity: "warning"
+      message: "Width is below the active rule set."
+    landing_fits:
+      expr: "landing_after >= 2 and landing_after <= risers - 2"
+      severity: "warning"
+      message: "The landing must leave at least two risers on each flight; it was moved."
+    pitch_range:
+      expr: "rules.stairs = null or rules.stairs.pitch_max = null or pitch <= rules.stairs.pitch_max"
+      severity: "warning"
+      message: "The pitch is steeper than the active rule set allows."
+    handrail_range:
+      expr: "rules.handrails = null or (handrail_height >= rules.handrails.height_min and handrail_height <= rules.handrails.height_max)"
+      severity: "warning"
+      message: "The handrail height is outside the active rule set."
+  rulesets:
+    stairs:
+      default: null
+      note: "Off by default. Shared variants (library rulesets/stairs); there is no EN/ISO stair geometry norm."
+      fields:
+        riser_min: "length"
+        riser_max: "length"
+        going_min: "length"
+        going_max: "length"
+        rule_min: "length"
+        rule_max: "length"
+        width_min: "length"
+        pitch_max: "number"
+    handrails:
+      default: null
+      note: "Off by default. Shared variants (library rulesets/handrails)."
+      fields:
+        height_min: "length"
+        height_max: "length"
+recipe:
+  profile1:
+    op: "polygon"
+    plane: "xz"
+    args:
+      points: "profile1_points"
+  profile2:
+    op: "polygon"
+    plane: "xz"
+    args:
+      points: "profile2_points"
+  flight1:
+    op: "extrude"
+    plane: "xz"
+    args:
+      profile: "profile1"
+      from: "-hw"
+      to: "hw"
+  flight2_local:
+    op: "extrude"
+    plane: "xz"
+    args:
+      profile: "profile2"
+      from: "-hw"
+      to: "hw"
+  flight2:
+    op: "move"
+    args:
+      geometry: "rotate(flight2_local, [0, 0, 0], turn2)"
+      by: "origin2"
+  landing_slab:
+    op: "box"
+    args:
+      min: "[run1, -hw, if structure = \"waist\" then z_land - waist_thickness else 0]"
+      max: "[run1 + land_len, land_w - hw, z_land]"
+  body:
+    op: "union"
+    args:
+      items: "[if mirror_y then mirror(flight1, \"y\") else flight1, if mirror_y then mirror(flight2, \"y\") else flight2, if mirror_y then mirror(landing_slab, \"y\") else landing_slab]"
+  p1_below:
+    op: "rectangle"
+    plane: "xy"
+    args:
+      min: "[0, -hw]"
+      max: "[if cut_in_1 then x_cut1 else run1, hw]"
+  p1_above:
+    op: "rectangle"
+    plane: "xy"
+    when: "cut_in_1"
+    args:
+      min: "[x_cut1, -hw]"
+      max: "[run1, hw]"
+  p_landing:
+    op: "rectangle"
+    plane: "xy"
+    args:
+      min: "[run1, -hw]"
+      max: "[run1 + land_len, land_w - hw]"
+  p2_local:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[rectangle([0, -hw], [run2, hw])]"
+  p1_treads:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "for j in 1..k - 1 return j"
+      as: "j"
+      do: "line([j * going, -hw], [j * going, hw])"
+  p2_treads_local:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "for j in 1..n2 - 1 return j"
+      as: "j"
+      do: "line([j * going, -hw], [j * going, hw])"
+  p2_outline:
+    op: "move"
+    plane: "xy"
+    args:
+      geometry: "rotate(p2_local, [0, 0], turn2)"
+      by: "[origin2[1], origin2[2]]"
+  p2_treads:
+    op: "move"
+    plane: "xy"
+    args:
+      geometry: "rotate(p2_treads_local, [0, 0], turn2)"
+      by: "[origin2[1], origin2[2]]"
+  cut_local:
+    op: "polyline"
+    plane: "xy"
+    args:
+      points: "[[-0.15, -hw], [-0.05, -0.1 * width], [0.05, 0.1 * width], [0.15, hw]]"
+  cut_line_l:
+    op: "move"
+    plane: "xy"
+    args:
+      geometry: "if cut_in_1 then move(cut_local, [x_cut1, 0]) else move(rotate(move(cut_local, [u_cut2, 0]), [0, 0], turn2), [origin2[1], origin2[2]])"
+      by: "[0, 0]"
+  walk_l:
+    op: "polyline"
+    plane: "xy"
+    args:
+      points: "[[going / 2, 0], [run1 + hw, 0], [run1 + hw, hw + run2]]"
+  arrow_l:
+    op: "polyline"
+    plane: "xy"
+    args:
+      points: "[[run1 + hw - 0.075, hw + run2 - 0.15], [run1 + hw, hw + run2], [run1 + hw + 0.075, hw + run2 - 0.15]]"
+  label:
+    op: "text"
+    plane: "xy"
+    args:
+      at: "[going / 2, -0.12]"
+      value: "arrow_label"
+      height: "0.0025"
+  railing_outer_obj:
+    op: "instance"
+    when: "railing_outer"
+    args:
+      object: "\"opo-format.org/library/templates/IfcRailing\""
+      values: "{predefined_type: \"HANDRAIL\", width: 0.042}"
+      inputs: "{path: rail_outer_m}"
+  railing_inner_obj:
+    op: "instance"
+    when: "railing_inner"
+    args:
+      object: "\"opo-format.org/library/templates/IfcRailing\""
+      values: "{predefined_type: \"HANDRAIL\", width: 0.042}"
+      inputs: "{path: rail_inner_m}"
+  plan_below:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[if mirror_y then mirror(p1_below, \"y\") else p1_below, if mirror_y then mirror(p_landing, \"y\") else p_landing]"
+  plan_above:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[if cut_in_1 then if mirror_y then mirror(p1_above, \"y\") else p1_above else null, if mirror_y then mirror(p2_outline, \"y\") else p2_outline]"
+  plan_treads:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[if mirror_y then mirror(union([p1_treads, p2_treads]), \"y\") else union([p1_treads, p2_treads])]"
+  cut_line:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[if mirror_y then mirror(cut_line_l, \"y\") else cut_line_l]"
+  walk_line:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[if mirror_y then mirror(walk_l, \"y\") else walk_l]"
+  arrow:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[if mirror_y then mirror(arrow_l, \"y\") else arrow_l]"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+  model.medium:
+    context: "model"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+      - geometry: "railing_outer_obj"
+        part: "Railing"
+      - geometry: "railing_inner_obj"
+        part: "Railing"
+  model.high:
+    context: "model"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+      - geometry: "railing_outer_obj"
+        part: "Railing"
+      - geometry: "railing_inner_obj"
+        part: "Railing"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_below"
+        class: "projected"
+      - geometry: "plan_above"
+        class: "overhead"
+      - geometry: "cut_line"
+        class: "cut"
+      - geometry: "walk_line"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "arrow"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "label"
+        class: "annotation"
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_below"
+        class: "projected"
+      - geometry: "plan_above"
+        class: "overhead"
+      - geometry: "plan_treads"
+        class: "projected"
+      - geometry: "cut_line"
+        class: "cut"
+      - geometry: "walk_line"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "arrow"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "label"
+        class: "annotation"
+  plan.high:
+    context: "plan"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_below"
+        class: "projected"
+      - geometry: "plan_above"
+        class: "overhead"
+      - geometry: "plan_treads"
+        class: "projected"
+      - geometry: "cut_line"
+        class: "cut"
+      - geometry: "walk_line"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "arrow"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "label"
+        class: "annotation"
+  section:
+    context: "section"
+    lod: "all"
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "SECTION_VIEW"
+    derive:
+      from: "model.{lod}"
+      method: "cut"
+  elevation:
+    context: "elevation"
+    lod: "all"
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "ELEVATION_VIEW"
+    derive:
+      from: "model.{lod}"
+      method: "project"
+host:
+  is_host: false
+  level: "Base on a storey, top at the next storey (or a set rise)."
+  slab_opening:
+    note: "The application cuts the upper slab over flight 2 and the landing plus headroom."
+  nested:
+    objects:
+      - "opo-format.org/library/templates/IfcRailing"
+    note: "Handrails are nested IfcRailing class templates."
+handles:
+  - parameter: "width"
+    view:
+      - "plan"
+    at: "[run1 / 2, hw, 0]"
+    axis: "y"
+materials:
+  - "reinforced_concrete"
+ifc:
+  class: "IfcStair"
+  predefinedType: "\"QUARTER_TURN_STAIR\""
+  property_sets: "all parameters of type property_set, with the values set by `value` formulas"
+  properties:
+    Pset_StairCommon.NumberOfRiser: "risers"
+    Pset_StairCommon.NumberOfTreads: "treads"
+    Pset_StairCommon.RiserHeight: "riser"
+    Pset_StairCommon.TreadLength: "going"
+    Pset_StairCommon.NosingLength: "nosing"
+    Pset_StairCommon.WaistThickness: "if structure = \"waist\" then waist_thickness else null"
+  quantities: {}
+  parameter_pset: "OPO_Parameters"
+  decomposition: "IfcStair aggregating two IfcStairFlight and the landing as IfcSlab LANDING; nested railings as IfcRailing."
