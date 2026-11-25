@@ -467,6 +467,13 @@ rules:
       expr: "for s in all_treads return {n: s.n, pts: flatten(for p in s.pts return if p = null then [] else [{x: p[1], y: p[2]}])}"
       note: "Null points removed."
     treads_xy: "for s in tread_list return {n: s.n, z: s.n * riser, poly: for p in s.pts return [p.x, p.y]}"
+    waist_v:
+      expr: "waist_thickness / cos(atan2(riser, going))"
+      note: "Waist measured vertically, from the mean pitch."
+    corner_ns: "for s in corner_treads return s.n"
+    flight_slabs:
+      expr: "for i in 1..nseg return if nf[i] < 1 then null else {pts: concatenate([{x: 0, z: fbase[i] * riser}], flatten(for t in 1..nf[i] return [{x: (t - 1) * fg[i], z: (fbase[i] + t) * riser}, {x: t * fg[i], z: (fbase[i] + t) * riser}]), [{x: fl[i], z: (fbase[i] + nf[i]) * riser - waist_v}], if i = 1 then [{x: waist_v * fg[i] / riser, z: 0}] else [{x: 0, z: fbase[i] * riser - waist_v}]), a: [walkline[i][1] + sd[i][1] * fe0[i] + sn[i][1] * left_width, walkline[i][2] + sd[i][2] * fe0[i] + sn[i][2] * left_width, 0], b: [walkline[i][1] + sd[i][1] * fe0[i] - sn[i][1] * right_width, walkline[i][2] + sd[i][2] * fe0[i] - sn[i][2] * right_width, 0]}"
+      note: "Each straight flight as one sloping slab: the steps on top, the underside parallel to the pitch, waist_thickness below the inner corners."
     j_cut: "floor(view.cut_height / riser)"
     rail_path_right:
       expr: "concatenate(for q in flatten(for i in 1..nseg return concatenate(if nf[i] < 1 then [] else for t in 1..nf[i] return {p: [walkline[i][1] + sd[i][1] * (fe0[i] + (t - 1) * fg[i]) + sn[i][1] * (-(right_width - 0.05)), walkline[i][2] + sd[i][2] * (fe0[i] + (t - 1) * fg[i]) + sn[i][2] * (-(right_width - 0.05)), (fbase[i] + t) * riser + handrail_height]}, if i < nseg then [{p: [walkline[i + 1][1] + cbis[i][1] * (-(right_width - 0.05)), walkline[i + 1][2] + cbis[i][2] * (-(right_width - 0.05)), (cbase[i] + (cu[i] + 1) / 2) * riser + handrail_height]}] else [])) return q.p, [[walkline[nseg + 1][1] + sn[nseg][1] * (-(right_width - 0.05)), walkline[nseg + 1][2] + sn[nseg][2] * (-(right_width - 0.05)), total_rise + handrail_height]])"
@@ -549,8 +556,16 @@ recipe:
     args:
       items: "treads_xy"
       as: "s"
-      do: "extrude(polygon(s.poly), max(0, s.z - riser - waist_thickness), s.z)"
-    note: "Each tread is a solid block from one riser plus the waist below its top."
+      do: "if count(index_of(corner_ns, s.n)) > 0 then extrude(polygon(s.poly), max(0, s.z - riser - waist_v), s.z) else null"
+    note: "Corner treads (winders, landings) as blocks down to the waist line."
+  flights:
+    op: "for_each"
+    plane: "profile"
+    args:
+      items: "flight_slabs"
+      as: "f"
+      do: "if f = null then null else sweep(polygon(for p in f.pts return [p.x, p.z]), [f.a, f.b])"
+    note: "Each flight swept across its width from the left edge to the right edge."
   treads_below:
     op: "for_each"
     plane: "xy"
@@ -618,9 +633,12 @@ representations:
       context: "Body"
       targetView: "MODEL_VIEW"
     items:
+      - geometry: "flights"
+        material: "material"
+        part: "Flights"
       - geometry: "steps"
         material: "material"
-        part: "Steps"
+        part: "Corner steps"
   model.medium:
     context: "model"
     lod: "medium"
@@ -632,9 +650,12 @@ representations:
       context: "Body"
       targetView: "MODEL_VIEW"
     items:
+      - geometry: "flights"
+        material: "material"
+        part: "Flights"
       - geometry: "steps"
         material: "material"
-        part: "Steps"
+        part: "Corner steps"
       - geometry: "railing_right_obj"
         part: "Railing"
       - geometry: "railing_left_obj"
@@ -649,9 +670,12 @@ representations:
       context: "Body"
       targetView: "MODEL_VIEW"
     items:
+      - geometry: "flights"
+        material: "material"
+        part: "Flights"
       - geometry: "steps"
         material: "material"
-        part: "Steps"
+        part: "Corner steps"
       - geometry: "railing_right_obj"
         part: "Railing"
       - geometry: "railing_left_obj"
