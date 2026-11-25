@@ -103,6 +103,12 @@ parameters:
       min: 0.55
       max: 0.7
     description: "The classic step formula value; not a norm value. The stairs rule sets check the result."
+  last_tread_flush:
+    type: "boolean"
+    default: true
+    label: "Upper floor is the last tread"
+    group: "Geometry"
+    description: "Off: the stair has its own top tread, level with the upper floor, one going longer."
   first_riser_offset:
     type: "length"
     default: 0.0
@@ -441,7 +447,9 @@ rules:
     total_rise: "if rise_mode = \"storey\" then level.height else rise_value"
     risers: "ceiling(total_rise / max_riser)"
     riser: "total_rise / risers"
-    treads: "risers - 1"
+    treads:
+      expr: "if last_tread_flush then risers - 1 else risers"
+      note: "With a flush top, the upper floor is the last tread; otherwise the stair has its own top tread at floor level."
     tread_going:
       expr: "if going_mode = \"step_rule\" then target_step - 2 * riser else going"
       note: "Going of every tread."
