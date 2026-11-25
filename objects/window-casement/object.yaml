@@ -614,7 +614,7 @@ recipe:
     op: "union"
     when: "rect"
     args:
-      items: "[box([x0, fy - fd2, z0], [x0 + frame_width, fy + fd2, z1]), box([x1 - frame_width, fy - fd2, z0], [x1, fy + fd2, z1]), box([x0, fy - fd2, z1 - frame_width], [x1, fy + fd2, z1]), box([x0, fy - fd2, z0], [x1, fy + fd2, z0 + frame_width])] "
+      items: "[box([x0, fy - fd2, z0], [x0 + frame_width, fy + fd2, z1]), box([x1 - frame_width, fy - fd2, z0], [x1, fy + fd2, z1]), box([x0 + frame_width, fy - fd2, z1 - frame_width], [x1 - frame_width, fy + fd2, z1]), box([x0 + frame_width, fy - fd2, z0], [x1 - frame_width, fy + fd2, z0 + frame_width])] "
   mullions:
     op: "for_each"
     when: "rect and n > 1"
@@ -640,7 +640,7 @@ recipe:
     args:
       items: "for i in 1..n return i"
       as: "i"
-      do: "if opens[i] then union([box([px[i], sy - sash_depth / 2, z0 + frame_width], [px[i] + sash_width, sy + sash_depth / 2, zi1]), box([px[i] + pw - sash_width, sy - sash_depth / 2, z0 + frame_width], [px[i] + pw, sy + sash_depth / 2, zi1]), box([px[i], sy - sash_depth / 2, zi1 - sash_width], [px[i] + pw, sy + sash_depth / 2, zi1]), box([px[i], sy - sash_depth / 2, z0 + frame_width], [px[i] + pw, sy + sash_depth / 2, z0 + frame_width + sash_width])]) else null"
+      do: "if opens[i] then union([box([px[i], sy - sash_depth / 2, z0 + frame_width], [px[i] + sash_width, sy + sash_depth / 2, zi1]), box([px[i] + pw - sash_width, sy - sash_depth / 2, z0 + frame_width], [px[i] + pw, sy + sash_depth / 2, zi1]), box([px[i] + sash_width, sy - sash_depth / 2, zi1 - sash_width], [px[i] + pw - sash_width, sy + sash_depth / 2, zi1]), box([px[i] + sash_width, sy - sash_depth / 2, z0 + frame_width], [px[i] + pw - sash_width, sy + sash_depth / 2, z0 + frame_width + sash_width])]) else null"
   panes:
     op: "for_each"
     when: "rect"
