@@ -26,12 +26,18 @@ references:
   - ref: "bs-4787-uk-metric-and-uk-imperial-door-sizes"
     role: "sizes"
     used: "Leaf sizes 2040 × 526…926 (40 mm) and 1981 × 610…838 (35 mm)."
+  - ref: "uk-metric-door-makers"
+    role: "sizes"
+    used: "UK metric leaf sizes and thickness as offered by makers (BS 4787 sizes)."
   - ref: "us-industry-standard-door-sizes"
     role: "sizes"
     used: "Leaf 24, 28, 30, 32, 36 in × 80 in; rough opening = leaf + 2 in × + 2½ in."
   - ref: "iso-21542-2021-eu-en-17210-functional-requirements-ada-2010"
     role: "rules"
     used: "Accessibility rule set layers."
+  - ref: "us-ada-2010-standards"
+    role: "rules"
+    used: "404.2.3 clear width and 404.2.7 hardware heights in the US ADA rule set layer."
 parameters:
   nominal_reference:
     type: "choice"

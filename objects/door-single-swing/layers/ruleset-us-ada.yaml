@@ -6,18 +6,18 @@ source: "2010 ADA Standards §404.2.3 (32 in clear, door open 90°) and §404.2.
 values:
   min_clear_width:
     value: "inch(32)"
-    source: "iso-21542-2021-eu-en-17210-functional-requirements-ada-2010"
-    status: "to_verify"
-    note: "2010 ADA Standards 404.2.3 minimum clear width; check the text."
+    source: "us-ada-2010-standards"
+    status: "norm"
+    note: "2010 ADA Standards 404.2.3: clear width at least 32 in (815 mm), door open 90°. Checked against the Access Board text."
   measure: "\"usable_clear_width\""
   handle_min:
     value: "inch(34)"
-    source: "iso-21542-2021-eu-en-17210-functional-requirements-ada-2010"
-    status: "to_verify"
-    note: "2010 ADA Standards 404.2.7 lowest height of operable parts; check the text."
+    source: "us-ada-2010-standards"
+    status: "norm"
+    note: "2010 ADA Standards 404.2.7: operable parts at least 34 in (865 mm) above the floor. Checked against the Access Board text."
   handle_max:
     value: "inch(48)"
-    source: "iso-21542-2021-eu-en-17210-functional-requirements-ada-2010"
-    status: "to_verify"
-    note: "2010 ADA Standards 404.2.7 highest height of operable parts; check the text."
+    source: "us-ada-2010-standards"
+    status: "norm"
+    note: "2010 ADA Standards 404.2.7: operable parts at most 48 in (1220 mm) above the floor. Checked against the Access Board text."
 node: "f5107809-48bd-5407-82f5-98a158a1c95b"

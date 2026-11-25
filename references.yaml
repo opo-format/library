@@ -67,6 +67,11 @@ uk-approved-document-k:
 uk-approved-document-m:
   title: "Approved Document M: Access to and use of buildings (England)"
   kind: "regulation"
+uk-metric-door-makers:
+  title: "UK door makers' metric size guides (BS 4787 sizes: 2040 mm high, 526/626/726/826/926 mm wide, 40 mm thick)"
+  kind: "maker"
+  url: "https://www.emeralddoors.co.uk/door-size-guide"
+  note: "Same sizes in the guides of Emerald Doors, Direct Doors, Leader Doors, Door Superstore and Lathams (checked Nov 2026)."
 us-ada-2010-standards:
   title: "2010 ADA Standards for Accessible Design"
   kind: "regulation"
