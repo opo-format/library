@@ -1,0 +1,67 @@
+kind: "ruleset"
+id: "accessibility"
+label: "2010 ADA Standards"
+uri: "https://opo-format.org/rulesets/accessibility/us-ada-2010@0.1"
+source: "2010 ADA Standards: doors (404), ramps (405), toilet rooms (604, 606)."
+values:
+  min_clear_width:
+    value: "inch(32)"
+    source: "us-ada-2010-standards"
+    status: "to_verify"
+    note: "404.2.3: clear width with the door open 90°."
+  measure: "\"usable_clear_width\""
+  handle_min:
+    value: "inch(34)"
+    source: "us-ada-2010-standards"
+    status: "to_verify"
+    note: "404.2.7: operable parts, lowest height."
+  handle_max:
+    value: "inch(48)"
+    source: "us-ada-2010-standards"
+    status: "to_verify"
+    note: "404.2.7: operable parts, highest height."
+  threshold_max:
+    value: "inch(0.5)"
+    source: "us-ada-2010-standards"
+    status: "to_verify"
+    note: "404: threshold height."
+  ramp_gradient_max:
+    value: "1 / 12"
+    source: "us-ada-2010-standards"
+    status: "to_verify"
+    note: "405: running slope."
+  ramp_rise_max:
+    value: "inch(30)"
+    source: "us-ada-2010-standards"
+    status: "to_verify"
+    note: "405: rise of one ramp run."
+  ramp_width_min:
+    value: "inch(36)"
+    source: "us-ada-2010-standards"
+    status: "to_verify"
+    note: "405: clear width between handrails."
+  ramp_landing_min:
+    value: "inch(60)"
+    source: "us-ada-2010-standards"
+    status: "to_verify"
+    note: "405: landing length."
+  wc_seat_min:
+    value: "inch(17)"
+    source: "us-ada-2010-standards"
+    status: "to_verify"
+    note: "604: seat height, lowest."
+  wc_seat_max:
+    value: "inch(19)"
+    source: "us-ada-2010-standards"
+    status: "to_verify"
+    note: "604: seat height, highest."
+  basin_rim_max:
+    value: "inch(34)"
+    source: "us-ada-2010-standards"
+    status: "to_verify"
+    note: "606: lavatory rim height."
+  basin_knee_min:
+    value: "inch(27)"
+    source: "us-ada-2010-standards"
+    status: "to_verify"
+    note: "606: knee clearance height."

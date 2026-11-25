@@ -1,0 +1,30 @@
+kind: "ruleset"
+id: "stairs"
+label: "US International Residential Code, R311.7"
+uri: "https://opo-format.org/rulesets/stairs/us-irc@0.1"
+source: "IRC R311.7 (dwellings): riser, tread depth, width, headroom."
+values:
+  riser_min: "null"
+  riser_max:
+    value: "inch(7.75)"
+    source: "us-irc"
+    status: "to_verify"
+    note: "R311.7: maximum riser height."
+  going_min:
+    value: "inch(10)"
+    source: "us-irc"
+    status: "to_verify"
+    note: "R311.7: minimum tread depth (with nosing)."
+  going_max: "null"
+  rule_min: "null"
+  rule_max: "null"
+  width_min:
+    value: "inch(36)"
+    source: "us-irc"
+    status: "to_verify"
+    note: "R311.7: minimum stair width."
+  headroom_min:
+    value: "inch(80)"
+    source: "us-irc"
+    status: "to_verify"
+    note: "R311.7: minimum headroom."

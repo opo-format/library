@@ -5676,6 +5676,27 @@ IfcRamp:
         expr: "predefined_type = \"STRAIGHT_RUN_RAMP\" or predefined_type = \"USERDEFINED\" or predefined_type = \"NOTDEFINED\""
         severity: "warning"
         message: "This class template draws a straight run; turning and spiral ramps are library objects (C-06)."
+      riser_range: null
+      going_range: null
+      step_rule_range: null
+      width_min: null
+      min_risers: null
+      gradient_ok:
+        expr: "rules.accessibility = null or rules.accessibility.ramp_gradient_max = null or gradient <= rules.accessibility.ramp_gradient_max"
+        severity: "warning"
+        message: "The gradient is steeper than the active accessibility rule set allows."
+      ramp_width_ok:
+        expr: "rules.accessibility = null or rules.accessibility.ramp_width_min = null or width >= rules.accessibility.ramp_width_min"
+        severity: "warning"
+        message: "The ramp is narrower than the active accessibility rule set."
+    rulesets:
+      stairs: null
+      accessibility:
+        default: null
+        note: "Off by default; shared accessibility rule sets (library rulesets/accessibility) set ramp limits."
+        fields:
+          ramp_gradient_max: "number"
+          ramp_width_min: "length"
   recipe:
     treads_below:
       when: "false"
@@ -5721,6 +5742,27 @@ IfcRampFlight:
         expr: "predefined_type = \"STRAIGHT\" or predefined_type = \"USERDEFINED\" or predefined_type = \"NOTDEFINED\""
         severity: "warning"
         message: "This class template draws a straight run; turning and spiral ramps are library objects (C-06)."
+      riser_range: null
+      going_range: null
+      step_rule_range: null
+      width_min: null
+      min_risers: null
+      gradient_ok:
+        expr: "rules.accessibility = null or rules.accessibility.ramp_gradient_max = null or gradient <= rules.accessibility.ramp_gradient_max"
+        severity: "warning"
+        message: "The gradient is steeper than the active accessibility rule set allows."
+      ramp_width_ok:
+        expr: "rules.accessibility = null or rules.accessibility.ramp_width_min = null or width >= rules.accessibility.ramp_width_min"
+        severity: "warning"
+        message: "The ramp is narrower than the active accessibility rule set."
+    rulesets:
+      stairs: null
+      accessibility:
+        default: null
+        note: "Off by default; shared accessibility rule sets (library rulesets/accessibility) set ramp limits."
+        fields:
+          ramp_gradient_max: "number"
+          ramp_width_min: "length"
   recipe:
     treads_below:
       when: "false"

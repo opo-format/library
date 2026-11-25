@@ -1,0 +1,42 @@
+kind: "ruleset"
+id: "stairs"
+label: "UK Approved Document K, private stair"
+uri: "https://opo-format.org/rulesets/stairs/uk-adk-private@0.1"
+source: "Approved Document K (England), private stair: rise, going, 2R + G, pitch."
+values:
+  riser_min:
+    value: "mm(150)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Minimum rise, private stair."
+  riser_max:
+    value: "mm(220)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Maximum rise, private stair."
+  going_min:
+    value: "mm(220)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Minimum going, private stair."
+  going_max:
+    value: "mm(300)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Maximum going, private stair."
+  rule_min:
+    value: "mm(550)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Minimum 2R + G."
+  rule_max:
+    value: "mm(700)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Maximum 2R + G."
+  width_min: "null"
+  pitch_max:
+    value: "42"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Maximum pitch of a private stair, degrees."

@@ -1,0 +1,31 @@
+kind: "ruleset"
+id: "escape_windows"
+label: "US International Residential Code, R310"
+uri: "https://opo-format.org/rulesets/escape_windows/us-irc@0.1"
+source: "IRC R310: emergency escape and rescue openings."
+values:
+  net_area_min:
+    value: "0.53"
+    source: "us-irc"
+    status: "to_verify"
+    note: "R310: net clear opening, 5.7 sq ft, in m²."
+  net_area_grade_min:
+    value: "0.465"
+    source: "us-irc"
+    status: "to_verify"
+    note: "R310: net clear opening at grade floor, 5.0 sq ft, in m²."
+  net_height_min:
+    value: "inch(24)"
+    source: "us-irc"
+    status: "to_verify"
+    note: "R310: net clear height."
+  net_width_min:
+    value: "inch(20)"
+    source: "us-irc"
+    status: "to_verify"
+    note: "R310: net clear width."
+  sill_max:
+    value: "inch(44)"
+    source: "us-irc"
+    status: "to_verify"
+    note: "R310: sill height above the floor."

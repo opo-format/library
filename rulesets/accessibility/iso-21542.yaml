@@ -1,0 +1,47 @@
+kind: "ruleset"
+id: "accessibility"
+label: "ISO 21542:2021"
+uri: "https://opo-format.org/rulesets/accessibility/iso-21542-2021@0.1"
+source: "ISO 21542:2021 door, control and ramp criteria. EN 17210 (EU) states the functional requirements."
+values:
+  min_clear_width:
+    value: "mm(800)"
+    source: "iso-21542-2021"
+    status: "to_verify"
+    note: "Door clear opening width, measured with the door open."
+  measure: "\"usable_clear_width\""
+  handle_min:
+    value: "mm(800)"
+    source: "iso-21542-2021"
+    status: "to_verify"
+    note: "Door hardware height, lowest."
+  handle_max:
+    value: "mm(1000)"
+    source: "iso-21542-2021"
+    status: "to_verify"
+    note: "Door hardware height, highest."
+  clear_height_min:
+    value: "mm(2000)"
+    source: "iso-21542-2021"
+    status: "to_verify"
+    note: "Door clear height."
+  threshold_max:
+    value: "mm(20)"
+    source: "iso-21542-2021"
+    status: "to_verify"
+    note: "Threshold height."
+  controls_min:
+    value: "mm(800)"
+    source: "iso-21542-2021"
+    status: "to_verify"
+    note: "Controls and switches, lowest height."
+  controls_max:
+    value: "mm(1100)"
+    source: "iso-21542-2021"
+    status: "to_verify"
+    note: "Controls and switches, highest height."
+  ramp_width_min:
+    value: "mm(1000)"
+    source: "iso-21542-2021"
+    status: "to_verify"
+    note: "Ramp clear width between handrails."

@@ -1,0 +1,41 @@
+kind: "ruleset"
+id: "kitchen"
+label: "EN 1116:2018"
+uri: "https://opo-format.org/rulesets/kitchen/en-1116-2018@0.1"
+source: "EN 1116:2018 kitchen furniture co-ordinating sizes."
+values:
+  worktop_heights:
+    value: "[mm(850), mm(900), mm(950)]"
+    source: "en-1116-2018"
+    status: "to_verify"
+    note: "Worktop heights (+0 / +50 mm)."
+  worktop_depth_min:
+    value: "mm(600)"
+    source: "en-1116-2018"
+    status: "to_verify"
+    note: "Worktop depth."
+  base_depth_min:
+    value: "mm(550)"
+    source: "en-1116-2018"
+    status: "to_verify"
+    note: "Base unit depth under a 600 mm worktop."
+  wall_depth_min:
+    value: "mm(310)"
+    source: "en-1116-2018"
+    status: "to_verify"
+    note: "Wall unit depth, smallest."
+  wall_depth_max:
+    value: "mm(400)"
+    source: "en-1116-2018"
+    status: "to_verify"
+    note: "Wall unit depth, largest."
+  wall_unit_gap_min:
+    value: "mm(450)"
+    source: "en-1116-2018"
+    status: "to_verify"
+    note: "Worktop to wall unit."
+  plinth_min:
+    value: "mm(80)"
+    source: "en-1116-2018"
+    status: "to_verify"
+    note: "Plinth height."

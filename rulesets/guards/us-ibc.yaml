@@ -1,0 +1,21 @@
+kind: "ruleset"
+id: "guards"
+label: "US International Building Code, 1015"
+uri: "https://opo-format.org/rulesets/guards/us-ibc@0.1"
+source: "IBC 1015: guard height and openings."
+values:
+  height_min:
+    value: "inch(42)"
+    source: "us-ibc"
+    status: "to_verify"
+    note: "1015: minimum guard height."
+  opening_max:
+    value: "inch(4)"
+    source: "us-ibc"
+    status: "to_verify"
+    note: "1015: sphere that must not pass, up to 36 in."
+  opening_upper_max:
+    value: "inch(4.375)"
+    source: "us-ibc"
+    status: "to_verify"
+    note: "1015: sphere that must not pass, 36 to 42 in."

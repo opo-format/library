@@ -1,0 +1,12 @@
+kind: "ruleset"
+id: "accessibility"
+label: "UK Approved Document M (ramps)"
+uri: "https://opo-format.org/rulesets/accessibility/uk-adm@0.1"
+source: "Approved Document M (England), ramp gradients."
+note: "Door values from AD M are still to be added."
+values:
+  ramp_gradient_max:
+    value: "1 / 20"
+    source: "uk-approved-document-m"
+    status: "to_verify"
+    note: "Ramp gradient for a going up to 10 m (500 mm rise); steeper gradients for shorter goings per the AD M table."

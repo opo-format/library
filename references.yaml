@@ -7,6 +7,10 @@ bim-all-doors-dormakaba:
 bs-4787-uk-metric-and-uk-imperial-door-sizes:
   title: "BS 4787 (UK metric) and UK imperial door sizes"
   kind: "other"
+en-1116-2018:
+  title: "EN 1116:2018 Kitchen furniture — Co-ordinating sizes for kitchen furniture and kitchen appliances"
+  kind: "norm"
+  edition: "2018"
 generic-metric-openings-no-eu-door-size-norm-exists:
   title: "Generic metric openings (no EU door size norm exists)"
   kind: "other"
@@ -15,6 +19,10 @@ ifc-4.3-pset-doorliningproperties-pset-doorpanelproperties:
   kind: "ifc"
   licence: "buildingSMART"
   url: "https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/Pset_DoorLiningProperties.htm"
+iso-21542-2021:
+  title: "ISO 21542:2021 Building construction — Accessibility and usability of the built environment"
+  kind: "norm"
+  edition: "2021"
 iso-21542-2021-eu-en-17210-functional-requirements-ada-2010:
   title: "ISO 21542:2021 (EU: EN 17210 functional requirements), ADA 2010 Standards §404"
   kind: "regulation"
@@ -23,6 +31,25 @@ osarch-door-window-generator-discussion-door-frame-set:
   kind: "other"
   licence: "CC-BY-4.0"
   url: "https://community.osarch.org/discussion/comment/24127/"
+uk-approved-document-k:
+  title: "Approved Document K: Protection from falling, collision and impact (England)"
+  kind: "regulation"
+uk-approved-document-m:
+  title: "Approved Document M: Access to and use of buildings (England)"
+  kind: "regulation"
+us-ada-2010-standards:
+  title: "2010 ADA Standards for Accessible Design"
+  kind: "regulation"
+  edition: "2010"
+us-ibc:
+  title: "International Building Code (IBC)"
+  kind: "regulation"
 us-industry-standard-door-sizes:
   title: "US industry standard door sizes"
+  kind: "other"
+us-irc:
+  title: "International Residential Code (IRC)"
+  kind: "regulation"
+us-kitchen-cabinet-practice:
+  title: "US kitchen cabinet sizes, industry practice (maker catalogues)"
   kind: "other"

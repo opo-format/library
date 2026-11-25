@@ -1,0 +1,34 @@
+kind: "ruleset"
+id: "stairs"
+label: "US International Building Code, 1011"
+uri: "https://opo-format.org/rulesets/stairs/us-ibc@0.1"
+source: "IBC 1011 (other buildings): riser, tread depth, width, headroom."
+values:
+  riser_min:
+    value: "inch(4)"
+    source: "us-ibc"
+    status: "to_verify"
+    note: "1011: minimum riser height."
+  riser_max:
+    value: "inch(7)"
+    source: "us-ibc"
+    status: "to_verify"
+    note: "1011: maximum riser height."
+  going_min:
+    value: "inch(11)"
+    source: "us-ibc"
+    status: "to_verify"
+    note: "1011: minimum tread depth."
+  going_max: "null"
+  rule_min: "null"
+  rule_max: "null"
+  width_min:
+    value: "inch(44)"
+    source: "us-ibc"
+    status: "to_verify"
+    note: "1011: minimum stair width."
+  headroom_min:
+    value: "inch(80)"
+    source: "us-ibc"
+    status: "to_verify"
+    note: "1011: minimum headroom."

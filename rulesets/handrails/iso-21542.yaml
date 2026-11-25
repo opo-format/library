@@ -1,0 +1,26 @@
+kind: "ruleset"
+id: "handrails"
+label: "ISO 21542:2021"
+uri: "https://opo-format.org/rulesets/handrails/iso-21542-2021@0.1"
+source: "ISO 21542:2021 handrail heights."
+values:
+  height_min:
+    value: "mm(850)"
+    source: "iso-21542-2021"
+    status: "to_verify"
+    note: "Top handrail, lowest height."
+  height_max:
+    value: "mm(1000)"
+    source: "iso-21542-2021"
+    status: "to_verify"
+    note: "Top handrail, highest height."
+  lower_min:
+    value: "mm(600)"
+    source: "iso-21542-2021"
+    status: "to_verify"
+    note: "Second, lower handrail, lowest height."
+  lower_max:
+    value: "mm(750)"
+    source: "iso-21542-2021"
+    status: "to_verify"
+    note: "Second, lower handrail, highest height."

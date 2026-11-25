@@ -1,0 +1,37 @@
+kind: "ruleset"
+id: "stairs"
+label: "UK Approved Document K, utility stair"
+uri: "https://opo-format.org/rulesets/stairs/uk-adk-utility@0.1"
+source: "Approved Document K (England), utility stair: rise, going, 2R + G."
+values:
+  riser_min:
+    value: "mm(150)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Minimum rise, utility stair."
+  riser_max:
+    value: "mm(190)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Maximum rise, utility stair."
+  going_min:
+    value: "mm(250)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Minimum going, utility stair."
+  going_max:
+    value: "mm(400)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Maximum going, utility stair."
+  rule_min:
+    value: "mm(550)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Minimum 2R + G."
+  rule_max:
+    value: "mm(700)"
+    source: "uk-approved-document-k"
+    status: "to_verify"
+    note: "Maximum 2R + G."
+  width_min: "null"
