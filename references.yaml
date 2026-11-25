@@ -24,6 +24,11 @@ ifc-4.3-add2-ifcstair:
   kind: "ifc"
   licence: "buildingSMART"
   url: "https://identifier.buildingsmart.org/uri/buildingsmart/ifc/4.3/class/IfcStair"
+ifc-4.3-add2-ifcwindow:
+  title: "IFC 4.3 ADD2 IfcWindow, IfcWindowTypeEnum and its property and quantity set templates"
+  kind: "ifc"
+  licence: "buildingSMART"
+  url: "https://identifier.buildingsmart.org/uri/buildingsmart/ifc/4.3/class/IfcWindow"
 ifc-4.3-pset-doorliningproperties-pset-doorpanelproperties:
   title: "IFC 4.3 Pset_DoorLiningProperties, Pset_DoorPanelProperties"
   kind: "ifc"

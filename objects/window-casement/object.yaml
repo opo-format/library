@@ -1,11 +1,24 @@
 id: "window-casement"
 name: "Casement / tilt-turn window"
-status: "planned"
+version: "0.1.0"
+status: "draft"
 priority: "P1"
 catalogue_id: "O-08"
-ifc:
-  class: "IfcWindow"
-  predefinedType: "WINDOW"
+description: "Window in a wall opening with 1–3 panels, each fixed, side-hung or tilt-turn, opening in or out, an optional transom with a fixed top light, frame, mullions, sashes, glazing, glazing bars, interior and exterior sills and handles. In custom outline mode the frame follows the outline and the window has one fixed pane. Defaults are illustrative design values, not maker or norm values; the escape windows and guards rule sets add checks."
+tags:
+  - "window"
+  - "casement"
+  - "tilt-turn"
+  - "outline"
+  - "openings"
+template: "IfcWindow"
+references:
+  - ref: "ifc-4.3-add2-ifcwindow"
+    role: "IFC parameters"
+    used: "Class, PartitioningType, Pset_WindowLiningProperties and Pset_WindowPanelProperties names."
+  - ref: "us-irc"
+    role: "rules"
+    used: "Escape window and guard checks through the shared rule sets."
 sheet:
   scope: "The reference rectangular window: 1–3 vertical panels, optional transom with top light, each panel fixed, side-hung (casement) or tilt-turn; frame, sash, glazing unit, glazing bars, sill, handles. Inward (EU) or outward (UK/US casement) opening."
   not_in_scope:
@@ -20,3 +33,948 @@ sheet:
   lod: "3D: low pane in opening · medium frame, sash, glass, sills · high + glazing beads, handles, hinges. Plan: low frame lines + glass line · medium frame/sash cut (hatched) + glass + sills · high cut. Elevation: medium frame, sash outlines, opening triangles (annotation, apex at hinge side; tilt shown as triangle pointing down)."
   open_questions:
     - "Exact frame/sash profiles: one generic profile (timber, PVC, aluminium as presets) vs. profile input slot."
+parameters:
+  outline_mode:
+    type: "choice"
+    default: "rectangle"
+    label: "Shape"
+    group: "Size"
+    options:
+      - "rectangle"
+      - "custom"
+    option_labels:
+      rectangle: "Rectangle (width × height drive)"
+      custom: "Custom outline (outline drives, width and height read-only)"
+  width:
+    type: "length"
+    default: 1.2
+    label: "Width"
+    group: "Size"
+    visible: "outline_mode = \"rectangle\""
+    limits:
+      min: 0.01
+      max: 50
+  height:
+    type: "length"
+    default: 1.35
+    label: "Height"
+    group: "Size"
+    visible: "outline_mode = \"rectangle\""
+    limits:
+      min: 0.01
+      max: 50
+  sill_height:
+    type: "length"
+    default: 0.9
+    label: "Bottom above host base"
+    group: "Placement"
+    limits:
+      min: -5
+      max: 50
+  fitting_gap:
+    type: "length"
+    default: 0.01
+    label: "Fitting gap round the frame"
+    group: "Frame"
+    limits:
+      min: 0.0
+      max: 0.05
+  panels:
+    type: "integer"
+    default: 2
+    label: "Panels"
+    group: "Panels"
+    visible: "outline_mode = \"rectangle\""
+    limits:
+      min: 1
+      max: 3
+  panel_1_operation:
+    type: "choice"
+    default: "side_left"
+    label: "Panel 1"
+    group: "Panels"
+    options:
+      - "fixed"
+      - "side_left"
+      - "side_right"
+      - "tilt_turn_left"
+      - "tilt_turn_right"
+    visible: "outline_mode = \"rectangle\" and panels >= 1"
+    option_labels:
+      fixed: "Fixed"
+      side_left: "Side-hung, hinges left"
+      side_right: "Side-hung, hinges right"
+      tilt_turn_left: "Tilt-turn, hinges left"
+      tilt_turn_right: "Tilt-turn, hinges right"
+  panel_2_operation:
+    type: "choice"
+    default: "tilt_turn_right"
+    label: "Panel 2"
+    group: "Panels"
+    options:
+      - "fixed"
+      - "side_left"
+      - "side_right"
+      - "tilt_turn_left"
+      - "tilt_turn_right"
+    visible: "outline_mode = \"rectangle\" and panels >= 2"
+    option_labels:
+      fixed: "Fixed"
+      side_left: "Side-hung, hinges left"
+      side_right: "Side-hung, hinges right"
+      tilt_turn_left: "Tilt-turn, hinges left"
+      tilt_turn_right: "Tilt-turn, hinges right"
+  panel_3_operation:
+    type: "choice"
+    default: "fixed"
+    label: "Panel 3"
+    group: "Panels"
+    options:
+      - "fixed"
+      - "side_left"
+      - "side_right"
+      - "tilt_turn_left"
+      - "tilt_turn_right"
+    visible: "outline_mode = \"rectangle\" and panels >= 3"
+    option_labels:
+      fixed: "Fixed"
+      side_left: "Side-hung, hinges left"
+      side_right: "Side-hung, hinges right"
+      tilt_turn_left: "Tilt-turn, hinges left"
+      tilt_turn_right: "Tilt-turn, hinges right"
+  transom:
+    type: "boolean"
+    default: false
+    label: "Transom with a fixed top light"
+    group: "Panels"
+    visible: "outline_mode = \"rectangle\""
+  top_light_height:
+    type: "length"
+    default: 0.4
+    label: "Top light height"
+    group: "Panels"
+    visible: "outline_mode = \"rectangle\" and transom"
+    limits:
+      min: 0.15
+      max: 1.5
+  opening_direction:
+    type: "choice"
+    default: "in"
+    label: "Sashes open"
+    group: "Panels"
+    options:
+      - "in"
+      - "out"
+    description: "Inward is usual in continental Europe, outward for UK and US casements."
+  frame_width:
+    type: "length"
+    default: 0.07
+    label: "Frame width (lining thickness)"
+    group: "Frame"
+    limits:
+      min: 0.02
+      max: 0.3
+  frame_depth:
+    type: "length"
+    default: 0.08
+    label: "Frame depth"
+    group: "Frame"
+    limits:
+      min: 0.03
+      max: 0.4
+  sash_width:
+    type: "length"
+    default: 0.06
+    label: "Sash width"
+    group: "Sash"
+    limits:
+      min: 0.03
+      max: 0.15
+  sash_depth:
+    type: "length"
+    default: 0.07
+    label: "Sash depth"
+    group: "Sash"
+    limits:
+      min: 0.03
+      max: 0.15
+  glass_thickness:
+    type: "length"
+    default: 0.024
+    label: "Glazing unit thickness"
+    group: "Glazing"
+    limits:
+      min: 0.004
+      max: 0.08
+  bar_rows:
+    type: "integer"
+    default: 0
+    label: "Glazing bar rows"
+    group: "Glazing bars"
+    limits:
+      min: 0
+      max: 8
+  bar_columns:
+    type: "integer"
+    default: 0
+    label: "Glazing bar columns (per panel)"
+    group: "Glazing bars"
+    limits:
+      min: 0
+      max: 8
+  bar_width:
+    type: "length"
+    default: 0.025
+    label: "Glazing bar width"
+    group: "Glazing bars"
+    visible: "bar_rows > 0 or bar_columns > 0"
+    limits:
+      min: 0.01
+      max: 0.06
+  reveal_offset:
+    type: "length"
+    default: 0.0
+    label: "Frame offset from the wall centre"
+    group: "Placement"
+    limits:
+      min: -0.3
+      max: 0.3
+    description: "Positive towards the outside (+y)."
+  interior_sill:
+    type: "boolean"
+    default: true
+    label: "Interior sill board"
+    group: "Sills"
+  exterior_sill:
+    type: "boolean"
+    default: true
+    label: "Exterior sill"
+    group: "Sills"
+  sill_projection:
+    type: "length"
+    default: 0.04
+    label: "Sill projection beyond the wall face"
+    group: "Sills"
+    limits:
+      min: 0.0
+      max: 0.15
+  handle_height:
+    type: "length"
+    default: 0.0
+    label: "Handle height above the sash bottom (0: centre)"
+    group: "Hardware"
+    limits:
+      min: 0.0
+      max: 2.0
+  frame_material:
+    type: "material"
+    default: "painted_timber"
+    label: "Frame"
+    group: "Materials"
+    options: "materials"
+  Pset_DoorWindowGlazingType:
+    type: "property_set"
+    default: {}
+    label: "Pset_DoorWindowGlazingType"
+    group: "IFC data"
+    properties:
+      - name: "GlassLayers"
+        measure: "IfcCountMeasure"
+      - name: "GlassThickness1"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "GlassThickness2"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "GlassThickness3"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "FillGas"
+        measure: "IfcLabel"
+      - name: "GlassColour"
+        measure: "IfcLabel"
+      - name: "IsTempered"
+        measure: "IfcBoolean"
+      - name: "IsLaminated"
+        measure: "IfcBoolean"
+      - name: "IsCoated"
+        measure: "IfcBoolean"
+      - name: "IsWired"
+        measure: "IfcBoolean"
+      - name: "VisibleLightReflectance"
+        measure: "IfcNormalisedRatioMeasure"
+      - name: "VisibleLightTransmittance"
+        measure: "IfcNormalisedRatioMeasure"
+      - name: "SolarAbsorption"
+        measure: "IfcNormalisedRatioMeasure"
+      - name: "SolarReflectance"
+        measure: "IfcNormalisedRatioMeasure"
+      - name: "SolarTransmittance"
+        measure: "IfcNormalisedRatioMeasure"
+      - name: "SolarHeatGainTransmittance"
+        measure: "IfcNormalisedRatioMeasure"
+      - name: "ShadingCoefficient"
+        measure: "IfcNormalisedRatioMeasure"
+      - name: "ThermalTransmittanceSummer"
+        measure: "IfcThermalTransmittanceMeasure"
+      - name: "ThermalTransmittanceWinter"
+        measure: "IfcThermalTransmittanceMeasure"
+    optional: false
+  Pset_PermeableCoveringProperties:
+    type: "property_set"
+    default: {}
+    label: "Pset_PermeableCoveringProperties"
+    group: "IFC data"
+    properties:
+      - name: "OperationType"
+        measure: "IfcLabel"
+        enum:
+          - "GRILL"
+          - "LOUVER"
+          - "SCREEN"
+          - "OTHER"
+          - "NOTKNOWN"
+          - "UNSET"
+      - name: "PanelPosition"
+        measure: "IfcLabel"
+        enum:
+          - "BOTTOM"
+          - "LEFT"
+          - "MIDDLE"
+          - "RIGHT"
+          - "TOP"
+          - "OTHER"
+          - "NOTKNOWN"
+          - "UNSET"
+      - name: "FrameDepth"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "FrameThickness"
+        measure: "IfcPositiveLengthMeasure"
+    optional: false
+  Pset_WindowCommon:
+    type: "property_set"
+    default: {}
+    label: "Pset_WindowCommon"
+    group: "IFC data"
+    properties:
+      - name: "Reference"
+        measure: "IfcIdentifier"
+      - name: "Status"
+        measure: "IfcLabel"
+        enum:
+          - "DEMOLISH"
+          - "EXISTING"
+          - "NEW"
+          - "TEMPORARY"
+          - "OTHER"
+          - "NOTKNOWN"
+          - "UNSET"
+      - name: "AcousticRating"
+        measure: "IfcLabel"
+      - name: "FireRating"
+        measure: "IfcLabel"
+      - name: "SecurityRating"
+        measure: "IfcLabel"
+      - name: "IsExternal"
+        measure: "IfcBoolean"
+      - name: "Infiltration"
+        measure: "IfcVolumetricFlowRateMeasure"
+      - name: "ThermalTransmittance"
+        measure: "IfcThermalTransmittanceMeasure"
+      - name: "GlazingAreaFraction"
+        measure: "IfcPositiveRatioMeasure"
+      - name: "HasSillExternal"
+        measure: "IfcBoolean"
+      - name: "HasSillInternal"
+        measure: "IfcBoolean"
+      - name: "HasDrive"
+        measure: "IfcBoolean"
+      - name: "SmokeStop"
+        measure: "IfcBoolean"
+      - name: "FireExit"
+        measure: "IfcBoolean"
+      - name: "WaterTightnessRating"
+        measure: "IfcLabel"
+      - name: "MechanicalLoadRating"
+        measure: "IfcLabel"
+      - name: "WindLoadRating"
+        measure: "IfcLabel"
+    optional: false
+  Pset_WindowLiningProperties:
+    type: "property_set"
+    default: {}
+    label: "Pset_WindowLiningProperties"
+    group: "IFC data"
+    properties:
+      - name: "LiningDepth"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "LiningThickness"
+        measure: "IfcNonNegativeLengthMeasure"
+      - name: "TransomThickness"
+        measure: "IfcNonNegativeLengthMeasure"
+      - name: "MullionThickness"
+        measure: "IfcNonNegativeLengthMeasure"
+      - name: "FirstTransomOffset"
+        measure: "IfcNormalisedRatioMeasure"
+      - name: "SecondTransomOffset"
+        measure: "IfcNormalisedRatioMeasure"
+      - name: "FirstMullionOffset"
+        measure: "IfcNormalisedRatioMeasure"
+      - name: "SecondMullionOffset"
+        measure: "IfcNormalisedRatioMeasure"
+      - name: "LiningOffset"
+        measure: "IfcLengthMeasure"
+      - name: "LiningToPanelOffsetX"
+        measure: "IfcLengthMeasure"
+      - name: "LiningToPanelOffsetY"
+        measure: "IfcLengthMeasure"
+    optional: false
+  Pset_WindowPanelProperties:
+    type: "property_set"
+    default: {}
+    label: "Pset_WindowPanelProperties"
+    group: "IFC data"
+    properties:
+      - name: "OperationType"
+        measure: "IfcLabel"
+        enum:
+          - "BOTTOMHUNG"
+          - "FIXEDCASEMENT"
+          - "OTHEROPERATION"
+          - "PIVOTHORIZONTAL"
+          - "PIVOTVERTICAL"
+          - "REMOVABLECASEMENT"
+          - "SIDEHUNGLEFTHAND"
+          - "SIDEHUNGRIGHTHAND"
+          - "SLIDINGHORIZONTAL"
+          - "SLIDINGVERTICAL"
+          - "TILTANDTURNLEFTHAND"
+          - "TILTANDTURNRIGHTHAND"
+          - "TOPHUNG"
+          - "OTHER"
+          - "NOTKNOWN"
+          - "UNSET"
+      - name: "PanelPosition"
+        measure: "IfcLabel"
+        enum:
+          - "BOTTOM"
+          - "LEFT"
+          - "MIDDLE"
+          - "RIGHT"
+          - "TOP"
+          - "OTHER"
+          - "NOTKNOWN"
+          - "UNSET"
+      - name: "FrameDepth"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "FrameThickness"
+        measure: "IfcPositiveLengthMeasure"
+    optional: false
+slots:
+  outline:
+    type: "polygon"
+    plane: "xz"
+    default: null
+    optional: true
+    rules:
+      closed: true
+      fits_host: true
+    description: "Custom outline in the host plane (custom outline mode)."
+rules:
+  derived:
+    is_recess: "false"
+    y_from: "host.y_min - 0.01"
+    y_to: "host.y_max + 0.01"
+    z_from: "host.bottom - 0.01"
+    z_to: "host.top + 0.01"
+    depth: "host.thickness"
+    profile_points: "if outline_mode = \"custom\" and outline != null then outline else [[-width / 2, sill_height], [width / 2, sill_height], [width / 2, sill_height + height], [-width / 2, sill_height + height]]"
+    open_width: "max(for p in profile_points return p[1]) - min(for p in profile_points return p[1])"
+    open_height: "max(for p in profile_points return p[2]) - min(for p in profile_points return p[2])"
+    area: "abs(sum(for i in 1..count(profile_points) return profile_points[i][1] * profile_points[modulo(i, count(profile_points)) + 1][2] - profile_points[modulo(i, count(profile_points)) + 1][1] * profile_points[i][2])) / 2"
+    above_cut:
+      expr: "min(for p in profile_points return p[2]) > view.cut_height"
+      note: "Opening starts above the plan cut: drawn dashed."
+    top: "sill_height + height"
+    rect: "outline_mode = \"rectangle\""
+    n: "if rect then panels else 1"
+    ops:
+      expr: "if rect then sublist([panel_1_operation, panel_2_operation, panel_3_operation], 1, n) else [\"fixed\"]"
+      note: "A custom outline has one fixed panel: sashes need straight hinge edges."
+    fy: "reveal_offset"
+    fd2: "frame_depth / 2"
+    x0: "-width / 2 + fitting_gap"
+    x1: "width / 2 - fitting_gap"
+    z0: "sill_height + fitting_gap"
+    z1: "sill_height + height - fitting_gap"
+    zi1: "if transom then z1 - frame_width - top_light_height - frame_width else z1 - frame_width"
+    pw:
+      expr: "(x1 - x0 - 2 * frame_width - (n - 1) * frame_width) / n"
+      note: "Clear width of each panel inside the frame and mullions."
+    px:
+      expr: "for i in 1..n return x0 + frame_width + (i - 1) * (pw + frame_width)"
+      note: "Left edge of each panel."
+    sy:
+      expr: "if opening_direction = \"in\" then fy - fd2 + sash_depth / 2 else fy + fd2 - sash_depth / 2"
+      note: "Sash centre, on the opening side of the frame."
+    hinge_left: "for o in ops return o = \"side_left\" or o = \"tilt_turn_left\""
+    opens: "for o in ops return o != \"fixed\""
+    sash_inner_w: "pw - 2 * sash_width"
+    sash_inner_h: "zi1 - (z0 + frame_width) - 2 * sash_width"
+    net_area:
+      expr: "if count(index_of(opens, true)) > 0 then sash_inner_w * sash_inner_h else 0"
+      note: "Net clear opening of one opening sash (for escape windows)."
+    outline_closed: "append(profile_points, profile_points[1])"
+    band_path:
+      expr: "concatenate([[(profile_points[1][1] + profile_points[2][1]) / 2, (profile_points[1][2] + profile_points[2][2]) / 2]], sublist(outline_closed, 2, count(outline_closed) - 1), [[(profile_points[1][1] + profile_points[2][1]) / 2, (profile_points[1][2] + profile_points[2][2]) / 2]])"
+      note: "The outline as a path starting mid-edge, so the band closes without a corner at its ends."
+    outline_ccw:
+      expr: "sum(for i in 1..count(profile_points) return profile_points[i][1] * profile_points[modulo(i, count(profile_points)) + 1][2] - profile_points[modulo(i, count(profile_points)) + 1][1] * profile_points[i][2]) > 0"
+      note: "Counter-clockwise outlines have their inside on the left."
+  checks:
+    outline_given:
+      expr: "outline_mode = \"rectangle\" or outline != null"
+      severity: "error"
+      message: "Custom outline mode needs an outline."
+    glass_positive:
+      expr: "width > 2 * frame_width and height > 2 * frame_width"
+      severity: "error"
+      message: "The frame is wider than the opening."
+    panels_fit:
+      expr: "pw > 2 * sash_width + 0.05"
+      severity: "error"
+      message: "The panels are too narrow for frame, mullions and sashes."
+    transom_fits:
+      expr: "not(transom) or zi1 - z0 > 0.3"
+      severity: "error"
+      message: "The top light leaves no room for the panels below."
+    escape_area:
+      expr: "rules.escape_windows = null or net_area >= rules.escape_windows.net_area_min"
+      severity: "warning"
+      message: "No sash gives the net clear opening the active escape window rule set requires."
+    escape_sill:
+      expr: "rules.escape_windows = null or sill_height <= rules.escape_windows.sill_max"
+      severity: "warning"
+      message: "The sill is higher than the active escape window rule set allows."
+    guard_needed:
+      expr: "rules.guards = null or rules.guards.height_min = null or sill_height >= rules.guards.height_min"
+      severity: "warning"
+      message: "The sill is below the guard height: a guard or safety glazing is needed."
+  rulesets:
+    escape_windows:
+      default: null
+      note: "Off by default. Shared variants (library rulesets/escape_windows)."
+      fields:
+        net_area_min: "number"
+        sill_max: "length"
+    guards:
+      default: null
+      note: "Off by default. Shared variants (library rulesets/guards)."
+      fields:
+        height_min: "length"
+recipe:
+  profile:
+    op: "polygon"
+    plane: "xz"
+    args:
+      points: "profile_points"
+  void_wall:
+    op: "extrude"
+    plane: "xz"
+    args:
+      profile: "profile"
+      from: "y_from"
+      to: "y_to"
+  void:
+    op: "union"
+    args:
+      items: "[void_wall]"
+  elev_outline:
+    op: "boundary_curves"
+    plane: "xz"
+    args:
+      region: "profile"
+  frame_rect:
+    op: "union"
+    when: "rect"
+    args:
+      items: "[box([x0, fy - fd2, z0], [x0 + frame_width, fy + fd2, z1]), box([x1 - frame_width, fy - fd2, z0], [x1, fy + fd2, z1]), box([x0, fy - fd2, z1 - frame_width], [x1, fy + fd2, z1]), box([x0, fy - fd2, z0], [x1, fy + fd2, z0 + frame_width])] "
+  mullions:
+    op: "for_each"
+    when: "rect and n > 1"
+    args:
+      items: "for i in 1..n - 1 return i"
+      as: "i"
+      do: "box([px[i] + pw, fy - fd2, z0 + frame_width], [px[i] + pw + frame_width, fy + fd2, zi1])"
+  transom_bar:
+    op: "box"
+    when: "rect and transom"
+    args:
+      min: "[x0 + frame_width, fy - fd2, zi1]"
+      max: "[x1 - frame_width, fy + fd2, zi1 + frame_width]"
+  top_light:
+    op: "box"
+    when: "rect and transom"
+    args:
+      min: "[x0 + frame_width, fy - glass_thickness / 2, zi1 + frame_width]"
+      max: "[x1 - frame_width, fy + glass_thickness / 2, z1 - frame_width]"
+  sashes:
+    op: "for_each"
+    when: "rect"
+    args:
+      items: "for i in 1..n return i"
+      as: "i"
+      do: "if opens[i] then union([box([px[i], sy - sash_depth / 2, z0 + frame_width], [px[i] + sash_width, sy + sash_depth / 2, zi1]), box([px[i] + pw - sash_width, sy - sash_depth / 2, z0 + frame_width], [px[i] + pw, sy + sash_depth / 2, zi1]), box([px[i], sy - sash_depth / 2, zi1 - sash_width], [px[i] + pw, sy + sash_depth / 2, zi1]), box([px[i], sy - sash_depth / 2, z0 + frame_width], [px[i] + pw, sy + sash_depth / 2, z0 + frame_width + sash_width])]) else null"
+  panes:
+    op: "for_each"
+    when: "rect"
+    args:
+      items: "for i in 1..n return i"
+      as: "i"
+      do: "if opens[i] then box([px[i] + sash_width, sy - glass_thickness / 2, z0 + frame_width + sash_width], [px[i] + pw - sash_width, sy + glass_thickness / 2, zi1 - sash_width]) else box([px[i], fy - glass_thickness / 2, z0 + frame_width], [px[i] + pw, fy + glass_thickness / 2, zi1])"
+  bars:
+    op: "for_each"
+    when: "rect and (bar_rows > 0 or bar_columns > 0)"
+    args:
+      items: "for i in 1..n return i"
+      as: "i"
+      do: "union(concatenate(for r in 1..max(bar_rows, 1) return if bar_rows > 0 then box([px[i], fy - glass_thickness, z0 + frame_width + r * (zi1 - z0 - frame_width) / (bar_rows + 1) - bar_width / 2], [px[i] + pw, fy + glass_thickness, z0 + frame_width + r * (zi1 - z0 - frame_width) / (bar_rows + 1) + bar_width / 2]) else null, for c in 1..max(bar_columns, 1) return if bar_columns > 0 then box([px[i] + c * pw / (bar_columns + 1) - bar_width / 2, fy - glass_thickness, z0 + frame_width], [px[i] + c * pw / (bar_columns + 1) + bar_width / 2, fy + glass_thickness, zi1]) else null))"
+    note: "Glazing bars across each panel, over the glass on both faces."
+  handles:
+    op: "for_each"
+    when: "rect"
+    args:
+      items: "for i in 1..n return i"
+      as: "i"
+      do: "if opens[i] then box([(if hinge_left[i] then px[i] + pw - sash_width / 2 else px[i] + sash_width / 2) - 0.015, (if opening_direction = \"in\" then sy - sash_depth / 2 - 0.05 else sy + sash_depth / 2), (if handle_height > 0 then z0 + frame_width + handle_height else (z0 + frame_width + zi1) / 2) - 0.07], [(if hinge_left[i] then px[i] + pw - sash_width / 2 else px[i] + sash_width / 2) + 0.015, (if opening_direction = \"in\" then sy - sash_depth / 2 else sy + sash_depth / 2 + 0.05), (if handle_height > 0 then z0 + frame_width + handle_height else (z0 + frame_width + zi1) / 2) + 0.07]) else null"
+  frame_ring_2d:
+    op: "band"
+    plane: "xz"
+    when: "not(rect)"
+    args:
+      path: "band_path"
+      left: "if outline_ccw then frame_width else 0"
+      right: "if outline_ccw then 0 else -frame_width"
+  pane_2d:
+    op: "difference"
+    plane: "xz"
+    when: "not(rect)"
+    args:
+      a: "profile"
+      b: "frame_ring_2d"
+  frame_custom:
+    op: "extrude"
+    plane: "xz"
+    when: "not(rect)"
+    args:
+      profile: "frame_ring_2d"
+      from: "fy - fd2"
+      to: "fy + fd2"
+  pane_custom:
+    op: "extrude"
+    plane: "xz"
+    when: "not(rect)"
+    args:
+      profile: "pane_2d"
+      from: "fy - glass_thickness / 2"
+      to: "fy + glass_thickness / 2"
+  sill_inside:
+    op: "box"
+    when: "interior_sill"
+    args:
+      min: "[x0 - 0.02, host.y_min - sill_projection, sill_height - 0.02]"
+      max: "[x1 + 0.02, fy - fd2, sill_height]"
+  sill_outside:
+    op: "box"
+    when: "exterior_sill"
+    args:
+      min: "[x0 - 0.03, fy + fd2, sill_height - 0.03]"
+      max: "[x1 + 0.03, host.y_max + sill_projection, sill_height]"
+  plan_frame:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[rectangle([x0, fy - fd2], [x0 + frame_width, fy + fd2]), rectangle([x1 - frame_width, fy - fd2], [x1, fy + fd2])]"
+  plan_mullions:
+    op: "for_each"
+    plane: "xy"
+    when: "rect and n > 1"
+    args:
+      items: "for i in 1..n - 1 return i"
+      as: "i"
+      do: "rectangle([px[i] + pw, fy - fd2], [px[i] + pw + frame_width, fy + fd2])"
+  plan_glass:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "for i in 1..n return i"
+      as: "i"
+      do: "line([px[i], fy], [px[i] + pw, fy])"
+  plan_sills:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[if interior_sill then rectangle([x0 - 0.02, host.y_min - sill_projection], [x1 + 0.02, fy - fd2]) else null, if exterior_sill then rectangle([x0 - 0.03, fy + fd2], [x1 + 0.03, host.y_max + sill_projection]) else null]"
+  elev_symbols:
+    op: "for_each"
+    plane: "xz"
+    when: "rect"
+    args:
+      items: "for i in 1..n return i"
+      as: "i"
+      do: "if opens[i] then union([if hinge_left[i] then polyline([[px[i] + pw, z0 + frame_width], [px[i], (z0 + frame_width + zi1) / 2], [px[i] + pw, zi1]]) else polyline([[px[i], z0 + frame_width], [px[i] + pw, (z0 + frame_width + zi1) / 2], [px[i], zi1]]), if ops[i] = \"tilt_turn_left\" or ops[i] = \"tilt_turn_right\" then polyline([[px[i], zi1], [px[i] + pw / 2, z0 + frame_width], [px[i] + pw, zi1]]) else null]) else null"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "void"
+        role: "void"
+      - geometry: "panes"
+        material: "\"glass\""
+      - geometry: "pane_custom"
+        material: "\"glass\""
+    note: "The void is not drawn; it cuts the host."
+  model.medium:
+    context: "model"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "void"
+        role: "void"
+      - geometry: "frame_rect"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "mullions"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "transom_bar"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "frame_custom"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "sashes"
+        material: "frame_material"
+        part: "Sash"
+      - geometry: "panes"
+        material: "\"glass\""
+        part: "Glazing"
+      - geometry: "top_light"
+        material: "\"glass\""
+        part: "Glazing"
+      - geometry: "pane_custom"
+        material: "\"glass\""
+        part: "Glazing"
+      - geometry: "bars"
+        material: "frame_material"
+        part: "Glazing bars"
+      - geometry: "sill_inside"
+        material: "frame_material"
+        part: "Sill"
+      - geometry: "sill_outside"
+        material: "\"aluminium\""
+        part: "Sill"
+  model.high:
+    context: "model"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "void"
+        role: "void"
+      - geometry: "frame_rect"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "mullions"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "transom_bar"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "frame_custom"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "sashes"
+        material: "frame_material"
+        part: "Sash"
+      - geometry: "panes"
+        material: "\"glass\""
+        part: "Glazing"
+      - geometry: "top_light"
+        material: "\"glass\""
+        part: "Glazing"
+      - geometry: "pane_custom"
+        material: "\"glass\""
+        part: "Glazing"
+      - geometry: "bars"
+        material: "frame_material"
+        part: "Glazing bars"
+      - geometry: "sill_inside"
+        material: "frame_material"
+        part: "Sill"
+      - geometry: "sill_outside"
+        material: "\"aluminium\""
+        part: "Sill"
+      - geometry: "handles"
+        material: "\"aluminium\""
+        part: "Hardware"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_frame"
+        class: "cut"
+      - geometry: "plan_mullions"
+        class: "cut"
+      - geometry: "plan_glass"
+        class: "cut"
+      - geometry: "plan_sills"
+        class: "projected"
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_frame"
+        class: "cut"
+      - geometry: "plan_mullions"
+        class: "cut"
+      - geometry: "plan_glass"
+        class: "cut"
+      - geometry: "plan_sills"
+        class: "projected"
+    note: "Wall openings below the cut show as a gap in the host's cut; openings above the cut are drawn dashed with a cross. Slab openings: outline with a cross."
+  plan.high:
+    context: "plan"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_frame"
+        class: "cut"
+      - geometry: "plan_mullions"
+        class: "cut"
+      - geometry: "plan_glass"
+        class: "cut"
+      - geometry: "plan_sills"
+        class: "projected"
+  elevation:
+    context: "elevation"
+    lod: "all"
+    source: "authored"
+    ifc:
+      context: "Profile"
+      targetView: "ELEVATION_VIEW"
+    items:
+      - geometry: "elev_outline"
+        class: "projected"
+      - geometry: "elev_symbols"
+        class: "annotation"
+host:
+  hosts:
+    - "IfcWall"
+    - "IfcSlab"
+    - "IfcRoof"
+    - "IfcCovering"
+    - "IfcPlate"
+    - "IfcCurtainWall"
+    - "IfcBeam"
+    - "IfcColumn"
+    - "IfcMember"
+  inputs:
+    thickness:
+      type: "length"
+      default: 0.2
+    y_min:
+      type: "length"
+      default: -0.1
+    y_max:
+      type: "length"
+      default: 0.1
+    bottom:
+      type: "length"
+      default: 0.0
+    top:
+      type: "length"
+      default: 3.0
+  void:
+    geometry: "void"
+    ifc: "this element (IfcRelVoidsElement to the host)"
+  insertion:
+    point: "[0, 0, 0]"
+    description: "Wall: centre of the width on the host axis at the host base. Slab: the outline's own coordinates on the slab."
+handles:
+  - parameter: "width"
+    view:
+      - "elevation"
+      - "model"
+    at: "[width / 2, 0, sill_height + height / 2]"
+    axis: "x"
+    symmetric: true
+  - parameter: "height"
+    view:
+      - "elevation"
+      - "model"
+    at: "[0, 0, sill_height + height]"
+    axis: "z"
+  - slot: "outline"
+    kind: "points"
+    view:
+      - "elevation"
+    visible: "outline_mode = \"custom\""
+materials:
+  - "painted_timber"
+  - "glass"
+  - "aluminium"
+ifc:
+  class: "IfcWindow"
+  predefinedType: "\"WINDOW\""
+  property_sets: "all parameters of type property_set, with the values set by `value` formulas"
+  properties:
+    bsi::ifc::prop::OverallWidth: "open_width"
+    bsi::ifc::prop::OverallHeight: "open_height"
+    bsi::ifc::prop::PartitioningType: "if not(rect) then \"SINGLE_PANEL\" else if not(transom) then (if n = 1 then \"SINGLE_PANEL\" else if n = 2 then \"DOUBLE_PANEL_VERTICAL\" else \"TRIPLE_PANEL_VERTICAL\") else if n = 1 then \"DOUBLE_PANEL_HORIZONTAL\" else \"USERDEFINED\""
+    Pset_WindowLiningProperties.LiningDepth: "frame_depth"
+    Pset_WindowLiningProperties.LiningThickness: "frame_width"
+    Pset_WindowLiningProperties.MullionThickness: "if n > 1 then frame_width else null"
+    Pset_WindowLiningProperties.TransomThickness: "if transom then frame_width else null"
+  quantities:
+    Qto_WindowBaseQuantities:
+      values:
+        Width: "open_width"
+        Height: "open_height"
+        Area: "area"
+      from_geometry:
+        - "Perimeter"
+  parameter_pset: "OPO_Parameters"
+  decomposition: "IfcWindow with one Pset_WindowPanelProperties per panel (OperationType from the panel operation)."
