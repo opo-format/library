@@ -1,10 +1,20 @@
 id: "curtain-wall-stick"
-name: "Stick curtain wall (captured, butt-joint, SSG)"
-status: "planned"
+name: "Stick curtain wall"
+version: "0.1.0"
+status: "draft"
 priority: "P1"
 catalogue_id: "O-16"
-ifc:
-  class: "IfcCurtainWall"
+description: "Mullion-and-transom curtain wall on a drawn baseline: mullions on a module (best division per straight run), a spandrel and a vision zone in every storey, captured, butt-jointed or SSG joints, corners. Members and panels are swappable component objects; per-wall edits (merged cells, a door in a cell) are instance overrides. Defaults are illustrative design values."
+tags:
+  - "curtain wall"
+  - "facade"
+  - "grid"
+  - "stick system"
+template: "IfcCurtainWall"
+references:
+  - ref: "ifc-4.3-add2-ifccurtainwall"
+    role: "IFC parameters"
+    used: "Class, USERDEFINED predefined type with the STICK object type, aggregation of members and panels."
 sheet:
   scope: "Mullion-and-transom system assembled on site: continuous mullions anchored to slabs, transoms between them, glazing **captured** with pressure plates and caps, or **butt-jointed** (silicone joints, no caps) on one or both directions, or **SSG** (glass bonded, flush outside). Spandrel zones, shadow boxes, vents and doors in cells. Corners outside/inside."
   not_in_scope:
@@ -13,3 +23,299 @@ sheet:
   ifc: "IfcCurtainWall · USERDEFINED (STICK) · Priority: high-rise core element; also exercises surface/grid inputs and nesting."
   parameters: "grid U/V (see shared rules) · `mullion_profile` (face width × depth, default 0.05 × 0.15 m / 2\" × 6\") · `transom_profile` · `joint_vertical`, `joint_horizontal` captured | butt_joint | ssg · `cap_profile` (captured: depth, shape) · `butt_joint_width` (default 0.015–0.02 m) · `glass_thickness` (IGU, default 0.032 m) · `glass_offset` (glass plane vs. mullion face) · `spandrel_zone` per floor (height from slab) · `slab_edge` (fire stop line, bracket type)."
   rules: "Shared rules + mullion span between anchors (floor-to-floor) vs. depth."
+parameters:
+  module:
+    type: "length"
+    default: 1.5
+    label: "Module (mullion spacing)"
+    group: "Grid"
+    limits:
+      min: 0.6
+      max: 4.0
+    description: "Target spacing; the bays are scaled to fit each straight run (best division)."
+  storey_height:
+    type: "length"
+    default: 3.3
+    label: "Storey height"
+    group: "Grid"
+    limits:
+      min: 2.4
+      max: 6.0
+    description: "The spandrel zone repeats in every storey."
+  spandrel_height:
+    type: "length"
+    default: 0.9
+    label: "Spandrel zone height"
+    group: "Grid"
+    limits:
+      min: 0.0
+      max: 2.0
+    description: "Opaque zone at each floor, from the slab level up; 0 for full-height vision."
+  mullion_width:
+    type: "length"
+    default: 0.05
+    label: "Mullion face width"
+    group: "Profiles"
+    limits:
+      min: 0.02
+      max: 0.2
+  mullion_depth:
+    type: "length"
+    default: 0.15
+    label: "Mullion depth"
+    group: "Profiles"
+    limits:
+      min: 0.03
+      max: 0.6
+  transom_width:
+    type: "length"
+    default: 0.05
+    label: "Transom face width"
+    group: "Profiles"
+    limits:
+      min: 0.02
+      max: 0.2
+  transom_depth:
+    type: "length"
+    default: 0.12
+    label: "Transom depth"
+    group: "Profiles"
+    limits:
+      min: 0.03
+      max: 0.6
+  joint_vertical:
+    type: "choice"
+    default: "captured"
+    group: "Joints"
+    options:
+      - "captured"
+      - "butt_joint"
+      - "ssg"
+    option_labels:
+      captured: "Captured (pressure plate and cap)"
+      butt_joint: "Butt joint (silicone, no cap)"
+      ssg: "Structural silicone glazing (flush)"
+    label: "Vertical joints"
+  joint_horizontal:
+    type: "choice"
+    default: "captured"
+    group: "Joints"
+    options:
+      - "captured"
+      - "butt_joint"
+      - "ssg"
+    option_labels:
+      captured: "Captured (pressure plate and cap)"
+      butt_joint: "Butt joint (silicone, no cap)"
+      ssg: "Structural silicone glazing (flush)"
+    label: "Horizontal joints"
+  cap_depth:
+    type: "length"
+    default: 0.02
+    label: "Cap depth"
+    group: "Joints"
+    limits:
+      min: 0.005
+      max: 0.1
+  glass_thickness:
+    type: "length"
+    default: 0.032
+    label: "Glass unit thickness"
+    group: "Glazing"
+    limits:
+      min: 0.006
+      max: 0.08
+  join:
+    type: "choice"
+    default: "u_continuous"
+    label: "Continuous members"
+    group: "Grid"
+    options:
+      - "u_continuous"
+      - "v_continuous"
+    option_labels:
+      u_continuous: "Mullions run through (stick system)"
+      v_continuous: "Transoms run through"
+  frame_classes:
+    type: "component"
+    interface: "frame"
+    default: null
+    label: "Frame members"
+    group: "Components"
+    allowed:
+      ifc_class: "IfcMember"
+    classes:
+      mullion: "opo-format.org/library/objects/curtain-wall-mullion"
+      transom: "opo-format.org/library/objects/curtain-wall-mullion"
+      boundary: "opo-format.org/library/objects/curtain-wall-mullion"
+      corner: "opo-format.org/library/objects/curtain-wall-mullion"
+      default: "opo-format.org/library/objects/curtain-wall-mullion"
+  panel_classes:
+    type: "component"
+    interface: "panel"
+    default: null
+    label: "Panels"
+    group: "Components"
+    classes:
+      vision: "opo-format.org/library/objects/curtain-wall-panel"
+      spandrel: "opo-format.org/library/objects/curtain-wall-panel"
+      default: "opo-format.org/library/objects/curtain-wall-panel"
+slots:
+  surface:
+    type: "surface"
+    default:
+      baseline: [[0.0, 0.0], [6.0, 0.0], [6.0, 3.0]]
+      base: 0.0
+      top: 6.6
+    description: "Baseline in plan (the glass plane, front to the right) with base and top heights."
+  overrides:
+    type: "overrides"
+    default: []
+    description: "Edits of this placed wall: remove a transom or mullion to merge cells, change a class, put another object in a cell or on a segment."
+rules:
+  derived:
+    base: "surface.base"
+    top: "surface.top"
+    height: "top - base"
+    floors:
+      expr: "for k in 1..max(1, ceiling(height / storey_height - 0.001)) return (k - 1) * storey_height"
+      note: "Floor levels above the base inside the wall."
+    levels_within:
+      expr: "for f in floors return if f > 0 then f else null"
+      note: "Break points of the vertical layout."
+    v_pattern:
+      expr: "if spandrel_height > 0 then [{size: spandrel_height, cls: \"spandrel\"}, {size: storey_height - spandrel_height, flexible: true, cls: \"vision\"}] else [{size: storey_height, flexible: true, cls: \"vision\"}]"
+      note: "Per storey: a spandrel zone, then vision."
+  checks:
+    spandrel_fits:
+      expr: "spandrel_height < storey_height - 0.3"
+      severity: "error"
+      message: "The spandrel zone leaves no vision zone."
+recipe:
+  g:
+    op: "grid"
+    args:
+      surface: "surface"
+      u: "{pattern: [{size: module, flexible: true}], distribution: \"best_division\"}"
+      v: "{pattern: v_pattern, distribution: \"best_division\", within: flatten(for f in levels_within return if f = null then [] else [f])}"
+      join: "join"
+      overrides: "overrides"
+      widths: "{mullion: reported(component_for(frame_classes, \"mullion\"), \"face_width\", {profile_width: mullion_width}), boundary: reported(component_for(frame_classes, \"boundary\"), \"face_width\", {profile_width: mullion_width}), corner: reported(component_for(frame_classes, \"corner\"), \"face_width\", {profile_width: mullion_width}), transom: reported(component_for(frame_classes, \"transom\"), \"face_width\", {profile_width: transom_width})}"
+    note: "Mullions on the module, a spandrel and a vision zone in every storey."
+  frames:
+    op: "for_each"
+    args:
+      items: "g.segments"
+      as: "s"
+      do: "instance(if s.component != null then s.component else component_for(frame_classes, s.cls), if s.values != null then s.values else {profile_width: if s.direction = \"v\" then mullion_width else transom_width, profile_depth: if s.direction = \"v\" then mullion_depth else transom_depth, joint: if s.direction = \"v\" then joint_vertical else joint_horizontal, cap_depth: cap_depth, glass_thickness: glass_thickness}, {path: s.path, normal: s.normal, trim_start: s.trim_start, trim_end: s.trim_end, left_cell: null, right_cell: null})"
+  panels:
+    op: "for_each"
+    args:
+      items: "g.cells"
+      as: "c"
+      do: "instance(if c.component != null then c.component else component_for(panel_classes, c.cls), if c.values != null then c.values else {kind: if c.cls = \"spandrel\" then \"spandrel\" else \"vision\", glass_thickness: glass_thickness}, {outline: c.panel_outline, normal: c.normal, insets: c.insets})"
+  plan_frames:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "for s in g.segments return if s.direction = \"v\" and s.start[3] < base + 0.001 then s else null"
+      as: "s"
+      do: "if s = null then null else instance(component_for(frame_classes, s.cls), {profile_width: if s.direction = \"v\" then mullion_width else transom_width, profile_depth: if s.direction = \"v\" then mullion_depth else transom_depth, joint: if s.direction = \"v\" then joint_vertical else joint_horizontal, cap_depth: cap_depth, glass_thickness: glass_thickness}, {path: s.path, normal: s.normal, trim_start: 0, trim_end: 0, left_cell: null, right_cell: null}, \"plan.medium\")"
+  plan_glass:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "for c in g.cells return if c.row = 0 then c else null"
+      as: "c"
+      do: "if c = null then null else line([c.panel_outline[1][1], c.panel_outline[1][2]], [c.panel_outline[2][1], c.panel_outline[2][2]])"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "frames"
+        part: "Frame members"
+      - geometry: "panels"
+        part: "Panels"
+  model.medium:
+    context: "model"
+    lod: "medium"
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "frames"
+        part: "Frame members"
+      - geometry: "panels"
+        part: "Panels"
+  model.high:
+    context: "model"
+    lod: "high"
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "frames"
+        part: "Frame members"
+      - geometry: "panels"
+        part: "Panels"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_frames"
+        class: "cut"
+      - geometry: "plan_glass"
+        class: "cut"
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_frames"
+        class: "cut"
+      - geometry: "plan_glass"
+        class: "cut"
+  plan.high:
+    context: "plan"
+    lod: "high"
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_frames"
+        class: "cut"
+      - geometry: "plan_glass"
+        class: "cut"
+host:
+  is_host: false
+  level: "Base and top heights of the surface input."
+  nested:
+    objects:
+      - "opo-format.org/library/objects/curtain-wall-mullion"
+      - "opo-format.org/library/objects/curtain-wall-panel"
+    note: "Default components; others can be chosen or set per member."
+materials:
+  - "aluminium"
+  - "glass"
+  - "mineral_wool"
+ifc:
+  class: "IfcCurtainWall"
+  predefinedType: "\"USERDEFINED\""
+  objectType: "\"STICK\""
+  parameter_pset: "OPO_Parameters"
+  decomposition: "IfcCurtainWall aggregating one IfcMember per grid segment and one IfcPlate per cell (IfcRelAggregates)."

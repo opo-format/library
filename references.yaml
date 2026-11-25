@@ -14,6 +14,11 @@ en-1116-2018:
 generic-metric-openings-no-eu-door-size-norm-exists:
   title: "Generic metric openings (no EU door size norm exists)"
   kind: "other"
+ifc-4.3-add2-ifccurtainwall:
+  title: "IFC 4.3 ADD2 IfcCurtainWall, IfcCurtainWallTypeEnum and its property and quantity set templates"
+  kind: "ifc"
+  licence: "buildingSMART"
+  url: "https://identifier.buildingsmart.org/uri/buildingsmart/ifc/4.3/class/IfcCurtainWall"
 ifc-4.3-add2-ifcmember:
   title: "IFC 4.3 ADD2 IfcMember, IfcMemberTypeEnum and its property and quantity set templates"
   kind: "ifc"
