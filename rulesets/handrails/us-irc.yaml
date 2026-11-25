@@ -7,20 +7,20 @@ values:
   height_min:
     value: "inch(34)"
     source: "us-irc"
-    status: "to_verify"
-    note: "Handrail height above the nosing line, lowest."
+    status: "norm"
+    note: "IRC 2021 R311.7.8.1: handrail height above the nosing line, at least 34 in (864 mm). Checked against the code text as quoted in municipal IRC handouts."
   height_max:
     value: "inch(38)"
     source: "us-irc"
-    status: "to_verify"
-    note: "Handrail height, highest."
+    status: "norm"
+    note: "IRC 2021 R311.7.8.1: at most 38 in (965 mm). Checked against the code text as quoted in municipal IRC handouts."
   grip_min:
     value: "inch(1.25)"
     source: "us-irc"
-    status: "to_verify"
-    note: "Round handrail, smallest diameter."
+    status: "norm"
+    note: "IRC 2021 R311.7.8.5 Type I: circular handrail, outside diameter at least 1 1/4 in (32 mm). Checked against the code text as quoted in municipal IRC handouts."
   grip_max:
     value: "inch(2)"
     source: "us-irc"
-    status: "to_verify"
-    note: "Round handrail, largest diameter."
+    status: "norm"
+    note: "IRC 2021 R311.7.8.5 Type I: at most 2 in (51 mm). Checked against the code text as quoted in municipal IRC handouts."
