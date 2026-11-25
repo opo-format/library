@@ -13,6 +13,8 @@ Licence: objects are CC0-1.0 (public domain dedication) unless a file says other
 ```
 objects/<id>/          object.yaml, layers/*.yaml (proposal 0002)
 templates/             archetypes/*.yaml and classes.yaml: the class templates
+rulesets/              <id>/<variant>.yaml: shared rule sets (stairs, guards, handrails, accessibility, …)
+families/              shared rules of each object family (openings, circulation, …)
 styles/                materials.yaml and hatches.yaml, embedded into objects at build
 references.yaml        every cited source
 opo-version            the opo-rs commit the library is built with
