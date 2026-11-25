@@ -124,6 +124,108 @@ parameters:
     limits:
       min: 0.004
       max: 0.04
+  baluster_mode:
+    type: "choice"
+    default: "from_gap"
+    label: "Baluster spacing"
+    group: "Infill"
+    options:
+      - "from_gap"
+      - "spacing"
+    option_labels:
+      from_gap: "From the clear gap"
+      spacing: "Set the centre-to-centre spacing"
+    visible: "infill = \"balusters\""
+  baluster_spacing:
+    type: "length"
+    default: 0.12
+    label: "Baluster spacing (centres)"
+    group: "Infill"
+    visible: "infill = \"balusters\" and baluster_mode = \"spacing\""
+    limits:
+      min: 0.04
+      max: 0.5
+  glass_fixing:
+    type: "choice"
+    default: "posts"
+    label: "Glass fixing"
+    group: "Infill"
+    options:
+      - "posts"
+      - "base_channel"
+    option_labels:
+      posts: "Clamped between posts"
+      base_channel: "In a base channel, no posts"
+    visible: "infill = \"glass\""
+  channel_width:
+    type: "length"
+    default: 0.08
+    label: "Base channel width"
+    group: "Infill"
+    visible: "infill = \"glass\" and glass_fixing = \"base_channel\""
+    limits:
+      min: 0.03
+      max: 0.2
+  channel_height:
+    type: "length"
+    default: 0.11
+    label: "Base channel height"
+    group: "Infill"
+    visible: "infill = \"glass\" and glass_fixing = \"base_channel\""
+    limits:
+      min: 0.03
+      max: 0.3
+  mount:
+    type: "choice"
+    default: "top"
+    label: "Mounting"
+    group: "Posts"
+    options:
+      - "top"
+      - "side"
+      - "embedded"
+    option_labels:
+      top: "On top of the floor or stair"
+      side: "On the side face (fascia)"
+      embedded: "Cast in or core-drilled"
+  outside:
+    type: "choice"
+    default: "right"
+    label: "Open side of the path"
+    group: "Posts"
+    options:
+      - "right"
+      - "left"
+    visible: "mount = \"side\""
+    description: "The side of the path (looking along it) where the drop is; side-mounted guards move to that side."
+  side_offset:
+    type: "length"
+    default: 0.06
+    label: "Offset from the edge"
+    group: "Posts"
+    visible: "mount = \"side\""
+    limits:
+      min: 0.0
+      max: 0.3
+    description: "Post centre to the path, outward."
+  side_drop:
+    type: "length"
+    default: 0.2
+    label: "Post length below the floor"
+    group: "Posts"
+    visible: "mount = \"side\""
+    limits:
+      min: 0.05
+      max: 0.6
+  embed_depth:
+    type: "length"
+    default: 0.1
+    label: "Embedment depth"
+    group: "Posts"
+    visible: "mount = \"embedded\""
+    limits:
+      min: 0.03
+      max: 0.3
   top_is_handrail:
     type: "boolean"
     default: false
@@ -149,21 +251,41 @@ slots:
 rules:
   derived:
     n_seg: "count(path) - 1"
-    seg_len: "for i in 1..n_seg return sqrt((path[i + 1][1] - path[i][1]) ** 2 + (path[i + 1][2] - path[i][2]) ** 2 + (path[i + 1][3] - path[i][3]) ** 2)"
+    pd:
+      expr: "for k in 1..n_seg return [(path[k + 1][1] - path[k][1]) / max(sqrt((path[k + 1][1] - path[k][1]) ** 2 + (path[k + 1][2] - path[k][2]) ** 2), 1e-9), (path[k + 1][2] - path[k][2]) / max(sqrt((path[k + 1][1] - path[k][1]) ** 2 + (path[k + 1][2] - path[k][2]) ** 2), 1e-9)]"
+      note: "Plan direction of each segment."
+    pn:
+      expr: "for d in pd return if outside = \"right\" then [d[2], -d[1]] else [-d[2], d[1]]"
+      note: "Outward normal of each segment in plan."
+    vn:
+      expr: "for i in 1..n_seg + 1 return if i = 1 then pn[1] else if i = n_seg + 1 then pn[n_seg] else [(pn[i - 1][1] + pn[i][1]) / (1 + pn[i - 1][1] * pn[i][1] + pn[i - 1][2] * pn[i][2]), (pn[i - 1][2] + pn[i][2]) / (1 + pn[i - 1][1] * pn[i][1] + pn[i - 1][2] * pn[i][2])]"
+      note: "Outward offset direction at each path point (mitred at corners)."
+    gpath:
+      expr: "if mount = \"side\" then for i in 1..count(path) return [path[i][1] + vn[i][1] * side_offset, path[i][2] + vn[i][2] * side_offset, path[i][3]] else path"
+      note: "The guard line: the path, moved outward for side mounting."
+    post_bottom:
+      expr: "if mount = \"side\" then -side_drop else if mount = \"embedded\" then -embed_depth else 0"
+      note: "Post foot below the gpath."
+    has_posts: "not(infill = \"glass\" and glass_fixing = \"base_channel\")"
+    bal_pitch:
+      expr: "if baluster_mode = \"spacing\" then baluster_spacing else clear_gap + infill_diameter"
+      note: "Baluster centre-to-centre spacing."
+    panel_bottom: "if infill = \"glass\" and glass_fixing = \"base_channel\" then 0.02 else bottom_gap"
+    seg_len: "for i in 1..n_seg return sqrt((gpath[i + 1][1] - gpath[i][1]) ** 2 + (gpath[i + 1][2] - gpath[i][2]) ** 2 + (gpath[i + 1][3] - gpath[i][3]) ** 2)"
     length: "sum(seg_len)"
     post_points:
-      expr: "concatenate(flatten(for i in 1..n_seg return for m in 0..max(1, ceiling(seg_len[i] / post_spacing)) - 1 return {x: path[i][1] + (path[i + 1][1] - path[i][1]) * m / max(1, ceiling(seg_len[i] / post_spacing)), y: path[i][2] + (path[i + 1][2] - path[i][2]) * m / max(1, ceiling(seg_len[i] / post_spacing)), z: path[i][3] + (path[i + 1][3] - path[i][3]) * m / max(1, ceiling(seg_len[i] / post_spacing))}), [{x: path[n_seg + 1][1], y: path[n_seg + 1][2], z: path[n_seg + 1][3]}])"
+      expr: "concatenate(flatten(for i in 1..n_seg return for m in 0..max(1, ceiling(seg_len[i] / post_spacing)) - 1 return {x: gpath[i][1] + (gpath[i + 1][1] - gpath[i][1]) * m / max(1, ceiling(seg_len[i] / post_spacing)), y: gpath[i][2] + (gpath[i + 1][2] - gpath[i][2]) * m / max(1, ceiling(seg_len[i] / post_spacing)), z: gpath[i][3] + (gpath[i + 1][3] - gpath[i][3]) * m / max(1, ceiling(seg_len[i] / post_spacing))}), [{x: gpath[n_seg + 1][1], y: gpath[n_seg + 1][2], z: gpath[n_seg + 1][3]}])"
       note: "Posts at the corners and evenly between them."
     infill_top: "height - top_rail_diameter"
     baluster_points:
-      expr: "flatten(for i in 1..n_seg return for m in 0..max(1, ceiling(seg_len[i] / (clear_gap + infill_diameter))) - 1 return {x: path[i][1] + (path[i + 1][1] - path[i][1]) * m / max(1, ceiling(seg_len[i] / (clear_gap + infill_diameter))), y: path[i][2] + (path[i + 1][2] - path[i][2]) * m / max(1, ceiling(seg_len[i] / (clear_gap + infill_diameter))), z: path[i][3] + (path[i + 1][3] - path[i][3]) * m / max(1, ceiling(seg_len[i] / (clear_gap + infill_diameter)))})"
-      note: "Balusters at most clear gap + diameter apart, centre to centre."
+      expr: "flatten(for i in 1..n_seg return for m in 0..max(1, ceiling(seg_len[i] / bal_pitch)) - 1 return {x: gpath[i][1] + (gpath[i + 1][1] - gpath[i][1]) * m / max(1, ceiling(seg_len[i] / bal_pitch)), y: gpath[i][2] + (gpath[i + 1][2] - gpath[i][2]) * m / max(1, ceiling(seg_len[i] / bal_pitch)), z: gpath[i][3] + (gpath[i + 1][3] - gpath[i][3]) * m / max(1, ceiling(seg_len[i] / bal_pitch))})"
+      note: "Balusters at most the baluster spacing apart, centre to centre."
     rail_levels: "for r in 0..max(0, floor((infill_top - bottom_gap) / (clear_gap + infill_diameter)) - 1) return bottom_gap + infill_diameter / 2 + r * (clear_gap + infill_diameter)"
     gap:
-      expr: "if infill = \"balusters\" then (if count(baluster_points) > 0 then min(for i in 1..n_seg return seg_len[i] / max(1, ceiling(seg_len[i] / (clear_gap + infill_diameter)))) - infill_diameter else clear_gap) else if infill = \"rails\" then max(infill_top - bottom_gap - count(rail_levels) * infill_diameter - (count(rail_levels) - 1) * clear_gap, clear_gap) else 0"
+      expr: "if infill = \"balusters\" then (if count(baluster_points) > 0 then min(for i in 1..n_seg return seg_len[i] / max(1, ceiling(seg_len[i] / bal_pitch))) - infill_diameter else clear_gap) else if infill = \"rails\" then max(infill_top - bottom_gap - count(rail_levels) * infill_diameter - (count(rail_levels) - 1) * clear_gap, clear_gap) else 0"
       note: "Largest clear opening of the infill (glass and mesh: none)."
-    rail_path: "for p in path return [p[1], p[2], p[3] + height - top_rail_diameter / 2]"
-    plan_path: "for p in path return [p[1], p[2]]"
+    rail_path: "for p in gpath return [p[1], p[2], p[3] + height - top_rail_diameter / 2]"
+    plan_path: "for p in gpath return [p[1], p[2]]"
   checks:
     path_points:
       expr: "count(path) >= 2"
@@ -201,10 +323,11 @@ rules:
 recipe:
   post_bodies:
     op: "for_each"
+    when: "has_posts"
     args:
       items: "post_points"
       as: "q"
-      do: "box([q.x - post_size / 2, q.y - post_size / 2, q.z], [q.x + post_size / 2, q.y + post_size / 2, q.z + infill_top])"
+      do: "box([q.x - post_size / 2, q.y - post_size / 2, q.z + post_bottom], [q.x + post_size / 2, q.y + post_size / 2, q.z + infill_top])"
   rail_profile:
     op: "circle"
     plane: "profile"
@@ -236,20 +359,33 @@ recipe:
     args:
       items: "rail_levels"
       as: "z"
-      do: "sweep(infill_profile, for p in path return [p[1], p[2], p[3] + z])"
+      do: "sweep(infill_profile, for p in gpath return [p[1], p[2], p[3] + z])"
   panel_profile:
     op: "rectangle"
     plane: "profile"
     when: "infill = \"glass\" or infill = \"mesh\""
     args:
       min: "[-panel_thickness / 2, 0]"
-      max: "[panel_thickness / 2, infill_top - bottom_gap]"
+      max: "[panel_thickness / 2, infill_top - panel_bottom]"
   panel:
     op: "sweep"
     when: "infill = \"glass\" or infill = \"mesh\""
     args:
       profile: "panel_profile"
-      path: "for p in path return [p[1], p[2], p[3] + bottom_gap]"
+      path: "for p in gpath return [p[1], p[2], p[3] + panel_bottom]"
+  channel_profile:
+    op: "rectangle"
+    plane: "profile"
+    when: "infill = \"glass\" and glass_fixing = \"base_channel\""
+    args:
+      min: "[-channel_width / 2, 0]"
+      max: "[channel_width / 2, channel_height]"
+  channel:
+    op: "sweep"
+    when: "infill = \"glass\" and glass_fixing = \"base_channel\""
+    args:
+      profile: "channel_profile"
+      path: "gpath"
   plan_line:
     op: "polyline"
     plane: "xy"
@@ -258,6 +394,7 @@ recipe:
   plan_posts:
     op: "for_each"
     plane: "xy"
+    when: "has_posts"
     args:
       items: "post_points"
       as: "q"
@@ -305,6 +442,9 @@ representations:
       - geometry: "panel"
         material: "if infill = \"glass\" then \"glass\" else \"sheet_metal\""
         part: "Infill"
+      - geometry: "channel"
+        material: "material"
+        part: "Base channel"
   model.high:
     context: "model"
     lod: "high"
@@ -330,6 +470,9 @@ representations:
       - geometry: "panel"
         material: "if infill = \"glass\" then \"glass\" else \"sheet_metal\""
         part: "Infill"
+      - geometry: "channel"
+        material: "material"
+        part: "Base channel"
   plan.low:
     context: "plan"
     lod: "low"
