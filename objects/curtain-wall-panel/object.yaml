@@ -1,0 +1,228 @@
+id: "curtain-wall-panel"
+name: "Curtain wall panel"
+version: "0.1.0"
+status: "draft"
+priority: "P1"
+description: "A curtain wall infill panel for one grid cell: an insulating glass unit (vision) or opaque glass with an insulated back panel (spandrel). Fills the panel interface. Defaults are illustrative design values."
+tags:
+  - "curtain wall"
+  - "panel"
+  - "glazing"
+  - "component"
+template: "IfcPlate"
+references:
+  - ref: "ifc-4.3-add2-ifcplate"
+    role: "IFC parameters"
+    used: "Class and the CURTAIN_PANEL predefined type."
+sheet:
+  scope: "Infill of a curtain wall cell placed by O-16: vision or spandrel."
+  ifc: "IfcPlate · CURTAIN_PANEL"
+  parameters: "Kind (vision | spandrel), glass unit thickness, back panel thickness and gap, materials."
+parameters:
+  kind:
+    type: "choice"
+    default: "vision"
+    label: "Panel"
+    group: "Panel"
+    options:
+      - "vision"
+      - "spandrel"
+    option_labels:
+      vision: "Vision (insulating glass unit)"
+      spandrel: "Spandrel (opaque glass with an insulated back panel)"
+  glass_thickness:
+    type: "length"
+    default: 0.032
+    label: "Glass unit thickness"
+    group: "Panel"
+    limits:
+      min: 0.006
+      max: 0.08
+  back_panel_thickness:
+    type: "length"
+    default: 0.1
+    label: "Insulated back panel"
+    group: "Panel"
+    visible: "kind = \"spandrel\""
+    limits:
+      min: 0.02
+      max: 0.3
+  back_panel_gap:
+    type: "length"
+    default: 0.02
+    label: "Gap behind the glass"
+    group: "Panel"
+    visible: "kind = \"spandrel\""
+    limits:
+      min: 0.0
+      max: 0.1
+  glass_material:
+    type: "material"
+    default: "glass"
+    label: "Glass"
+    group: "Material"
+    options: "materials"
+  back_material:
+    type: "material"
+    default: "mineral_wool"
+    label: "Back panel"
+    group: "Material"
+    options: "materials"
+    visible: "kind = \"spandrel\""
+slots:
+  outline:
+    type: "polyline3"
+    default: [[0.0, 0.0, 0.0], [1.5, 0.0, 0.0], [1.5, 0.0, 2.4], [0.0, 0.0, 2.4]]
+    description: "Panel outline, counter-clockwise from the front (panel interface: the cell inset by half the frame widths)."
+  normal:
+    type: "point"
+    default: [0.0, -1.0, 0.0]
+    description: "Front of the façade (panel interface)."
+interface:
+  name: "panel"
+  inputs:
+    - "outline"
+    - "normal"
+    - "insets"
+  reports:
+    - "thickness"
+    - "offset"
+rules:
+  derived:
+    width: "sqrt((outline[2][1] - outline[1][1]) * (outline[2][1] - outline[1][1]) + (outline[2][2] - outline[1][2]) * (outline[2][2] - outline[1][2]) + (outline[2][3] - outline[1][3]) * (outline[2][3] - outline[1][3]))"
+    height: "sqrt((outline[4][1] - outline[1][1]) * (outline[4][1] - outline[1][1]) + (outline[4][2] - outline[1][2]) * (outline[4][2] - outline[1][2]) + (outline[4][3] - outline[1][3]) * (outline[4][3] - outline[1][3]))"
+    up: "for k in 1..3 return (outline[4][k] - outline[1][k]) / height"
+    up_ref: "if abs(up[3]) < 0.99 then [0, 0, 1] else [1, 0, 0]"
+    across_raw: "[up_ref[2] * up[3] - up_ref[3] * up[2], up_ref[3] * up[1] - up_ref[1] * up[3], up_ref[1] * up[2] - up_ref[2] * up[1]]"
+    across: "for k in 1..3 return across_raw[k] / sqrt(across_raw[1] * across_raw[1] + across_raw[2] * across_raw[2] + across_raw[3] * across_raw[3])"
+    vert: "[up[2] * across[3] - up[3] * across[2], up[3] * across[1] - up[1] * across[3], up[1] * across[2] - up[2] * across[1]]"
+    roll:
+      expr: "atan2(normal[1] * vert[1] + normal[2] * vert[2] + normal[3] * vert[3], normal[1] * across[1] + normal[2] * across[2] + normal[3] * across[3])"
+      note: "Turns the profile so its u axis points to the front (the normal)."
+    thickness:
+      expr: "glass_thickness"
+      note: "Reported to the curtain wall (panel interface)."
+    offset:
+      expr: "glass_thickness / 2"
+      note: "Reported: from the glass plane to the front face."
+    area: "width * height"
+  checks:
+    size_positive:
+      expr: "width > 0.01 and height > 0.01"
+      severity: "error"
+      message: "The panel outline is too small (the frames are wider than the cell)."
+recipe:
+  glass_profile:
+    op: "rectangle"
+    plane: "profile"
+    args:
+      min: "[-glass_thickness / 2, 0]"
+      max: "[glass_thickness / 2, width]"
+  back_profile:
+    op: "rectangle"
+    plane: "profile"
+    when: "kind = \"spandrel\""
+    args:
+      min: "[-glass_thickness / 2 - back_panel_gap - back_panel_thickness, 0]"
+      max: "[-glass_thickness / 2 - back_panel_gap, width]"
+  glass:
+    op: "sweep"
+    args:
+      profile: "glass_profile"
+      path: "[outline[1], outline[4]]"
+      roll: "roll"
+  back:
+    op: "sweep"
+    when: "kind = \"spandrel\""
+    args:
+      profile: "back_profile"
+      path: "[outline[1], outline[4]]"
+      roll: "roll"
+  plan_glass:
+    op: "line"
+    plane: "xy"
+    args:
+      start: "[outline[1][1], outline[1][2]]"
+      end: "[outline[2][1], outline[2][2]]"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "glass"
+        material: "glass_material"
+        part: "Glazing"
+      - geometry: "back"
+        material: "back_material"
+        part: "Back panel"
+  model.medium:
+    context: "model"
+    lod: "medium"
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "glass"
+        material: "glass_material"
+        part: "Glazing"
+      - geometry: "back"
+        material: "back_material"
+        part: "Back panel"
+  model.high:
+    context: "model"
+    lod: "high"
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "glass"
+        material: "glass_material"
+        part: "Glazing"
+      - geometry: "back"
+        material: "back_material"
+        part: "Back panel"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_glass"
+        class: "cut"
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_glass"
+        class: "cut"
+  plan.high:
+    context: "plan"
+    lod: "high"
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "plan_glass"
+        class: "cut"
+materials:
+  - "glass"
+  - "mineral_wool"
+  - "sheet_metal"
+  - "aluminium"
+ifc:
+  class: "IfcPlate"
+  predefinedType: "\"CURTAIN_PANEL\""
+  parameter_pset: "OPO_Parameters"

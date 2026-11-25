@@ -19,6 +19,11 @@ ifc-4.3-add2-ifcmember:
   kind: "ifc"
   licence: "buildingSMART"
   url: "https://identifier.buildingsmart.org/uri/buildingsmart/ifc/4.3/class/IfcMember"
+ifc-4.3-add2-ifcplate:
+  title: "IFC 4.3 ADD2 IfcPlate, IfcPlateTypeEnum and its property and quantity set templates"
+  kind: "ifc"
+  licence: "buildingSMART"
+  url: "https://identifier.buildingsmart.org/uri/buildingsmart/ifc/4.3/class/IfcPlate"
 ifc-4.3-add2-ifcrailing:
   title: "IFC 4.3 ADD2 IfcRailing, IfcRailingTypeEnum and its property and quantity set templates"
   kind: "ifc"
