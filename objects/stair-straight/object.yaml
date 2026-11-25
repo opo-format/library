@@ -1,11 +1,29 @@
 id: "stair-straight"
 name: "Straight stair"
-status: "planned"
+version: "0.1.0"
+status: "draft"
 priority: "P1"
 catalogue_id: "C-01"
-ifc:
-  class: "IfcStair"
-  predefinedType: "STRAIGHT_RUN_STAIR"
+description: "Straight stair between two levels with an optional landing part-way: risers from the rise and the maximum riser, going, nosing, a concrete waist, solid fill, or timber or steel stringers with treads and open or closed risers, and nested handrails along the flight. Defaults are illustrative design values, not norm values; the shared stairs and handrails rule sets give UK and US limits."
+tags:
+  - "stair"
+  - "straight"
+  - "landing"
+  - "circulation"
+template: "IfcStair"
+references:
+  - ref: "ifc-4.3-add2-ifcstair"
+    role: "IFC parameters"
+    used: "Class, predefined types STRAIGHT_RUN_STAIR and TWO_STRAIGHT_RUN_STAIR, Pset_StairCommon property names."
+  - ref: "uk-approved-document-k"
+    role: "rules"
+    used: "Stair and handrail limits through the shared rule sets."
+  - ref: "us-irc"
+    role: "rules"
+    used: "Stair and handrail limits through the shared rule sets."
+  - ref: "us-ibc"
+    role: "rules"
+    used: "Stair limits through the shared rule sets."
 sheet:
   scope: "One straight flight between two levels; optional landings part-way (makes TWO_STRAIGHT_RUN_STAIR). Treads, risers, stringers or concrete waist, nosing, nested railing(s) and handrail(s)."
   not_in_scope:
@@ -17,3 +35,818 @@ sheet:
   rules: "Riser within rule set min/max · going within min/max · step rule · pitch ≤ max · width ≥ min · headroom ≥ min (checked against the slab opening edge: opening length derived so headroom is met) · uniform risers (computed) · landing depth ≥ min (from rule set) · guard required where fall height > threshold."
   sizes: "None (rise-driven). Presets per market: EU generic 175/280 mm, 1.0 m wide (not a norm); UK private 200/250 mm, 0.9 m; US residential 7½\"/10½\", 36\"."
   lod: "3D: low solid wedge per flight · medium treads, risers, stringers/waist, landing, simple railing · high + nosing profile, railing details. Plan: low outline + walkline + arrow · medium treads, cut line, overhead dashed, walkline, UP/DN · high + nosings, handrails. Section: cut from 3D (all LODs)."
+parameters:
+  rise_mode:
+    type: "choice"
+    default: "storey"
+    label: "Total rise"
+    group: "Rise"
+    options:
+      - "storey"
+      - "value"
+    option_labels:
+      storey: "Storey height"
+      value: "Value"
+  rise_value:
+    type: "length"
+    default: 3.0
+    label: "Total rise"
+    group: "Rise"
+    visible: "rise_mode = \"value\""
+    limits:
+      min: 0.1
+      max: 10
+  max_riser:
+    type: "length"
+    default: 0.18
+    label: "Maximum riser"
+    group: "Steps"
+    limits:
+      min: 0.05
+      max: 0.3
+    description: "Generic default (no EN/ISO stair geometry norm); the stairs rule sets set regional limits."
+  going:
+    type: "length"
+    default: 0.28
+    label: "Going"
+    group: "Steps"
+    limits:
+      min: 0.1
+      max: 0.6
+  width:
+    type: "length"
+    default: 1.0
+    label: "Width"
+    group: "Size"
+    limits:
+      min: 0.4
+      max: 10
+  nosing:
+    type: "length"
+    default: 0.03
+    label: "Nosing"
+    group: "Treads"
+    limits:
+      min: 0.0
+      max: 0.06
+    description: "Tread overhang over the riser below."
+  structure:
+    type: "choice"
+    default: "waist"
+    label: "Structure"
+    group: "Structure"
+    options:
+      - "waist"
+      - "solid"
+      - "timber_stringers"
+      - "steel_stringers"
+    option_labels:
+      waist: "Concrete waist slab"
+      solid: "Solid (on fill or masonry)"
+      timber_stringers: "Timber stringers"
+      steel_stringers: "Steel stringers"
+  waist_thickness:
+    type: "length"
+    default: 0.15
+    label: "Waist and landing thickness"
+    group: "Structure"
+    visible: "structure = \"waist\""
+    limits:
+      min: 0.06
+      max: 0.5
+  tread_thickness:
+    type: "length"
+    default: 0.04
+    label: "Tread thickness"
+    group: "Treads"
+    visible: "structure = \"timber_stringers\" or structure = \"steel_stringers\""
+    limits:
+      min: 0.02
+      max: 0.1
+  riser_type:
+    type: "choice"
+    default: "closed"
+    label: "Risers"
+    group: "Treads"
+    options:
+      - "closed"
+      - "open"
+    visible: "structure = \"timber_stringers\" or structure = \"steel_stringers\""
+  riser_thickness:
+    type: "length"
+    default: 0.02
+    label: "Riser board thickness"
+    group: "Treads"
+    visible: "riser_type = \"closed\" and (structure = \"timber_stringers\" or structure = \"steel_stringers\")"
+    limits:
+      min: 0.01
+      max: 0.05
+  stringer_width:
+    type: "length"
+    default: 0.05
+    label: "Stringer width"
+    group: "Structure"
+    visible: "structure = \"timber_stringers\" or structure = \"steel_stringers\""
+    limits:
+      min: 0.01
+      max: 0.2
+  stringer_depth:
+    type: "length"
+    default: 0.25
+    label: "Stringer depth"
+    group: "Structure"
+    visible: "structure = \"timber_stringers\" or structure = \"steel_stringers\""
+    limits:
+      min: 0.1
+      max: 0.5
+  landing:
+    type: "boolean"
+    default: false
+    label: "Landing part-way"
+    group: "Landing"
+    description: "Makes a TWO_STRAIGHT_RUN_STAIR."
+  landing_after:
+    type: "integer"
+    default: 8
+    label: "Landing after riser"
+    group: "Landing"
+    visible: "landing"
+    limits:
+      min: 2
+      max: 40
+  landing_depth:
+    type: "length"
+    default: 1.0
+    label: "Landing depth"
+    group: "Landing"
+    visible: "landing"
+    limits:
+      min: 0.5
+      max: 5.0
+  material:
+    type: "material"
+    default: "reinforced_concrete"
+    label: "Concrete or fill"
+    group: "Materials"
+    options: "materials"
+  tread_material:
+    type: "material"
+    default: "timber"
+    label: "Treads and risers"
+    group: "Materials"
+    options: "materials"
+    visible: "structure = \"timber_stringers\" or structure = \"steel_stringers\""
+  stringer_material:
+    type: "material"
+    default: "timber"
+    label: "Timber stringers"
+    group: "Materials"
+    options: "materials"
+    visible: "structure = \"timber_stringers\""
+    description: "Steel stringers are steel."
+  railing_left:
+    type: "boolean"
+    default: true
+    label: "Handrail on the left"
+    group: "Railings"
+    description: "A nested IfcRailing along the flight at the handrail height."
+  railing_right:
+    type: "boolean"
+    default: false
+    label: "Handrail on the right"
+    group: "Railings"
+    description: "A nested IfcRailing along the flight at the handrail height."
+  handrail_height:
+    type: "length"
+    default: 0.9
+    label: "Handrail height above the pitch line"
+    group: "Railings"
+    limits:
+      min: 0.6
+      max: 1.2
+    description: "Measured vertically above the nosings; the handrails rule sets check it."
+  arrow_label:
+    type: "text"
+    default: "UP"
+    label: "Walking line label"
+    group: "Drawing"
+  Pset_ConcreteElementGeneral:
+    type: "property_set"
+    default: {}
+    label: "Pset_ConcreteElementGeneral"
+    group: "IFC data"
+    properties:
+      - name: "AssemblyPlace"
+        measure: "IfcLabel"
+        enum:
+          - "FACTORY"
+          - "OFFSITE"
+          - "SITE"
+          - "OTHER"
+          - "NOTKNOWN"
+          - "UNSET"
+      - name: "CastingMethod"
+        measure: "IfcLabel"
+        enum:
+          - "INSITU"
+          - "MIXED"
+          - "PRECAST"
+          - "PRINTED"
+          - "OTHER"
+          - "NOTKNOWN"
+          - "UNSET"
+      - name: "StructuralClass"
+        measure: "IfcLabel"
+      - name: "StrengthClass"
+        measure: "IfcLabel"
+      - name: "ExposureClass"
+        measure: "IfcLabel"
+      - name: "ReinforcementVolumeRatio"
+        measure: "IfcMassDensityMeasure"
+      - name: "ReinforcementAreaRatio"
+        measure: "IfcAreaDensityMeasure"
+      - name: "DimensionalAccuracyClass"
+        measure: "IfcLabel"
+      - name: "ConstructionToleranceClass"
+        measure: "IfcLabel"
+      - name: "ConcreteCover"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "ConcreteCoverAtMainBars"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "ConcreteCoverAtLinks"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "ReinforcementStrengthClass"
+        measure: "IfcLabel"
+    optional: true
+  Pset_PrecastConcreteElementFabrication:
+    type: "property_set"
+    default: {}
+    label: "Pset_PrecastConcreteElementFabrication"
+    group: "IFC data"
+    properties:
+      - name: "TypeDesignation"
+        measure: "IfcLabel"
+      - name: "ProductionLotId"
+        measure: "IfcIdentifier"
+      - name: "SerialNumber"
+        measure: "IfcIdentifier"
+      - name: "PieceMark"
+        measure: "IfcLabel"
+      - name: "AsBuiltLocationNumber"
+        measure: "IfcLabel"
+      - name: "ActualProductionDate"
+        measure: "IfcDateTime"
+      - name: "ActualErectionDate"
+        measure: "IfcDateTime"
+    optional: true
+  Pset_PrecastConcreteElementGeneral:
+    type: "property_set"
+    default: {}
+    label: "Pset_PrecastConcreteElementGeneral"
+    group: "IFC data"
+    properties:
+      - name: "TypeDesignation"
+        measure: "IfcLabel"
+      - name: "CornerChamfer"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "ManufacturingToleranceClass"
+        measure: "IfcLabel"
+      - name: "FormStrippingStrength"
+        measure: "IfcPressureMeasure"
+      - name: "LiftingStrength"
+        measure: "IfcPressureMeasure"
+      - name: "ReleaseStrength"
+        measure: "IfcPressureMeasure"
+      - name: "MinimumAllowableSupportLength"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "InitialTension"
+        measure: "IfcPressureMeasure"
+      - name: "TendonRelaxation"
+        measure: "IfcPositiveRatioMeasure"
+      - name: "TransportationStrength"
+        measure: "IfcPressureMeasure"
+      - name: "SupportDuringTransportDescription"
+        measure: "IfcText"
+      - name: "SupportDuringTransportDocReference"
+        measure: "IfcExternalReference"
+      - name: "HollowCorePlugging"
+        measure: "IfcLabel"
+      - name: "CamberAtMidspan"
+        measure: "IfcRatioMeasure"
+      - name: "BatterAtStart"
+        measure: "IfcPlaneAngleMeasure"
+      - name: "BatterAtEnd"
+        measure: "IfcPlaneAngleMeasure"
+      - name: "Twisting"
+        measure: "IfcPlaneAngleMeasure"
+      - name: "Shortening"
+        measure: "IfcRatioMeasure"
+      - name: "PieceMark"
+        measure: "IfcLabel"
+      - name: "DesignLocationNumber"
+        measure: "IfcLabel"
+    optional: true
+  Pset_StairCommon:
+    type: "property_set"
+    default: {}
+    label: "Pset_StairCommon"
+    group: "IFC data"
+    properties:
+      - name: "Reference"
+        measure: "IfcIdentifier"
+      - name: "Status"
+        measure: "IfcLabel"
+        enum:
+          - "DEMOLISH"
+          - "EXISTING"
+          - "NEW"
+          - "TEMPORARY"
+          - "OTHER"
+          - "NOTKNOWN"
+          - "UNSET"
+      - name: "NumberOfRiser"
+        measure: "IfcCountMeasure"
+        value: "risers"
+      - name: "NumberOfTreads"
+        measure: "IfcCountMeasure"
+        value: "treads"
+      - name: "RiserHeight"
+        measure: "IfcPositiveLengthMeasure"
+        value: "riser"
+      - name: "TreadLength"
+        measure: "IfcPositiveLengthMeasure"
+        value: "going"
+      - name: "NosingLength"
+        measure: "IfcLengthMeasure"
+      - name: "WalkingLineOffset"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "TreadLengthAtOffset"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "TreadLengthAtInnerSide"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "WaistThickness"
+        measure: "IfcPositiveLengthMeasure"
+        value: "if structure = \"waist\" then waist_thickness else null"
+      - name: "RequiredHeadroom"
+        measure: "IfcPositiveLengthMeasure"
+      - name: "HandicapAccessible"
+        measure: "IfcBoolean"
+      - name: "HasNonSkidSurface"
+        measure: "IfcBoolean"
+      - name: "IsExternal"
+        measure: "IfcBoolean"
+      - name: "ThermalTransmittance"
+        measure: "IfcThermalTransmittanceMeasure"
+      - name: "LoadBearing"
+        measure: "IfcBoolean"
+      - name: "FireRating"
+        measure: "IfcLabel"
+      - name: "FireExit"
+        measure: "IfcBoolean"
+    optional: false
+slots: {}
+rules:
+  derived:
+    total_rise: "if rise_mode = \"storey\" then level.height else rise_value"
+    risers: "ceiling(total_rise / max_riser)"
+    riser: "total_rise / risers"
+    treads: "risers - 1"
+    k:
+      expr: "if landing then min(max(landing_after, 2), risers - 2) else risers"
+      note: "Risers below the landing (all risers without one)."
+    tread_x:
+      expr: "for j in 1..treads return (if landing and j > k then (k - 1) * going + landing_depth + (j - k - 1) * going else (j - 1) * going)"
+      note: "Front (nosing line) of each tread; the landing takes the place of tread k."
+    tread_d: "for j in 1..treads return (if landing and j = k then landing_depth else going)"
+    run: "tread_x[treads] + tread_d[treads]"
+    pitch: "atan2(riser, going)"
+    step_rule:
+      expr: "2 * riser + going"
+      note: "Shown for information (2R + G); checked only by a rule set."
+    waist_v:
+      expr: "waist_thickness / cos(pitch)"
+      note: "Waist thickness measured vertically."
+    z_land: "k * riser"
+    land_end: "if landing then tread_x[k] + landing_depth else 0"
+    under_x0: "max(0, (waist_v - riser) * going / riser)"
+    under_z0: "max(0, riser - waist_v)"
+    xa: "max(tread_x[min(k, treads)], land_end + (waist_v - waist_thickness - riser) * going / riser)"
+    xb: "min(land_end, ((k - 1) * riser - waist_thickness + waist_v) * going / riser)"
+    steps:
+      expr: "for i in 1..2 * treads return if modulo(i, 2) = 1 then [tread_x[(i + 1) / 2], (i + 1) / 2 * riser] else [tread_x[i / 2] + tread_d[i / 2], i / 2 * riser]"
+      note: "Front and back of each tread and of the landing."
+    underside: "if landing then [[run, total_rise - waist_v], [xa, z_land - waist_thickness], [xb, z_land - waist_thickness], [under_x0, under_z0]] else [[run, total_rise - waist_v], [under_x0, under_z0]]"
+    profile_points: "if structure = \"waist\" then concatenate([[0, 0]], steps, [[run, total_rise]], underside) else concatenate([[0, 0]], steps, [[run, total_rise], [run, 0]])"
+    has_stringers: "structure = \"timber_stringers\" or structure = \"steel_stringers\""
+    j_cut: "floor(view.cut_height / riser)"
+    x_cut:
+      expr: "if j_cut < 1 then 0 else if j_cut >= treads then run else tread_x[j_cut] + tread_d[j_cut] / 2"
+      note: "Where the plan cut height meets the stair."
+    hw: "width / 2"
+    rail_path_left:
+      expr: "concatenate(for j in 1..min(k, treads) return [tread_x[j], hw - 0.05, j * riser + handrail_height], if landing then [[land_end, hw - 0.05, z_land + handrail_height]] else [], if landing then for j in k + 1..treads return [tread_x[j], hw - 0.05, j * riser + handrail_height] else [], [[run, hw - 0.05, total_rise + handrail_height]])"
+      note: "Handrail over the nosings, level along the landing."
+    rail_path_right: "for p in rail_path_left return [p[1], -p[2], p[3]]"
+  checks:
+    min_risers:
+      expr: "risers >= 2"
+      severity: "error"
+      message: "A stair needs at least two risers."
+    riser_range:
+      expr: "rules.stairs = null or (riser >= rules.stairs.riser_min and riser <= rules.stairs.riser_max)"
+      severity: "warning"
+      message: "Riser is outside the active rule set."
+    going_range:
+      expr: "rules.stairs = null or (going >= rules.stairs.going_min and going <= rules.stairs.going_max)"
+      severity: "warning"
+      message: "Going is outside the active rule set."
+    step_rule_range:
+      expr: "rules.stairs = null or rules.stairs.rule_min = null or (step_rule >= rules.stairs.rule_min and step_rule <= rules.stairs.rule_max)"
+      severity: "warning"
+      message: "2R + G is outside the active rule set."
+    width_min:
+      expr: "rules.stairs = null or rules.stairs.width_min = null or width >= rules.stairs.width_min"
+      severity: "warning"
+      message: "Width is below the active rule set."
+    landing_fits:
+      expr: "not(landing) or (landing_after >= 2 and landing_after <= risers - 2)"
+      severity: "warning"
+      message: "The landing must leave at least two risers on each flight; it was moved."
+    pitch_range:
+      expr: "rules.stairs = null or rules.stairs.pitch_max = null or pitch <= rules.stairs.pitch_max"
+      severity: "warning"
+      message: "The pitch is steeper than the active rule set allows."
+    nosing_fits:
+      expr: "nosing < going / 2"
+      severity: "error"
+      message: "The nosing is too deep for the going."
+    handrail_range:
+      expr: "rules.handrails = null or (handrail_height >= rules.handrails.height_min and handrail_height <= rules.handrails.height_max)"
+      severity: "warning"
+      message: "The handrail height is outside the active rule set."
+  rulesets:
+    stairs:
+      default: null
+      note: "Off by default. Shared variants (library rulesets/stairs) give UK and US limits; there is no EN/ISO stair geometry norm."
+      fields:
+        riser_min: "length"
+        riser_max: "length"
+        going_min: "length"
+        going_max: "length"
+        rule_min: "length"
+        rule_max: "length"
+        width_min: "length"
+        pitch_max: "number"
+    handrails:
+      default: null
+      note: "Off by default. Shared variants (library rulesets/handrails)."
+      fields:
+        height_min: "length"
+        height_max: "length"
+recipe:
+  profile:
+    op: "polygon"
+    plane: "xz"
+    when: "not(has_stringers)"
+    args:
+      points: "profile_points"
+  body:
+    op: "extrude"
+    plane: "xz"
+    when: "not(has_stringers)"
+    args:
+      profile: "profile"
+      from: "-hw"
+      to: "hw"
+  outline_below:
+    op: "rectangle"
+    plane: "xy"
+    args:
+      min: "[0, -hw]"
+      max: "[x_cut, hw]"
+  outline_above:
+    op: "rectangle"
+    plane: "xy"
+    when: "x_cut < run"
+    args:
+      min: "[x_cut, -hw]"
+      max: "[run, hw]"
+  treads_below:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "for j in 1..treads return j"
+      as: "j"
+      index: "i"
+      do: "if tread_x[j] + tread_d[j] <= x_cut then line([tread_x[j] + tread_d[j], -hw], [tread_x[j] + tread_d[j], hw]) else null"
+  treads_above:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "for j in 1..treads return j"
+      as: "j"
+      index: "i"
+      do: "if tread_x[j] + tread_d[j] > x_cut then line([tread_x[j] + tread_d[j], -hw], [tread_x[j] + tread_d[j], hw]) else null"
+  cut_line:
+    op: "polyline"
+    plane: "xy"
+    when: "x_cut < run"
+    args:
+      points: "[[x_cut - 0.15, -hw], [x_cut - 0.05, -0.1 * width], [x_cut + 0.05, 0.1 * width], [x_cut + 0.15, hw]]"
+  walk_line:
+    op: "polyline"
+    plane: "xy"
+    args:
+      points: "[[going / 2, 0], [run, 0]]"
+  arrow:
+    op: "polyline"
+    plane: "xy"
+    args:
+      points: "[[run - 0.15, -0.075], [run, 0], [run - 0.15, 0.075]]"
+  label:
+    op: "text"
+    plane: "xy"
+    args:
+      at: "[going / 2, -0.12]"
+      value: "arrow_label"
+      height: "0.0025"
+  tread_boards:
+    op: "for_each"
+    when: "has_stringers"
+    args:
+      items: "for j in 1..treads return j"
+      as: "j"
+      do: "box([tread_x[j] - nosing, -hw + stringer_width, j * riser - tread_thickness], [tread_x[j] + tread_d[j], hw - stringer_width, j * riser])"
+  risers_boards:
+    op: "for_each"
+    when: "has_stringers and riser_type = \"closed\""
+    args:
+      items: "for j in 1..risers return j"
+      as: "j"
+      do: "box([(if j = 1 then 0 else tread_x[j - 1] + tread_d[j - 1]) - riser_thickness, -hw + stringer_width, (j - 1) * riser], [(if j = 1 then 0 else tread_x[j - 1] + tread_d[j - 1]), hw - stringer_width, j * riser - tread_thickness])"
+  stringer_profile_1:
+    op: "polygon"
+    plane: "xz"
+    when: "has_stringers"
+    args:
+      points: "if landing then [[0, 0], [tread_x[k], z_land - stringer_depth / 2], [tread_x[k], z_land + stringer_depth / 2], [0, riser]] else [[0, 0], [run, total_rise - stringer_depth], [run, total_rise], [0, riser]]"
+  stringer_profile_2:
+    op: "polygon"
+    plane: "xz"
+    when: "has_stringers and landing"
+    args:
+      points: "[[land_end, z_land - stringer_depth / 2], [run, total_rise - stringer_depth], [run, total_rise], [land_end, z_land + stringer_depth / 2]]"
+  stringers:
+    op: "union"
+    when: "has_stringers"
+    args:
+      items: "[extrude(stringer_profile_1, -hw, -hw + stringer_width), extrude(stringer_profile_1, hw - stringer_width, hw), if landing then extrude(stringer_profile_2, -hw, -hw + stringer_width) else null, if landing then extrude(stringer_profile_2, hw - stringer_width, hw) else null]"
+    note: "Side stringers along the pitch, one pair per flight; the landing frame is not modelled."
+  landing_slab:
+    op: "box"
+    when: "has_stringers and landing"
+    args:
+      min: "[tread_x[k], -hw, z_land - tread_thickness - stringer_depth / 2]"
+      max: "[land_end, hw, z_land]"
+    note: "Landing as one block under the landing tread."
+  nosings:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "for j in 1..treads return j"
+      as: "j"
+      do: "if nosing > 0 then line([tread_x[j] - nosing, -hw], [tread_x[j] - nosing, hw]) else null"
+  railing_left_obj:
+    op: "instance"
+    when: "railing_left"
+    args:
+      object: "\"opo-format.org/library/templates/IfcRailing\""
+      values: "{predefined_type: \"HANDRAIL\", width: 0.042}"
+      inputs: "{path: rail_path_left}"
+  railing_right_obj:
+    op: "instance"
+    when: "railing_right"
+    args:
+      object: "\"opo-format.org/library/templates/IfcRailing\""
+      values: "{predefined_type: \"HANDRAIL\", width: 0.042}"
+      inputs: "{path: rail_path_right}"
+  plan_rails:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[if railing_left then line([0, hw - 0.05], [run, hw - 0.05]) else null, if railing_right then line([0, -hw + 0.05], [run, -hw + 0.05]) else null]"
+representations:
+  model.low:
+    context: "model"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+      - geometry: "stringers"
+        material: "if structure = \"steel_stringers\" then \"steel\" else stringer_material"
+      - geometry: "tread_boards"
+        material: "tread_material"
+  model.medium:
+    context: "model"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+      - geometry: "tread_boards"
+        material: "tread_material"
+        part: "Treads"
+      - geometry: "risers_boards"
+        material: "tread_material"
+        part: "Risers"
+      - geometry: "stringers"
+        material: "if structure = \"steel_stringers\" then \"steel\" else stringer_material"
+        part: "Stringers"
+      - geometry: "landing_slab"
+        material: "tread_material"
+        part: "Landing"
+      - geometry: "railing_left_obj"
+        part: "Railing"
+      - geometry: "railing_right_obj"
+        part: "Railing"
+  model.high:
+    context: "model"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Body"
+      targetView: "MODEL_VIEW"
+    items:
+      - geometry: "body"
+        material: "material"
+      - geometry: "tread_boards"
+        material: "tread_material"
+        part: "Treads"
+      - geometry: "risers_boards"
+        material: "tread_material"
+        part: "Risers"
+      - geometry: "stringers"
+        material: "if structure = \"steel_stringers\" then \"steel\" else stringer_material"
+        part: "Stringers"
+      - geometry: "landing_slab"
+        material: "tread_material"
+        part: "Landing"
+      - geometry: "railing_left_obj"
+        part: "Railing"
+      - geometry: "railing_right_obj"
+        part: "Railing"
+  plan.low:
+    context: "plan"
+    lod: "low"
+    scale:
+      min_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "outline_below"
+        class: "projected"
+      - geometry: "outline_above"
+        class: "overhead"
+      - geometry: "cut_line"
+        class: "cut"
+      - geometry: "walk_line"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "arrow"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "label"
+        class: "annotation"
+  plan.medium:
+    context: "plan"
+    lod: "medium"
+    scale:
+      min_scale: 50
+      max_scale: 200
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "outline_below"
+        class: "projected"
+      - geometry: "treads_below"
+        class: "projected"
+      - geometry: "outline_above"
+        class: "overhead"
+      - geometry: "treads_above"
+        class: "overhead"
+      - geometry: "cut_line"
+        class: "cut"
+      - geometry: "walk_line"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "arrow"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "label"
+        class: "annotation"
+      - geometry: "plan_rails"
+        class: "projected"
+    note: "Treads below the cut drawn, above it dashed; break line at the cut; walking line with arrow and label."
+  plan.high:
+    context: "plan"
+    lod: "high"
+    scale:
+      max_scale: 50
+    source: "authored"
+    ifc:
+      context: "Plan"
+      targetView: "PLAN_VIEW"
+    items:
+      - geometry: "outline_below"
+        class: "projected"
+      - geometry: "treads_below"
+        class: "projected"
+      - geometry: "outline_above"
+        class: "overhead"
+      - geometry: "treads_above"
+        class: "overhead"
+      - geometry: "cut_line"
+        class: "cut"
+      - geometry: "walk_line"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "arrow"
+        class: "annotation"
+        role: "walking_line"
+      - geometry: "label"
+        class: "annotation"
+      - geometry: "nosings"
+        class: "hidden"
+      - geometry: "plan_rails"
+        class: "projected"
+  section:
+    context: "section"
+    lod: "all"
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "SECTION_VIEW"
+    derive:
+      from: "model.{lod}"
+      method: "cut"
+  elevation:
+    context: "elevation"
+    lod: "all"
+    source: "derived"
+    ifc:
+      context: "Profile"
+      targetView: "ELEVATION_VIEW"
+    derive:
+      from: "model.{lod}"
+      method: "project"
+host:
+  is_host: false
+  level: "Base on a storey, top at the next storey (or a set rise)."
+  slab_opening:
+    note: "The application cuts the upper slab over the run plus headroom; the stairs rule set headroom value is the target."
+  nested:
+    objects:
+      - "opo-format.org/library/templates/IfcRailing"
+    note: "Handrails are nested IfcRailing class templates along the flight."
+handles:
+  - parameter: "width"
+    view:
+      - "plan"
+    at: "[run / 2, hw, 0]"
+    axis: "y"
+materials:
+  - "reinforced_concrete"
+  - "timber"
+  - "steel"
+ifc:
+  class: "IfcStair"
+  predefinedType: "if landing then \"TWO_STRAIGHT_RUN_STAIR\" else \"STRAIGHT_RUN_STAIR\""
+  property_sets: "all parameters of type property_set, with the values set by `value` formulas"
+  properties:
+    Pset_StairCommon.NumberOfRiser: "risers"
+    Pset_StairCommon.NumberOfTreads: "treads"
+    Pset_StairCommon.RiserHeight: "riser"
+    Pset_StairCommon.TreadLength: "going"
+    Pset_StairCommon.NosingLength: "nosing"
+    Pset_StairCommon.WaistThickness: "if structure = \"waist\" then waist_thickness else null"
+  quantities: {}
+  parameter_pset: "OPO_Parameters"
+  decomposition: "IfcStair aggregating one IfcStairFlight per flight (two with a landing) and the landing as IfcSlab LANDING; nested railings as IfcRailing."
