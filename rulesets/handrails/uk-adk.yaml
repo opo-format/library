@@ -7,15 +7,15 @@ values:
   height_min:
     value: "mm(900)"
     source: "uk-approved-document-k"
-    status: "to_verify"
-    note: "Handrail height above pitch line or floor, lowest."
+    status: "norm"
+    note: "Approved Document K (2013 edition incorporating 2013 amendments), section 1: handrail height at least 900 mm above the pitch line or floor. Checked against published summaries of the AD K guidance (Designing Buildings Wiki, RICS); a 2026 review proposes changes for general access and utility stairs that are not yet in force."
   height_max:
     value: "mm(1000)"
     source: "uk-approved-document-k"
-    status: "to_verify"
-    note: "Handrail height, highest."
+    status: "norm"
+    note: "Approved Document K (2013 edition incorporating 2013 amendments), section 1: at most 1000 mm. Checked against published summaries of the AD K guidance (Designing Buildings Wiki, RICS); a 2026 review proposes changes for general access and utility stairs that are not yet in force."
   both_sides_width:
     value: "mm(1000)"
     source: "uk-approved-document-k"
-    status: "to_verify"
-    note: "Handrails on both sides when the stair is at least this wide."
+    status: "norm"
+    note: "Approved Document K (2013 edition incorporating 2013 amendments), section 1: handrails on both sides of stairs 1000 mm wide or more. Checked against published summaries of the AD K guidance (Designing Buildings Wiki, RICS); a 2026 review proposes changes for general access and utility stairs that are not yet in force."
