@@ -30,9 +30,9 @@ sheet:
   ifc: "IfcStair · CURVED_RUN_STAIR or matching …_WINDING_STAIR type (derived from the walkline)"
   based_on: "— · spec §4.14 script step · `stairs` rule set (winder rules)."
   inputs: "Slot `walkline` (flat curve; per-segment flags flight | landing; per-corner flags landing | winders) · width either side of the walkline (`inner_width`, `outer_width`) · levels."
-  parameters: "Rise, maximum riser, width left and right of the walkline, corners (landings | winders), winders per corner, nosing, waist, material. Each of the first four corners can be set on its own. Planned: `balancing`, `min_inner_going`."
+  parameters: "Rise, maximum riser, width left and right of the walkline, corners (landings | winders), winders per corner, nosing, waist, material, handrails left and right. Each of the first four corners can be set on its own. Planned: `balancing`, `min_inner_going`."
   rules: "All C-01 rules at the walkline; winder going at narrow end ≥ min; even tread depth along the walkline."
-  lod: "Plan: treads below the cut, treads above dashed, walkline and arrow. 3D: solid blocks per step (all LODs). Planned: handrails, waist slab, timber treads."
+  lod: "Plan: treads below the cut, treads above dashed, walkline and arrow. 3D: solid blocks per step (all LODs). Nested handrails. Planned: waist slab, timber treads."
 parameters:
   rise_mode:
     type: "choice"
@@ -165,6 +165,27 @@ parameters:
       min: 0.0
       max: 0.06
     description: "Tread overhang over the riser below."
+  railing_right:
+    type: "boolean"
+    default: true
+    label: "Handrail on the right"
+    group: "Railings"
+    description: "A nested IfcRailing over the tread fronts, mitred at the corners."
+  railing_left:
+    type: "boolean"
+    default: false
+    label: "Handrail on the left"
+    group: "Railings"
+    description: "A nested IfcRailing over the tread fronts, mitred at the corners."
+  handrail_height:
+    type: "length"
+    default: 0.9
+    label: "Handrail height above the pitch line"
+    group: "Railings"
+    limits:
+      min: 0.6
+      max: 1.2
+    description: "Measured vertically above the nosings; the handrails rule sets check it."
   waist_thickness:
     type: "length"
     default: 0.15
@@ -447,6 +468,10 @@ rules:
       note: "Null points removed."
     treads_xy: "for s in tread_list return {n: s.n, z: s.n * riser, poly: for p in s.pts return [p.x, p.y]}"
     j_cut: "floor(view.cut_height / riser)"
+    rail_path_right:
+      expr: "concatenate(for q in flatten(for i in 1..nseg return concatenate(if nf[i] < 1 then [] else for t in 1..nf[i] return {p: [walkline[i][1] + sd[i][1] * (fe0[i] + (t - 1) * fg[i]) + sn[i][1] * (-(right_width - 0.05)), walkline[i][2] + sd[i][2] * (fe0[i] + (t - 1) * fg[i]) + sn[i][2] * (-(right_width - 0.05)), (fbase[i] + t) * riser + handrail_height]}, if i < nseg then [{p: [walkline[i + 1][1] + cbis[i][1] * (-(right_width - 0.05)), walkline[i + 1][2] + cbis[i][2] * (-(right_width - 0.05)), (cbase[i] + (cu[i] + 1) / 2) * riser + handrail_height]}] else [])) return q.p, [[walkline[nseg + 1][1] + sn[nseg][1] * (-(right_width - 0.05)), walkline[nseg + 1][2] + sn[nseg][2] * (-(right_width - 0.05)), total_rise + handrail_height]])"
+      note: "Right handrail over the tread fronts, at the middle corner tread height across each corner."
+    rail_path_left: "concatenate(for q in flatten(for i in 1..nseg return concatenate(if nf[i] < 1 then [] else for t in 1..nf[i] return {p: [walkline[i][1] + sd[i][1] * (fe0[i] + (t - 1) * fg[i]) + sn[i][1] * (left_width - 0.05), walkline[i][2] + sd[i][2] * (fe0[i] + (t - 1) * fg[i]) + sn[i][2] * (left_width - 0.05), (fbase[i] + t) * riser + handrail_height]}, if i < nseg then [{p: [walkline[i + 1][1] + cbis[i][1] * (left_width - 0.05), walkline[i + 1][2] + cbis[i][2] * (left_width - 0.05), (cbase[i] + (cu[i] + 1) / 2) * riser + handrail_height]}] else [])) return q.p, [[walkline[nseg + 1][1] + sn[nseg][1] * (left_width - 0.05), walkline[nseg + 1][2] + sn[nseg][2] * (left_width - 0.05), total_rise + handrail_height]])"
     start_pt: "walkline[1]"
     end_pt: "walkline[count(walkline)]"
     end_dir: "sd[nseg]"
@@ -494,6 +519,10 @@ rules:
       expr: "rules.stairs = null or rules.stairs.pitch_max = null or pitch <= rules.stairs.pitch_max"
       severity: "warning"
       message: "The pitch is steeper than the active rule set allows."
+    handrail_range:
+      expr: "rules.handrails = null or (handrail_height >= rules.handrails.height_min and handrail_height <= rules.handrails.height_max)"
+      severity: "warning"
+      message: "The handrail height is outside the active rule set."
   rulesets:
     stairs:
       default: null
@@ -507,6 +536,12 @@ rules:
         rule_max: "length"
         width_min: "length"
         pitch_max: "number"
+    handrails:
+      default: null
+      note: "Off by default. Shared variants (library rulesets/handrails)."
+      fields:
+        height_min: "length"
+        height_max: "length"
 recipe:
   steps:
     op: "for_each"
@@ -546,6 +581,25 @@ recipe:
     plane: "xy"
     args:
       points: "[[end_pt[1] + (-0.15 * end_dir[1]) + (0.075 * sn[nseg][1]), end_pt[2] + (-0.15 * end_dir[2]) + (0.075 * sn[nseg][2])], [end_pt[1], end_pt[2]], [end_pt[1] + (-0.15 * end_dir[1]) + (-0.075 * sn[nseg][1]), end_pt[2] + (-0.15 * end_dir[2]) + (-0.075 * sn[nseg][2])]]"
+  railing_right_obj:
+    op: "instance"
+    when: "railing_right"
+    args:
+      object: "\"opo-format.org/library/templates/IfcRailing\""
+      values: "{predefined_type: \"HANDRAIL\", width: 0.042}"
+      inputs: "{path: rail_path_right}"
+  railing_left_obj:
+    op: "instance"
+    when: "railing_left"
+    args:
+      object: "\"opo-format.org/library/templates/IfcRailing\""
+      values: "{predefined_type: \"HANDRAIL\", width: 0.042}"
+      inputs: "{path: rail_path_left}"
+  plan_rails:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[if railing_right then polyline(for p in rail_path_right return [p[1], p[2]]) else null, if railing_left then polyline(for p in rail_path_left return [p[1], p[2]]) else null]"
   label:
     op: "text"
     plane: "xy"
@@ -581,6 +635,10 @@ representations:
       - geometry: "steps"
         material: "material"
         part: "Steps"
+      - geometry: "railing_right_obj"
+        part: "Railing"
+      - geometry: "railing_left_obj"
+        part: "Railing"
   model.high:
     context: "model"
     lod: "high"
@@ -594,6 +652,10 @@ representations:
       - geometry: "steps"
         material: "material"
         part: "Steps"
+      - geometry: "railing_right_obj"
+        part: "Railing"
+      - geometry: "railing_left_obj"
+        part: "Railing"
   plan.low:
     context: "plan"
     lod: "low"
@@ -616,6 +678,8 @@ representations:
         role: "walking_line"
       - geometry: "label"
         class: "annotation"
+      - geometry: "plan_rails"
+        class: "projected"
   plan.medium:
     context: "plan"
     lod: "medium"
@@ -639,6 +703,8 @@ representations:
         role: "walking_line"
       - geometry: "label"
         class: "annotation"
+      - geometry: "plan_rails"
+        class: "projected"
     note: "Treads below the cut drawn, above it dashed; break line at the cut; walking line with arrow and label."
   plan.high:
     context: "plan"
@@ -662,11 +728,17 @@ representations:
         role: "walking_line"
       - geometry: "label"
         class: "annotation"
+      - geometry: "plan_rails"
+        class: "projected"
 host:
   is_host: false
   level: "Base on a storey, top at the next storey (or a set rise)."
   slab_opening:
     note: "The application cuts the upper slab over the run plus headroom; the stairs rule set headroom value is the target."
+  nested:
+    objects:
+      - "opo-format.org/library/templates/IfcRailing"
+    note: "Handrails are nested IfcRailing class templates along the flight."
 handles:
   - parameter: "left_width"
     view:
