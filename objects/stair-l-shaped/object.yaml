@@ -89,7 +89,7 @@ parameters:
   landing_after:
     type: "integer"
     default: 9
-    label: "Landing after riser"
+    label: "Landing (or first winder) after riser"
     group: "Landing"
     limits:
       min: 2
@@ -327,6 +327,26 @@ parameters:
       - name: "FireExit"
         measure: "IfcBoolean"
     optional: false
+  corner:
+    type: "choice"
+    default: "landing"
+    label: "Corner"
+    group: "Landing"
+    options:
+      - "landing"
+      - "winders"
+    option_labels:
+      landing: "Quarter landing"
+      winders: "Winders"
+  corner_winders:
+    type: "integer"
+    default: 3
+    label: "Winders in the corner"
+    group: "Landing"
+    visible: "corner = \"winders\""
+    limits:
+      min: 2
+      max: 5
 slots: {}
 rules:
   derived:
@@ -337,8 +357,14 @@ rules:
     k:
       expr: "min(max(landing_after, 2), risers - 2)"
       note: "Risers of flight 1; flight 2 has the rest."
-    n2: "risers - k"
+    wn:
+      expr: "if corner = \"winders\" then corner_winders else 1"
+      note: "Treads in the corner: the landing counts as one."
+    n2: "risers - k - (wn - 1)"
     z_land: "k * riser"
+    z2:
+      expr: "z_land + (wn - 1) * riser"
+      note: "Where flight 2 starts: the top of the landing or of the last winder."
     run1: "(k - 1) * going"
     run2: "(n2 - 1) * going"
     pitch: "atan2(riser, going)"
@@ -356,10 +382,10 @@ rules:
     under_x0: "max(0, (waist_v - riser) * going / riser)"
     under_z0: "max(0, riser - waist_v)"
     steps1: "for i in 1..2 * (k - 1) return if modulo(i, 2) = 1 then [(i - 1) / 2 * going, (i + 1) / 2 * riser] else [i / 2 * going, i / 2 * riser]"
-    steps2: "for i in 1..2 * (n2 - 1) return if modulo(i, 2) = 1 then [(i - 1) / 2 * going, z_land + (i + 1) / 2 * riser] else [i / 2 * going, z_land + i / 2 * riser]"
+    steps2: "for i in 1..2 * (n2 - 1) return if modulo(i, 2) = 1 then [(i - 1) / 2 * going, z2 + (i + 1) / 2 * riser] else [i / 2 * going, z2 + i / 2 * riser]"
     ua: "(waist_v - waist_thickness - riser) * going / riser"
     profile1_points: "if structure = \"waist\" then concatenate([[0, 0]], steps1, [[run1, z_land], [run1, z_land - waist_v], [under_x0, under_z0]]) else concatenate([[0, 0]], steps1, [[run1, z_land], [run1, 0]])"
-    profile2_points: "if structure = \"waist\" then concatenate([[0, z_land]], steps2, [[run2, total_rise], [run2, total_rise - waist_v]], if ua >= 0 then [[ua, z_land - waist_thickness], [0, z_land - waist_thickness]] else [[0, z_land + riser - waist_v]]) else concatenate([[0, z_land]], steps2, [[run2, total_rise], [run2, 0], [0, 0]])"
+    profile2_points: "if structure = \"waist\" then concatenate([[0, z2]], steps2, [[run2, total_rise], [run2, total_rise - waist_v]], if ua >= 0 then [[ua, z2 - waist_thickness], [0, z2 - waist_thickness]] else [[0, z2 + riser - waist_v]]) else concatenate([[0, z2]], steps2, [[run2, total_rise], [run2, 0], [0, 0]])"
     mirror_y:
       expr: "turn = \"right\""
       note: "A right turn is the left turn mirrored across the axis of flight 1."
@@ -369,11 +395,14 @@ rules:
     u_cut2: "min(run2, max(0, (j_cut - k - 0.5) * going))"
     rail_y: "hw - 0.05"
     rail_outer:
-      expr: "concatenate(for j in 1..k - 1 return [(j - 1) * going, -rail_y, j * riser + handrail_height], [[run1, -rail_y, z_land + handrail_height], [run1 + width - 0.05, -rail_y, z_land + handrail_height], [run1 + width - 0.05, hw, z_land + handrail_height]], for j in 1..n2 - 1 return [run1 + width - 0.05, hw + (j - 1) * going, z_land + j * riser + handrail_height], [[run1 + width - 0.05, hw + run2, total_rise + handrail_height]])"
+      expr: "concatenate(for j in 1..k - 1 return [(j - 1) * going, -rail_y, j * riser + handrail_height], [[run1, -rail_y, z_land + handrail_height], [run1 + width - 0.05, -rail_y, (z_land + z2) / 2 + handrail_height], [run1 + width - 0.05, hw, z2 + handrail_height]], for j in 1..n2 - 1 return [run1 + width - 0.05, hw + (j - 1) * going, z2 + j * riser + handrail_height], [[run1 + width - 0.05, hw + run2, total_rise + handrail_height]])"
       note: "Outer handrail: flight 1, round the landing, flight 2."
-    rail_inner: "concatenate(for j in 1..k - 1 return [(j - 1) * going, rail_y, j * riser + handrail_height], [[run1, rail_y, z_land + handrail_height]], for j in 1..n2 - 1 return [run1 + 0.05, hw + (j - 1) * going, z_land + j * riser + handrail_height], [[run1 + 0.05, hw + run2, total_rise + handrail_height]])"
+    rail_inner: "concatenate(for j in 1..k - 1 return [(j - 1) * going, rail_y, j * riser + handrail_height], [[run1, rail_y, z_land + handrail_height]], for j in 1..n2 - 1 return [run1 + 0.05, hw + (j - 1) * going, z2 + j * riser + handrail_height], [[run1 + 0.05, hw + run2, total_rise + handrail_height]])"
     rail_outer_m: "if mirror_y then for p in rail_outer return [p[1], -p[2], p[3]] else rail_outer"
     rail_inner_m: "if mirror_y then for p in rail_inner return [p[1], -p[2], p[3]] else rail_inner"
+    winder_polys:
+      expr: "if corner = \"winders\" then for j in 1..wn return concatenate([[run1, hw], (if ((j - 1) * 2 * width / wn) <= width then [run1 + ((j - 1) * 2 * width / wn), -hw] else [run1 + width, -hw + ((j - 1) * 2 * width / wn) - width])], if ((j - 1) * 2 * width / wn) < width and (j * 2 * width / wn) > width then [[run1 + width, -hw]] else [], [(if (j * 2 * width / wn) <= width then [run1 + (j * 2 * width / wn), -hw] else [run1 + width, -hw + (j * 2 * width / wn) - width])]) else []"
+      note: "Winders fanned from the inner corner, splitting the outer edges evenly (built for a left turn)."
   checks:
     min_risers:
       expr: "risers >= 2"
@@ -461,10 +490,19 @@ recipe:
     args:
       min: "[run1, -hw, if structure = \"waist\" then z_land - waist_thickness else 0]"
       max: "[run1 + land_len, land_w - hw, z_land]"
+    when: "corner = \"landing\""
+  winders:
+    op: "for_each"
+    plane: "xy"
+    when: "corner = \"winders\""
+    args:
+      items: "for j in 1..wn return j"
+      as: "j"
+      do: "extrude(polygon(winder_polys[j]), if structure = \"waist\" then max(0, z_land + (j - 2) * riser - waist_thickness) else 0, z_land + (j - 1) * riser)"
   body:
     op: "union"
     args:
-      items: "[if mirror_y then mirror(flight1, \"y\") else flight1, if mirror_y then mirror(flight2, \"y\") else flight2, if mirror_y then mirror(landing_slab, \"y\") else landing_slab]"
+      items: "[if mirror_y then mirror(flight1, \"y\") else flight1, if mirror_y then mirror(flight2, \"y\") else flight2, if corner = \"landing\" then if mirror_y then mirror(landing_slab, \"y\") else landing_slab else null, if corner = \"winders\" then if mirror_y then mirror(winders, \"y\") else winders else null]"
   p1_below:
     op: "rectangle"
     plane: "xy"
@@ -484,6 +522,7 @@ recipe:
     args:
       min: "[run1, -hw]"
       max: "[run1 + land_len, land_w - hw]"
+    when: "corner = \"landing\""
   p2_local:
     op: "union"
     plane: "xy"
@@ -557,11 +596,19 @@ recipe:
       object: "\"opo-format.org/library/templates/IfcRailing\""
       values: "{predefined_type: \"HANDRAIL\", width: 0.042}"
       inputs: "{path: rail_inner_m}"
+  p_winders:
+    op: "for_each"
+    plane: "xy"
+    when: "corner = \"winders\""
+    args:
+      items: "winder_polys"
+      as: "w"
+      do: "polyline(append(w, w[1]))"
   plan_below:
     op: "union"
     plane: "xy"
     args:
-      items: "[if mirror_y then mirror(p1_below, \"y\") else p1_below, if mirror_y then mirror(p_landing, \"y\") else p_landing]"
+      items: "[if mirror_y then mirror(p1_below, \"y\") else p1_below, if corner = \"landing\" then if mirror_y then mirror(p_landing, \"y\") else p_landing else null]"
   plan_above:
     op: "union"
     plane: "xy"
@@ -571,7 +618,7 @@ recipe:
     op: "union"
     plane: "xy"
     args:
-      items: "[if mirror_y then mirror(union([p1_treads, p2_treads]), \"y\") else union([p1_treads, p2_treads])]"
+      items: "[if mirror_y then mirror(union([p1_treads, p2_treads]), \"y\") else union([p1_treads, p2_treads]), if corner = \"winders\" then if mirror_y then mirror(p_winders, \"y\") else p_winders else null]"
   cut_line:
     op: "union"
     plane: "xy"
@@ -749,7 +796,7 @@ materials:
   - "reinforced_concrete"
 ifc:
   class: "IfcStair"
-  predefinedType: "\"QUARTER_TURN_STAIR\""
+  predefinedType: "if corner = \"winders\" then \"QUARTER_WINDING_STAIR\" else \"QUARTER_TURN_STAIR\""
   property_sets: "all parameters of type property_set, with the values set by `value` formulas"
   properties:
     Pset_StairCommon.NumberOfRiser: "risers"
