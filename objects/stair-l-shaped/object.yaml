@@ -29,7 +29,7 @@ sheet:
   ifc: "IfcStair · QUARTER_TURN_STAIR (landing) / QUARTER_WINDING_STAIR (winders) · 2 IfcStairFlight + IfcSlab LANDING"
   based_on: "as C-01."
   inputs: "as C-01."
-  parameters: "(beyond C-01) `turn` left | right · `corner` landing | winders · `winders` (count, default 3) · `split_riser` (risers in first flight) · `walkline_offset`."
+  parameters: "(beyond C-01) `turn` left | right · `corner` landing | winders · `corner_winders` (count, default 3) · `landing_after` (risers in the first flight) · `walkline_offset`."
   rules: "as C-01 + winder going at walkline ≥ min and at narrow end ≥ min (`stairs.winders`)."
   lod: "Plan: winder lines radiating to the walkline geometry; walkline curved through the corner."
 parameters:
@@ -347,6 +347,15 @@ parameters:
     limits:
       min: 2
       max: 5
+  walkline_offset:
+    type: "length"
+    default: 0.5
+    label: "Walking line from the inner side"
+    group: "Plan"
+    limits:
+      min: 0.1
+      max: 2.0
+    description: "Where the walking line is drawn and reported (Pset_StairCommon WalkingLineOffset)."
 slots: {}
 rules:
   derived:
@@ -569,12 +578,12 @@ recipe:
     op: "polyline"
     plane: "xy"
     args:
-      points: "[[going / 2, 0], [run1 + hw, 0], [run1 + hw, hw + run2]]"
+      points: "[[going / 2, hw - min(walkline_offset, width)], [run1 + min(walkline_offset, width), hw - min(walkline_offset, width)], [run1 + min(walkline_offset, width), hw + run2]]"
   arrow_l:
     op: "polyline"
     plane: "xy"
     args:
-      points: "[[run1 + hw - 0.075, hw + run2 - 0.15], [run1 + hw, hw + run2], [run1 + hw + 0.075, hw + run2 - 0.15]]"
+      points: "[[run1 + min(walkline_offset, width) - 0.075, hw + run2 - 0.15], [run1 + min(walkline_offset, width), hw + run2], [run1 + min(walkline_offset, width) + 0.075, hw + run2 - 0.15]]"
   label:
     op: "text"
     plane: "xy"
@@ -805,6 +814,7 @@ ifc:
     Pset_StairCommon.TreadLength: "going"
     Pset_StairCommon.NosingLength: "nosing"
     Pset_StairCommon.WaistThickness: "if structure = \"waist\" then waist_thickness else null"
+    Pset_StairCommon.WalkingLineOffset: "walkline_offset"
   quantities: {}
   parameter_pset: "OPO_Parameters"
   decomposition: "IfcStair aggregating two IfcStairFlight and the landing as IfcSlab LANDING; nested railings as IfcRailing."
