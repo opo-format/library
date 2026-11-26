@@ -155,7 +155,7 @@ recipe:
       as: "b"
       index: "i"
       do: "extrude(b, bottom, top)"
-    note: "Each item keeps its layer (each.material) from layer_bands."
+    note: "Each layer as a solid, for applications that hatch a cut by layer; the wall's 3D is the body (decision 0028)."
   outline:
     op: "band"
     plane: "xy"
@@ -188,6 +188,8 @@ representations:
     items:
       - geometry: "body"
         material: "layers[core_index].material"
+        part: "Wall"
+        category: "structure"
   model.medium:
     context: "model"
     lod: "medium"
@@ -199,9 +201,11 @@ representations:
       context: "Body"
       targetView: "MODEL_VIEW"
     items:
-      - geometry: "layer_solids"
-        material: "each.material"
-        part: "Layer"
+      - geometry: "body"
+        material: "layers[core_index].material"
+        part: "Wall"
+        category: "structure"
+    note: "One closed solid; layers are hatched where the wall is cut (decision 0028)."
   model.high:
     context: "model"
     lod: "high"
@@ -212,9 +216,11 @@ representations:
       context: "Body"
       targetView: "MODEL_VIEW"
     items:
-      - geometry: "layer_solids"
-        material: "each.material"
-        part: "Layer"
+      - geometry: "body"
+        material: "layers[core_index].material"
+        part: "Wall"
+        category: "structure"
+    note: "One closed solid; layers are hatched where the wall is cut (decision 0028)."
   plan.low:
     context: "plan"
     lod: "low"
@@ -254,14 +260,19 @@ representations:
     lod: "high"
     scale:
       max_scale: 50
-    source: "derived"
+    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    derive:
-      from: "model.high"
-      method: "cut"
-    note: "Cut from the layer solids; hatches from each layer's material."
+    items:
+      - geometry: "layer_bands"
+        class: "cut"
+        hatch: "each.material"
+        role: "layer"
+      - geometry: "outline"
+        class: "cut"
+        role: "outline"
+    note: "Each layer hatched with its material (decision 0028: layers are drawn, the wall is one solid)."
   elevation:
     context: "elevation"
     lod: "all"
