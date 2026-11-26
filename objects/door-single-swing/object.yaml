@@ -348,6 +348,9 @@ rules:
       note: "Front casing steps back so the rebated leaf lap sits beside it."
     hinge: "[-leaf_width / 2, leaf_front]"
     leaf_tip: "[hinge[1] + leaf_width * cos(opening_angle), hinge[2] + leaf_width * sin(opening_angle)]"
+    hinge_sym:
+      expr: "[hinge[1], frame_front]"
+      note: "Hinge of the plan symbols, on the frame face, so the drawn leaf touches the frame."
     handle_x: "leaf_width / 2 - backset"
     hinge_count: "if leaf_height > mm(2300) then 3 else 2"
     hinge_z:
@@ -630,6 +633,29 @@ recipe:
       geometry: "leaf_closed_plan"
       center: "hinge"
       angle: "opening_angle"
+  leaf_line_sym:
+    op: "line"
+    plane: "xy"
+    args:
+      start: "hinge_sym"
+      end: "[hinge_sym[1] + leaf_width * cos(opening_angle), hinge_sym[2] + leaf_width * sin(opening_angle)]"
+    note: "Low detail: the open leaf as a line from the frame face."
+  leaf_open_sym:
+    op: "rotate"
+    args:
+      geometry: "move(leaf_closed_plan, [0, frame_front - leaf_front])"
+      center: "hinge_sym"
+      angle: "opening_angle"
+    note: "Medium detail: the open leaf, touching the frame face."
+  swing_arc_sym:
+    op: "arc"
+    plane: "xy"
+    args:
+      center: "hinge_sym"
+      radius: "leaf_width"
+      start_angle: "0"
+      end_angle: "opening_angle"
+    note: "Swing of the plan symbols, from the frame face."
   leaf_line_plan:
     op: "line"
     plane: "xy"
@@ -749,9 +775,9 @@ representations:
         - "Leaf"
         - "Hardware"
     overlay:
-      - geometry: "leaf_line_plan"
+      - geometry: "leaf_line_sym"
         class: "cut"
-      - geometry: "swing_arc_plan"
+      - geometry: "swing_arc_sym"
         class: "annotation"
         role: "opening"
   plan.medium:
@@ -773,10 +799,10 @@ representations:
         - "Stop"
         - "Casing"
     overlay:
-      - geometry: "leaf_open_plan"
+      - geometry: "leaf_open_sym"
         class: "cut"
         hatch: "leaf_material"
-      - geometry: "swing_arc_plan"
+      - geometry: "swing_arc_sym"
         class: "annotation"
         role: "swing"
   plan.high:
