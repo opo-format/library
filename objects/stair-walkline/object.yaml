@@ -640,17 +640,17 @@ recipe:
     when: "railing_right"
     args:
       object: "\"opo-format.org/library/objects/railing-guard\""
-      values: "if railing_right_fixing = \"wall\" then {predefined_type: \"HANDRAIL\", height: handrail_height, mount: \"wall\", outside: \"right\", wall_distance: 0.05, top_is_handrail: true} else {predefined_type: \"BALUSTRADE\", height: handrail_height, mount: \"embedded\", embed_depth: min(riser + 0.05, waist_thickness - 0.01), top_is_handrail: true}"
-      inputs: "{path: for p in rail_path_right return [p[1], p[2], p[3] - handrail_height]}"
-    note: "The guard follows the nosing line; its posts go down into the steps (up to one riser plus 0.05 m, no deeper than the slab) so they stand on every tread."
+      values: "if railing_right_fixing = \"wall\" then {predefined_type: \"HANDRAIL\", height: handrail_height, mount: \"wall\", outside: \"right\", wall_distance: 0.05, top_is_handrail: true} else {predefined_type: \"BALUSTRADE\", height: handrail_height, mount: \"embedded\", embed_depth: 0.1, top_is_handrail: true}"
+      inputs: "{path: for p in rail_path_right return [p[1], p[2], p[3] - handrail_height], ground: for e in concatenate(flatten(for k in 1..count(rail_path_right) - 1 return [{p: [rail_path_right[k][1], rail_path_right[k][2], rail_path_right[k][3] - handrail_height]}, {p: [rail_path_right[k + 1][1], rail_path_right[k + 1][2], rail_path_right[k][3] - handrail_height]}]), [{p: [rail_path_right[count(rail_path_right)][1], rail_path_right[count(rail_path_right)][2], rail_path_right[count(rail_path_right)][3] - handrail_height]}]) return e.p}"
+    note: "The guard follows the nosing line and stands on the steps: the stair passes its treads as the ground, so every post and baluster reaches the tread under it."
   railing_left_obj:
     op: "instance"
     when: "railing_left"
     args:
       object: "\"opo-format.org/library/objects/railing-guard\""
-      values: "if railing_left_fixing = \"wall\" then {predefined_type: \"HANDRAIL\", height: handrail_height, mount: \"wall\", outside: \"left\", wall_distance: 0.05, top_is_handrail: true} else {predefined_type: \"BALUSTRADE\", height: handrail_height, mount: \"embedded\", embed_depth: min(riser + 0.05, waist_thickness - 0.01), top_is_handrail: true}"
-      inputs: "{path: for p in rail_path_left return [p[1], p[2], p[3] - handrail_height]}"
-    note: "The guard follows the nosing line; its posts go down into the steps (up to one riser plus 0.05 m, no deeper than the slab) so they stand on every tread."
+      values: "if railing_left_fixing = \"wall\" then {predefined_type: \"HANDRAIL\", height: handrail_height, mount: \"wall\", outside: \"left\", wall_distance: 0.05, top_is_handrail: true} else {predefined_type: \"BALUSTRADE\", height: handrail_height, mount: \"embedded\", embed_depth: 0.1, top_is_handrail: true}"
+      inputs: "{path: for p in rail_path_left return [p[1], p[2], p[3] - handrail_height], ground: for e in concatenate(flatten(for k in 1..count(rail_path_left) - 1 return [{p: [rail_path_left[k][1], rail_path_left[k][2], rail_path_left[k][3] - handrail_height]}, {p: [rail_path_left[k + 1][1], rail_path_left[k + 1][2], rail_path_left[k][3] - handrail_height]}]), [{p: [rail_path_left[count(rail_path_left)][1], rail_path_left[count(rail_path_left)][2], rail_path_left[count(rail_path_left)][3] - handrail_height]}]) return e.p}"
+    note: "The guard follows the nosing line and stands on the steps: the stair passes its treads as the ground, so every post and baluster reaches the tread under it."
   plan_rails:
     op: "union"
     plane: "xy"
@@ -735,13 +735,14 @@ representations:
     lod: "low"
     scale:
       min_scale: 200
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "treads_below"
-        class: "projected"
+    source: "derived"
+    derive:
+      from: "model.low"
+      method: "cut_or_project"
+    overlay:
       - geometry: "treads_above"
         class: "overhead"
       - geometry: "walk_line"
@@ -752,21 +753,21 @@ representations:
         role: "walking_line"
       - geometry: "label"
         class: "annotation"
-      - geometry: "plan_rails"
-        class: "projected"
   plan.medium:
     context: "plan"
     lod: "medium"
     scale:
       min_scale: 50
       max_scale: 200
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "treads_below"
-        class: "projected"
+    note: "Treads below the cut drawn, above it dashed; break line at the cut; walking line with arrow and label."
+    source: "derived"
+    derive:
+      from: "model.medium"
+      method: "cut_or_project"
+    overlay:
       - geometry: "treads_above"
         class: "overhead"
       - geometry: "walk_line"
@@ -777,21 +778,19 @@ representations:
         role: "walking_line"
       - geometry: "label"
         class: "annotation"
-      - geometry: "plan_rails"
-        class: "projected"
-    note: "Treads below the cut drawn, above it dashed; break line at the cut; walking line with arrow and label."
   plan.high:
     context: "plan"
     lod: "high"
     scale:
       max_scale: 50
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "treads_below"
-        class: "projected"
+    source: "derived"
+    derive:
+      from: "model.high"
+      method: "cut_or_project"
+    overlay:
       - geometry: "treads_above"
         class: "overhead"
       - geometry: "walk_line"
@@ -802,8 +801,6 @@ representations:
         role: "walking_line"
       - geometry: "label"
         class: "annotation"
-      - geometry: "plan_rails"
-        class: "projected"
 host:
   is_host: false
   level: "Base on a storey, top at the next storey (or a set rise)."
