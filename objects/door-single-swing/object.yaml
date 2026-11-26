@@ -332,6 +332,12 @@ rules:
     usable_clear_width:
       expr: "clear_width - leaf_thickness"
       note: "Clear width with the leaf open at 90°: the open leaf takes its thickness off the hinge side."
+    wall_centre:
+      expr: "(host.face_front - host.face_back) / 2"
+      note: "Centre of the wall thickness, from the wall's location line (proposal 0004)."
+    seat_y:
+      expr: "if frame_type = \"block\" then host.core_front - block_depth / 2 else wall_centre"
+      note: "Where the door's centre plane sits in the wall: block frames against the front of the core, frames that span the wall on its centre."
     lining_depth:
       expr: "if frame_type = \"block\" then block_depth else host.thickness"
       note: "IFC LiningDepth; wrap-around, lining and hollow metal frames span the wall."
@@ -609,8 +615,8 @@ recipe:
     op: "extrude"
     args:
       profile: "opening"
-      from: "-host.thickness / 2 - mm(10)"
-      to: "host.thickness / 2 + mm(10)"
+      from: "-host.face_back - seat_y - mm(10)"
+      to: "host.face_front - seat_y + mm(10)"
   jamb_left_plan:
     op: "union"
     plane: "xy"
@@ -906,8 +912,33 @@ host:
   inputs:
     thickness:
       type: "length"
-      from: "host thickness at the insertion point"
+      from: "thickness"
       default: 0.115
+    face_front:
+      type: "length"
+      from: "face_front"
+      default: 0.0575
+    face_back:
+      type: "length"
+      from: "face_back"
+      default: 0.0575
+    core_front:
+      type: "length"
+      from: "core_front"
+      default: 0.0575
+    core_back:
+      type: "length"
+      from: "core_back"
+      default: 0.0575
+  seat:
+    to: "axis"
+    offset: "seat_y"
+  reveal:
+    - function: "finish"
+      rule: "return"
+      to: "frame"
+      frame_y: "lining_depth / 2"
+  head: "[[-opening_width / 2, 0, opening_height], [opening_width / 2, 0, opening_height]]"
   void:
     geometry: "void"
     ifc: "IfcOpeningElement"
