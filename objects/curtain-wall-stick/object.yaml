@@ -134,6 +134,29 @@ parameters:
       min: 0.0
       max: 0.05
     description: "Gasket space between the back of the glass and the frame members."
+  glass_plane:
+    type: "choice"
+    default: "centre"
+    label: "The drawn line is the glass"
+    group: "Glazing"
+    options:
+      - "outer"
+      - "centre"
+      - "inner"
+    option_labels:
+      outer: "Outer face"
+      centre: "Centre"
+      inner: "Inner face"
+    description: "Where the baseline sits on the glass and spandrel panels; frames follow the glass."
+  glass_plane_offset:
+    type: "length"
+    default: 0.0
+    label: "Glass offset from the drawn line"
+    group: "Glazing"
+    limits:
+      min: -0.3
+      max: 0.3
+    description: "Moves the glass, spandrels and frames forward (+, to the outside) or back (-)."
   fire_stops:
     type: "boolean"
     default: true
@@ -215,6 +238,9 @@ rules:
     base: "surface.base"
     top: "surface.top"
     height: "top - base"
+    glass_shift:
+      expr: "(if glass_plane = \"outer\" then -glass_thickness / 2 else if glass_plane = \"inner\" then glass_thickness / 2 else 0) + glass_plane_offset"
+      note: "Centre of the glass in front of the baseline (+ is the outside)."
     corner_turns:
       expr: "if count(surface.baseline) < 3 then [] else for k in 2..count(surface.baseline) - 1 return {x: surface.baseline[k][1], y: surface.baseline[k][2], left: (surface.baseline[k][1] - surface.baseline[k - 1][1]) * (surface.baseline[k + 1][2] - surface.baseline[k][2]) - (surface.baseline[k][2] - surface.baseline[k - 1][2]) * (surface.baseline[k + 1][1] - surface.baseline[k][1]) > 0}"
       note: "Each baseline corner and whether the baseline turns left there (an outside corner, the front being to the right)."
@@ -250,13 +276,13 @@ recipe:
     args:
       items: "g.segments"
       as: "s"
-      do: "instance(if s.component != null then s.component else component_for(frame_classes, s.cls), if s.values != null then s.values else {profile_width: if s.direction = \"v\" then mullion_width else transom_width, profile_depth: if s.direction = \"v\" then mullion_depth else transom_depth, joint: if s.direction = \"v\" then joint_vertical else joint_horizontal, cap_depth: cap_depth, glass_thickness: glass_thickness, glass_offset: glass_offset, shape: if s.cls = \"corner\" then \"corner_outside\" else if s.cls = \"corner_inside\" then \"corner_inside\" else \"straight\"}, {path: s.path, normal: s.normal, trim_start: s.trim_start, trim_end: s.trim_end, left_cell: (if s.cls = \"corner\" or s.cls = \"corner_inside\" then flatten(for c in g.cells return if c.id = s.cells[1] then [c] else [])[1] else null), right_cell: (if s.cls = \"corner\" or s.cls = \"corner_inside\" then flatten(for c in g.cells return if c.id = s.cells[2] then [c] else [])[1] else null)})"
+      do: "instance(if s.component != null then s.component else component_for(frame_classes, s.cls), if s.values != null then s.values else {profile_width: if s.direction = \"v\" then mullion_width else transom_width, profile_depth: if s.direction = \"v\" then mullion_depth else transom_depth, joint: if s.direction = \"v\" then joint_vertical else joint_horizontal, cap_depth: cap_depth, glass_thickness: glass_thickness, glass_offset: glass_offset, shape: if s.cls = \"corner\" then \"corner_outside\" else if s.cls = \"corner_inside\" then \"corner_inside\" else \"straight\", glass_shift: glass_shift}, {path: s.path, normal: s.normal, trim_start: s.trim_start, trim_end: s.trim_end, left_cell: (if s.cls = \"corner\" or s.cls = \"corner_inside\" then flatten(for c in g.cells return if c.id = s.cells[1] then [c] else [])[1] else null), right_cell: (if s.cls = \"corner\" or s.cls = \"corner_inside\" then flatten(for c in g.cells return if c.id = s.cells[2] then [c] else [])[1] else null)})"
   panels:
     op: "for_each"
     args:
       items: "g.cells"
       as: "c"
-      do: "instance(if c.component != null then c.component else component_for(panel_classes, c.cls), if c.values != null then c.values else {kind: if c.cls = \"spandrel\" then \"spandrel\" else \"vision\", glass_thickness: glass_thickness}, {outline: c.panel_outline, normal: c.normal, insets: c.insets})"
+      do: "instance(if c.component != null then c.component else component_for(panel_classes, c.cls), if c.values != null then c.values else {kind: if c.cls = \"spandrel\" then \"spandrel\" else \"vision\", glass_thickness: glass_thickness, glass_shift: glass_shift}, {outline: c.panel_outline, normal: c.normal, insets: c.insets})"
   fire_stops_3d:
     op: "for_each"
     plane: "xy"
@@ -264,7 +290,7 @@ recipe:
     args:
       items: "flatten(for f in levels_within return if f = null then [] else [f])"
       as: "f"
-      do: "extrude(band(for p in surface.baseline return [p[1], p[2]], glass_thickness / 2 + glass_offset + max(mullion_depth, transom_depth) + slab_edge_gap, glass_thickness / 2 + glass_offset + max(mullion_depth, transom_depth)), base + f, base + f + fire_stop_depth)"
+      do: "extrude(band(for p in surface.baseline return [p[1], p[2]], glass_thickness / 2 - glass_shift + glass_offset + max(mullion_depth, transom_depth) + slab_edge_gap, glass_thickness / 2 - glass_shift + glass_offset + max(mullion_depth, transom_depth)), base + f, base + f + fire_stop_depth)"
     note: "Behind the frame at each floor above the base, in the spandrel zone (hidden behind the spandrel panels), mitred at the corners."
   plan_frames:
     op: "for_each"
@@ -272,7 +298,7 @@ recipe:
     args:
       items: "for s in g.segments return if s.direction = \"v\" and s.start[3] < base + 0.001 then s else null"
       as: "s"
-      do: "if s = null then null else instance(component_for(frame_classes, s.cls), {profile_width: if s.direction = \"v\" then mullion_width else transom_width, profile_depth: if s.direction = \"v\" then mullion_depth else transom_depth, joint: if s.direction = \"v\" then joint_vertical else joint_horizontal, cap_depth: cap_depth, glass_thickness: glass_thickness, glass_offset: glass_offset, shape: if s.cls = \"corner\" then \"corner_outside\" else if s.cls = \"corner_inside\" then \"corner_inside\" else \"straight\"}, {path: s.path, normal: s.normal, trim_start: 0, trim_end: 0, left_cell: (if s.cls = \"corner\" or s.cls = \"corner_inside\" then flatten(for c in g.cells return if c.id = s.cells[1] then [c] else [])[1] else null), right_cell: (if s.cls = \"corner\" or s.cls = \"corner_inside\" then flatten(for c in g.cells return if c.id = s.cells[2] then [c] else [])[1] else null)}, \"plan.medium\")"
+      do: "if s = null then null else instance(component_for(frame_classes, s.cls), {profile_width: if s.direction = \"v\" then mullion_width else transom_width, profile_depth: if s.direction = \"v\" then mullion_depth else transom_depth, joint: if s.direction = \"v\" then joint_vertical else joint_horizontal, cap_depth: cap_depth, glass_thickness: glass_thickness, glass_offset: glass_offset, shape: if s.cls = \"corner\" then \"corner_outside\" else if s.cls = \"corner_inside\" then \"corner_inside\" else \"straight\", glass_shift: glass_shift}, {path: s.path, normal: s.normal, trim_start: 0, trim_end: 0, left_cell: (if s.cls = \"corner\" or s.cls = \"corner_inside\" then flatten(for c in g.cells return if c.id = s.cells[1] then [c] else [])[1] else null), right_cell: (if s.cls = \"corner\" or s.cls = \"corner_inside\" then flatten(for c in g.cells return if c.id = s.cells[2] then [c] else [])[1] else null)}, \"plan.medium\")"
   plan_glass:
     op: "for_each"
     plane: "xy"
