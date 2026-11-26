@@ -657,6 +657,7 @@ representations:
       targetView: "MODEL_VIEW"
     items:
       - geometry: "panel_low"
+        part: "Leaf"
         material: "leaf_material"
   model.medium:
     context: "model"
@@ -729,11 +730,17 @@ representations:
     lod: "low"
     scale:
       min_scale: 200
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
+    source: "derived"
+    derive:
+      from: "model.low"
+      method: "cut_or_project"
+      exclude_parts:
+        - "Leaf"
+        - "Hardware"
+    overlay:
       - geometry: "leaf_line_plan"
         class: "cut"
       - geometry: "swing_arc_plan"
@@ -745,17 +752,17 @@ representations:
     scale:
       min_scale: 50
       max_scale: 200
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "jamb_left_plan"
-        class: "cut"
-        hatch: "frame_material"
-      - geometry: "jamb_right_plan"
-        class: "cut"
-        hatch: "frame_material"
+    source: "derived"
+    derive:
+      from: "model.medium"
+      method: "cut_or_project"
+      exclude_parts:
+        - "Leaf"
+        - "Hardware"
+    overlay:
       - geometry: "leaf_open_plan"
         class: "cut"
         hatch: "leaf_material"
@@ -767,15 +774,17 @@ representations:
     lod: "high"
     scale:
       max_scale: 50
-    source: "derived"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
+    note: "Frame, casings and stop are cut from the 3D at the view's cut height; the leaf is drawn open with its swing."
+    source: "derived"
     derive:
       from: "model.high"
-      method: "cut"
+      method: "cut_or_project"
       exclude_parts:
         - "Leaf"
+        - "Hardware"
     overlay:
       - geometry: "leaf_open_plan"
         class: "cut"
@@ -783,7 +792,6 @@ representations:
       - geometry: "swing_arc_plan"
         class: "annotation"
         role: "swing"
-    note: "Frame, casings and stop are cut from the 3D at the view's cut height; the leaf is drawn open with its swing."
   elevation.low:
     context: "elevation"
     lod: "low"
