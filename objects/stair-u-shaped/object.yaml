@@ -569,6 +569,56 @@ recipe:
     args:
       geometry: "rotate(p2_treads_local, [0, 0], turn2)"
       by: "[origin2[1], origin2[2]]"
+  p1_over:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "for j in 1..k - 1 return j"
+      as: "j"
+      do: "if not(cut_in_1) or j * going >= x_cut1 then line([j * going, -hw], [j * going, hw]) else null"
+  p1_numbers:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "for j in 1..k - 1 return j"
+      as: "j"
+      do: "text([(j - 0.5) * going, -hw * 0.6], j, 0.002)"
+  p2_numbers_local:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "for j in 1..n2 - 1 return j"
+      as: "j"
+      do: "text([(j - 0.5) * going, -hw * 0.6], risers - n2 + j, 0.002)"
+  p2_numbers:
+    op: "move"
+    plane: "xy"
+    args:
+      geometry: "rotate(p2_numbers_local, [0, 0], turn2)"
+      by: "[origin2[1], origin2[2]]"
+  p1_nosings:
+    op: "for_each"
+    plane: "xy"
+    when: "nosing > 0"
+    args:
+      items: "for j in 1..k - 1 return j"
+      as: "j"
+      do: "line([j * going - nosing, -hw], [j * going - nosing, hw])"
+  p2_nosings_local:
+    op: "for_each"
+    plane: "xy"
+    when: "nosing > 0"
+    args:
+      items: "for j in 0..n2 - 1 return j"
+      as: "j"
+      do: "line([j * going - nosing, -hw], [j * going - nosing, hw])"
+  p2_nosings:
+    op: "move"
+    plane: "xy"
+    when: "nosing > 0"
+    args:
+      geometry: "rotate(p2_nosings_local, [0, 0], turn2)"
+      by: "[origin2[1], origin2[2]]"
   cut_local:
     op: "polyline"
     plane: "xy"
@@ -622,7 +672,7 @@ recipe:
     op: "union"
     plane: "xy"
     args:
-      items: "[if cut_in_1 then if mirror_y then mirror(p1_above, \"y\") else p1_above else null, if mirror_y then mirror(p2_outline, \"y\") else p2_outline]"
+      items: "[if cut_in_1 then if mirror_y then mirror(p1_above, \"y\") else p1_above else null, if cut_in_1 then if mirror_y then mirror(p_landing, \"y\") else p_landing else null, if mirror_y then mirror(p2_outline, \"y\") else p2_outline]"
   plan_treads:
     op: "union"
     plane: "xy"
@@ -643,6 +693,31 @@ recipe:
     plane: "xy"
     args:
       items: "[if mirror_y then mirror(arrow_l, \"y\") else arrow_l]"
+  treads_over:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[if mirror_y then mirror(p1_over, \"y\") else p1_over, if mirror_y then mirror(p2_treads, \"y\") else p2_treads]"
+    note: "Treads above the cut, drawn dashed."
+  step_numbers:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[if mirror_y then mirror(p1_numbers, \"y\") else p1_numbers, if mirror_y then mirror(p2_numbers, \"y\") else p2_numbers]"
+    note: "Tread numbers, counted up the stair."
+  nosings:
+    op: "union"
+    plane: "xy"
+    when: "nosing > 0"
+    args:
+      items: "[if mirror_y then mirror(p1_nosings, \"y\") else p1_nosings, if mirror_y then mirror(p2_nosings, \"y\") else p2_nosings]"
+    note: "Nosing overhangs, hidden."
+  plan_rails:
+    op: "union"
+    plane: "xy"
+    args:
+      items: "[if railing_outer then polyline(for p in rail_outer_m return [p[1], p[2]]) else null, if railing_inner then polyline(for p in rail_inner_m return [p[1], p[2]]) else null]"
+    note: "Railings as single lines."
 representations:
   model.low:
     context: "model"
@@ -701,9 +776,16 @@ representations:
     derive:
       from: "model.low"
       method: "project"
+      exclude_parts:
+        - "Railing"
     overlay:
       - geometry: "plan_above"
         class: "overhead"
+      - geometry: "treads_over"
+        class: "overhead"
+      - geometry: "cut_line"
+        class: "cut"
+        role: "break_line"
       - geometry: "walk_line"
         class: "annotation"
         role: "walking_line"
@@ -712,6 +794,9 @@ representations:
         role: "walking_line"
       - geometry: "label"
         class: "annotation"
+      - geometry: "plan_rails"
+        class: "projected"
+        role: "railing_line"
   plan.medium:
     context: "plan"
     lod: "medium"
@@ -728,6 +813,11 @@ representations:
     overlay:
       - geometry: "plan_above"
         class: "overhead"
+      - geometry: "treads_over"
+        class: "overhead"
+      - geometry: "cut_line"
+        class: "cut"
+        role: "break_line"
       - geometry: "walk_line"
         class: "annotation"
         role: "walking_line"
@@ -736,6 +826,9 @@ representations:
         role: "walking_line"
       - geometry: "label"
         class: "annotation"
+      - geometry: "step_numbers"
+        class: "annotation"
+        role: "step_numbers"
   plan.high:
     context: "plan"
     lod: "high"
@@ -751,6 +844,11 @@ representations:
     overlay:
       - geometry: "plan_above"
         class: "overhead"
+      - geometry: "treads_over"
+        class: "overhead"
+      - geometry: "cut_line"
+        class: "cut"
+        role: "break_line"
       - geometry: "walk_line"
         class: "annotation"
         role: "walking_line"
@@ -759,6 +857,11 @@ representations:
         role: "walking_line"
       - geometry: "label"
         class: "annotation"
+      - geometry: "step_numbers"
+        class: "annotation"
+        role: "step_numbers"
+      - geometry: "nosings"
+        class: "hidden"
   section:
     context: "section"
     lod: "all"
