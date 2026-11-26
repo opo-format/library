@@ -257,21 +257,15 @@ recipe:
       items: "g.cells"
       as: "c"
       do: "instance(if c.component != null then c.component else component_for(panel_classes, c.cls), if c.values != null then c.values else {kind: if c.cls = \"spandrel\" then \"spandrel\" else \"vision\", glass_thickness: glass_thickness}, {outline: c.panel_outline, normal: c.normal, insets: c.insets})"
-  fire_stop_profile:
-    op: "rectangle"
-    plane: "profile"
-    when: "fire_stops"
-    args:
-      min: "[glass_thickness / 2 + glass_offset + max(mullion_depth, transom_depth), -fire_stop_depth]"
-      max: "[glass_thickness / 2 + glass_offset + max(mullion_depth, transom_depth) + slab_edge_gap, 0]"
   fire_stops_3d:
     op: "for_each"
+    plane: "xy"
     when: "fire_stops and slab_edge_gap > 0"
     args:
       items: "flatten(for f in levels_within return if f = null then [] else [f])"
       as: "f"
-      do: "sweep(fire_stop_profile, for p in surface.baseline return [p[1], p[2], base + f])"
-    note: "Behind the frame, at each floor above the base; the profile u axis points to the back (left of the baseline)."
+      do: "extrude(band(for p in surface.baseline return [p[1], p[2]], glass_thickness / 2 + glass_offset + max(mullion_depth, transom_depth) + slab_edge_gap, glass_thickness / 2 + glass_offset + max(mullion_depth, transom_depth)), base + f, base + f + fire_stop_depth)"
+    note: "Behind the frame at each floor above the base, in the spandrel zone (hidden behind the spandrel panels), mitred at the corners."
   plan_frames:
     op: "for_each"
     plane: "xy"
@@ -335,39 +329,33 @@ representations:
   plan.low:
     context: "plan"
     lod: "low"
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "plan_frames"
-        class: "cut"
-      - geometry: "plan_glass"
-        class: "cut"
+    source: "derived"
+    derive:
+      from: "model.low"
+      method: "cut_or_project"
   plan.medium:
     context: "plan"
     lod: "medium"
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "plan_frames"
-        class: "cut"
-      - geometry: "plan_glass"
-        class: "cut"
+    source: "derived"
+    derive:
+      from: "model.medium"
+      method: "cut_or_project"
   plan.high:
     context: "plan"
     lod: "high"
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "plan_frames"
-        class: "cut"
-      - geometry: "plan_glass"
-        class: "cut"
+    source: "derived"
+    derive:
+      from: "model.high"
+      method: "cut_or_project"
 host:
   is_host: false
   level: "Base and top heights of the surface input."
