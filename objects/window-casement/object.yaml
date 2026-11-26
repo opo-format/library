@@ -749,6 +749,13 @@ recipe:
     plane: "xz"
     args:
       region: "profile"
+  low_block:
+    op: "box"
+    when: "rect"
+    args:
+      min: "[x0, fy - fd2, z0]"
+      max: "[x1, fy + fd2, z1]"
+    note: "Low detail: the window as one block the size of its frame."
   frame_rect:
     op: "union"
     when: "rect"
@@ -949,8 +956,12 @@ representations:
     items:
       - geometry: "void"
         role: "void"
-      - geometry: "panes"
-        material: "\"glass\""
+      - geometry: "low_block"
+        material: "frame_material"
+        part: "Frame"
+      - geometry: "frame_custom"
+        material: "frame_material"
+        part: "Frame"
       - geometry: "pane_custom"
         material: "\"glass\""
     note: "The void is not drawn; it cuts the host."
@@ -1075,7 +1086,7 @@ representations:
     source: "derived"
     derive:
       from: "model.low"
-      method: "cut_or_project"
+      method: "cut"
     overlay:
       - geometry: "plan_swings"
         class: "annotation"
