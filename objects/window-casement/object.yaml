@@ -1094,6 +1094,9 @@ representations:
       - geometry: "plan_slides"
         class: "annotation"
         role: "opening"
+      - geometry: "plan_glass"
+        class: "projected"
+        role: "glass_line"
   plan.medium:
     context: "plan"
     lod: "medium"
