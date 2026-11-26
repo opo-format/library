@@ -602,17 +602,17 @@ recipe:
     when: "railing_outer"
     args:
       object: "\"opo-format.org/library/objects/railing-guard\""
-      values: "if railing_outer_fixing = \"wall\" then {predefined_type: \"HANDRAIL\", height: handrail_height, mount: \"wall\", outside: if mirror_y then \"left\" else \"right\", wall_distance: 0.05, top_is_handrail: true} else {predefined_type: \"BALUSTRADE\", height: handrail_height, mount: \"embedded\", embed_depth: if structure = \"waist\" then min(riser + 0.05, waist_thickness - 0.01) else riser + 0.05, top_is_handrail: true}"
-      inputs: "{path: for p in rail_outer_m return [p[1], p[2], p[3] - handrail_height]}"
-    note: "The guard follows the nosing line; its posts go down into the steps (up to one riser plus 0.05 m, no deeper than the slab) so they stand on every tread."
+      values: "if railing_outer_fixing = \"wall\" then {predefined_type: \"HANDRAIL\", height: handrail_height, mount: \"wall\", outside: if mirror_y then \"left\" else \"right\", wall_distance: 0.05, top_is_handrail: true} else {predefined_type: \"BALUSTRADE\", height: handrail_height, mount: \"embedded\", embed_depth: 0.1, top_is_handrail: true}"
+      inputs: "{path: for p in rail_outer_m return [p[1], p[2], p[3] - handrail_height], ground: for e in concatenate(flatten(for k in 1..count(rail_outer_m) - 1 return [{p: [rail_outer_m[k][1], rail_outer_m[k][2], rail_outer_m[k][3] - handrail_height]}, {p: [rail_outer_m[k + 1][1], rail_outer_m[k + 1][2], rail_outer_m[k][3] - handrail_height]}]), [{p: [rail_outer_m[count(rail_outer_m)][1], rail_outer_m[count(rail_outer_m)][2], rail_outer_m[count(rail_outer_m)][3] - handrail_height]}]) return e.p}"
+    note: "The guard follows the nosing line and stands on the steps: the stair passes its treads as the ground, so every post and baluster reaches the tread under it."
   railing_inner_obj:
     op: "instance"
     when: "railing_inner"
     args:
       object: "\"opo-format.org/library/objects/railing-guard\""
-      values: "if railing_inner_fixing = \"wall\" then {predefined_type: \"HANDRAIL\", height: handrail_height, mount: \"wall\", outside: if mirror_y then \"right\" else \"left\", wall_distance: 0.05, top_is_handrail: true} else {predefined_type: \"BALUSTRADE\", height: handrail_height, mount: \"embedded\", embed_depth: if structure = \"waist\" then min(riser + 0.05, waist_thickness - 0.01) else riser + 0.05, top_is_handrail: true}"
-      inputs: "{path: for p in rail_inner_m return [p[1], p[2], p[3] - handrail_height]}"
-    note: "The guard follows the nosing line; its posts go down into the steps (up to one riser plus 0.05 m, no deeper than the slab) so they stand on every tread."
+      values: "if railing_inner_fixing = \"wall\" then {predefined_type: \"HANDRAIL\", height: handrail_height, mount: \"wall\", outside: if mirror_y then \"right\" else \"left\", wall_distance: 0.05, top_is_handrail: true} else {predefined_type: \"BALUSTRADE\", height: handrail_height, mount: \"embedded\", embed_depth: 0.1, top_is_handrail: true}"
+      inputs: "{path: for p in rail_inner_m return [p[1], p[2], p[3] - handrail_height], ground: for e in concatenate(flatten(for k in 1..count(rail_inner_m) - 1 return [{p: [rail_inner_m[k][1], rail_inner_m[k][2], rail_inner_m[k][3] - handrail_height]}, {p: [rail_inner_m[k + 1][1], rail_inner_m[k + 1][2], rail_inner_m[k][3] - handrail_height]}]), [{p: [rail_inner_m[count(rail_inner_m)][1], rail_inner_m[count(rail_inner_m)][2], rail_inner_m[count(rail_inner_m)][3] - handrail_height]}]) return e.p}"
+    note: "The guard follows the nosing line and stands on the steps: the stair passes its treads as the ground, so every post and baluster reaches the tread under it."
   plan_below:
     op: "union"
     plane: "xy"
@@ -694,17 +694,16 @@ representations:
     lod: "low"
     scale:
       min_scale: 200
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "plan_below"
-        class: "projected"
+    source: "derived"
+    derive:
+      from: "model.low"
+      method: "cut_or_project"
+    overlay:
       - geometry: "plan_above"
         class: "overhead"
-      - geometry: "cut_line"
-        class: "cut"
       - geometry: "walk_line"
         class: "annotation"
         role: "walking_line"
@@ -719,19 +718,16 @@ representations:
     scale:
       min_scale: 50
       max_scale: 200
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "plan_below"
-        class: "projected"
+    source: "derived"
+    derive:
+      from: "model.medium"
+      method: "cut_or_project"
+    overlay:
       - geometry: "plan_above"
         class: "overhead"
-      - geometry: "plan_treads"
-        class: "projected"
-      - geometry: "cut_line"
-        class: "cut"
       - geometry: "walk_line"
         class: "annotation"
         role: "walking_line"
@@ -745,19 +741,16 @@ representations:
     lod: "high"
     scale:
       max_scale: 50
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "plan_below"
-        class: "projected"
+    source: "derived"
+    derive:
+      from: "model.high"
+      method: "cut_or_project"
+    overlay:
       - geometry: "plan_above"
         class: "overhead"
-      - geometry: "plan_treads"
-        class: "projected"
-      - geometry: "cut_line"
-        class: "cut"
       - geometry: "walk_line"
         class: "annotation"
         role: "walking_line"
