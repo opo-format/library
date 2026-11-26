@@ -736,7 +736,7 @@ representations:
     source: "derived"
     derive:
       from: "model.low"
-      method: "cut_or_project"
+      method: "cut"
       exclude_parts:
         - "Leaf"
         - "Hardware"
