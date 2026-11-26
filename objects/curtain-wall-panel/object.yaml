@@ -190,33 +190,33 @@ representations:
   plan.low:
     context: "plan"
     lod: "low"
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "plan_glass"
-        class: "cut"
+    source: "derived"
+    derive:
+      from: "model.low"
+      method: "cut_or_project"
   plan.medium:
     context: "plan"
     lod: "medium"
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "plan_glass"
-        class: "cut"
+    source: "derived"
+    derive:
+      from: "model.medium"
+      method: "cut_or_project"
   plan.high:
     context: "plan"
     lod: "high"
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "plan_glass"
-        class: "cut"
+    source: "derived"
+    derive:
+      from: "model.high"
+      method: "cut_or_project"
 materials:
   - "glass"
   - "mineral_wool"
