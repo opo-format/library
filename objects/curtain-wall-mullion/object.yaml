@@ -89,6 +89,15 @@ parameters:
       corner_outside: "Outside corner post"
       corner_inside: "Inside corner post"
     description: "A corner post takes the directions of the two faces from the cells on either side and follows both glass planes. Outside corner: a post square to both faces, the glass stopping at it. Inside corner: an L-shaped post behind the meeting glass."
+  glass_shift:
+    type: "length"
+    default: 0.0
+    label: "Glass centre in front of the grid line"
+    group: "Placement"
+    limits:
+      min: -0.5
+      max: 0.5
+    description: "Passed by the curtain wall from where its drawn line sits on the glass (outer face, centre or inner face) and its offset; the member moves with the glass."
   trim_start:
     type: "length"
     default: 0.0
@@ -138,8 +147,8 @@ rules:
   derived:
     length: "sqrt((path[2][1] - path[1][1]) * (path[2][1] - path[1][1]) + (path[2][2] - path[1][2]) * (path[2][2] - path[1][2]) + (path[2][3] - path[1][3]) * (path[2][3] - path[1][3]))"
     dir: "for k in 1..3 return (path[2][k] - path[1][k]) / length"
-    p_start: "for k in 1..3 return path[1][k] + dir[k] * trim_start"
-    p_end: "for k in 1..3 return path[2][k] - dir[k] * trim_end"
+    p_start: "for k in 1..3 return path[1][k] + dir[k] * trim_start + normal[k] * glass_shift"
+    p_end: "for k in 1..3 return path[2][k] - dir[k] * trim_end + normal[k] * glass_shift"
     side: "[dir[2] * normal[3] - dir[3] * normal[2], dir[3] * normal[1] - dir[1] * normal[3], dir[1] * normal[2] - dir[2] * normal[1]]"
     up_ref: "if abs(dir[3]) < 0.99 then [0, 0, 1] else [1, 0, 0]"
     across_raw: "[up_ref[2] * dir[3] - up_ref[3] * dir[2], up_ref[3] * dir[1] - up_ref[1] * dir[3], up_ref[1] * dir[2] - up_ref[2] * dir[1]]"
@@ -166,21 +175,27 @@ rules:
     mden:
       expr: "max(1 + na[1] * nb[1] + na[2] * nb[2], 0.01)"
       note: "Mitre: a point offset o from both glass planes is the corner plus o (na + nb) / mden."
+    node:
+      expr: "if is_corner then [path[1][1] + glass_shift * (na[1] + nb[1]) / mden, path[1][2] + glass_shift * (na[2] + nb[2]) / mden] else [path[1][1] + normal[1] * glass_shift, path[1][2] + normal[2] * glass_shift]"
+      note: "The grid point moved with the glass (at a corner, the same distance from both glass planes)."
+    cut_pts:
+      expr: "for c in [[-1, -profile_depth - glass_offset - glass_thickness / 2], [1, -profile_depth - glass_offset - glass_thickness / 2], [1, glass_thickness / 2 + (if joint = \"captured\" then cap_depth else 0)], [-1, glass_thickness / 2 + (if joint = \"captured\" then cap_depth else 0)]] return [node[1] + side[1] * c[1] * profile_width / 2 + normal[1] * c[2], node[2] + side[2] * c[1] * profile_width / 2 + normal[2] * c[2]]"
+      note: "Plan cut through a vertical member."
     leg:
       expr: "profile_depth + glass_offset + glass_thickness / 2"
       note: "How far an outside corner post reaches along each face from the corner."
     cap_leg:
       expr: "if convex then leg else profile_width"
       note: "Cap legs: to the end of the post outside, one face width inside."
-    q1: "[path[1][1] + (-(glass_offset + glass_thickness / 2)) * (na[1] + nb[1]) / mden, path[1][2] + (-(glass_offset + glass_thickness / 2)) * (na[2] + nb[2]) / mden]"
-    q3: "[path[1][1] + (-leg) * (na[1] + nb[1]) / mden, path[1][2] + (-leg) * (na[2] + nb[2]) / mden]"
+    q1: "[node[1] + (-(glass_offset + glass_thickness / 2)) * (na[1] + nb[1]) / mden, node[2] + (-(glass_offset + glass_thickness / 2)) * (na[2] + nb[2]) / mden]"
+    q3: "[node[1] + (-leg) * (na[1] + nb[1]) / mden, node[2] + (-leg) * (na[2] + nb[2]) / mden]"
     la: "(q1[1] - q3[1]) * da[1] + (q1[2] - q3[2]) * da[2]"
     lb: "(q3[1] - q1[1]) * db[1] + (q3[2] - q1[2]) * db[2]"
     corner_body_pts:
       expr: "if convex then [q1, [q1[1] + lb * db[1], q1[2] + lb * db[2]], q3, [q1[1] - la * da[1], q1[2] - la * da[2]]] else [[path[1][1] - profile_width * da[1] - (glass_offset + glass_thickness / 2) * na[1], path[1][2] - profile_width * da[2] - (glass_offset + glass_thickness / 2) * na[2]], q1, [path[1][1] + profile_width * db[1] - (glass_offset + glass_thickness / 2) * nb[1], path[1][2] + profile_width * db[2] - (glass_offset + glass_thickness / 2) * nb[2]], [path[1][1] + profile_width * db[1] - leg * nb[1], path[1][2] + profile_width * db[2] - leg * nb[2]], q3, [path[1][1] - profile_width * da[1] - leg * na[1], path[1][2] - profile_width * da[2] - leg * na[2]]]"
       note: "Outside: a post behind the glass, its faces parallel and square to both glass planes. Inside: an L wrapped round the back of the corner, one face width under each pane."
     corner_cap_pts:
-      expr: "[[path[1][1] - cap_leg * da[1] + glass_thickness / 2 * na[1], path[1][2] - cap_leg * da[2] + glass_thickness / 2 * na[2]], [path[1][1] + (glass_thickness / 2) * (na[1] + nb[1]) / mden, path[1][2] + (glass_thickness / 2) * (na[2] + nb[2]) / mden], [path[1][1] + cap_leg * db[1] + glass_thickness / 2 * nb[1], path[1][2] + cap_leg * db[2] + glass_thickness / 2 * nb[2]], [path[1][1] + cap_leg * db[1] + (glass_thickness / 2 + cap_depth) * nb[1], path[1][2] + cap_leg * db[2] + (glass_thickness / 2 + cap_depth) * nb[2]], [path[1][1] + (glass_thickness / 2 + cap_depth) * (na[1] + nb[1]) / mden, path[1][2] + (glass_thickness / 2 + cap_depth) * (na[2] + nb[2]) / mden], [path[1][1] - cap_leg * da[1] + (glass_thickness / 2 + cap_depth) * na[1], path[1][2] - cap_leg * da[2] + (glass_thickness / 2 + cap_depth) * na[2]]]"
+      expr: "[[node[1] - cap_leg * da[1] + glass_thickness / 2 * na[1], node[2] - cap_leg * da[2] + glass_thickness / 2 * na[2]], [node[1] + (glass_thickness / 2) * (na[1] + nb[1]) / mden, node[2] + (glass_thickness / 2) * (na[2] + nb[2]) / mden], [node[1] + cap_leg * db[1] + glass_thickness / 2 * nb[1], node[2] + cap_leg * db[2] + glass_thickness / 2 * nb[2]], [node[1] + cap_leg * db[1] + (glass_thickness / 2 + cap_depth) * nb[1], node[2] + cap_leg * db[2] + (glass_thickness / 2 + cap_depth) * nb[2]], [node[1] + (glass_thickness / 2 + cap_depth) * (na[1] + nb[1]) / mden, node[2] + (glass_thickness / 2 + cap_depth) * (na[2] + nb[2]) / mden], [node[1] - cap_leg * da[1] + (glass_thickness / 2 + cap_depth) * na[1], node[2] - cap_leg * da[2] + (glass_thickness / 2 + cap_depth) * na[2]]]"
       note: "An L-shaped cap in front of the glass, mitred at the corner."
     face_width:
       expr: "if shape = \"corner_outside\" then 2 * (profile_depth + glass_offset + glass_thickness / 2) else if shape = \"corner_inside\" then 0 else profile_width"
@@ -189,11 +204,8 @@ rules:
       expr: "profile_depth + glass_offset + glass_thickness / 2 + (if joint = \"captured\" then cap_depth else 0)"
       note: "Reported: overall depth."
     offset:
-      expr: "if joint = \"captured\" then glass_thickness / 2 + cap_depth else glass_thickness / 2"
-      note: "Reported: from the glass plane to the front face."
-    cut_pts:
-      expr: "for c in [[-1, -profile_depth - glass_offset - glass_thickness / 2], [1, -profile_depth - glass_offset - glass_thickness / 2], [1, offset], [-1, offset]] return [path[1][1] + side[1] * c[1] * profile_width / 2 + normal[1] * c[2], path[1][2] + side[2] * c[1] * profile_width / 2 + normal[2] * c[2]]"
-      note: "Plan cut through a vertical member."
+      expr: "glass_shift + (if joint = \"captured\" then glass_thickness / 2 + cap_depth else glass_thickness / 2)"
+      note: "Reported: from the grid line to the front face."
   checks:
     length_positive:
       expr: "length - trim_start - trim_end > 0.001"
