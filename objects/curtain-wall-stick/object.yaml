@@ -335,7 +335,7 @@ representations:
     source: "derived"
     derive:
       from: "model.low"
-      method: "cut_or_project"
+      method: "cut"
   plan.medium:
     context: "plan"
     lod: "medium"
