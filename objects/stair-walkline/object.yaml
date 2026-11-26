@@ -656,6 +656,31 @@ recipe:
     plane: "xy"
     args:
       items: "[if railing_right then polyline(for p in rail_path_right return [p[1], p[2]]) else null, if railing_left then polyline(for p in rail_path_left return [p[1], p[2]]) else null]"
+  cut_slash:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "treads_xy"
+      as: "s"
+      do: "if s.n = j_cut + 1 then line(s.poly[1], s.poly[3]) else null"
+    note: "Break line: a slash across the tread the cut passes through."
+  step_numbers:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "treads_xy"
+      as: "s"
+      do: "text([sum(for p in s.poly return p[1]) / count(s.poly), sum(for p in s.poly return p[2]) / count(s.poly)], s.n, 0.002)"
+    note: "Tread numbers at the middle of each tread."
+  nosings:
+    op: "for_each"
+    plane: "xy"
+    when: "nosing > 0"
+    args:
+      items: "flight_treads"
+      as: "s"
+      do: "line([s.pts[1].x + nosing * (s.pts[2].y - s.pts[1].y) / sqrt((s.pts[2].x - s.pts[1].x) ** 2 + (s.pts[2].y - s.pts[1].y) ** 2), s.pts[1].y - nosing * (s.pts[2].x - s.pts[1].x) / sqrt((s.pts[2].x - s.pts[1].x) ** 2 + (s.pts[2].y - s.pts[1].y) ** 2)], [s.pts[2].x + nosing * (s.pts[2].y - s.pts[1].y) / sqrt((s.pts[2].x - s.pts[1].x) ** 2 + (s.pts[2].y - s.pts[1].y) ** 2), s.pts[2].y - nosing * (s.pts[2].x - s.pts[1].x) / sqrt((s.pts[2].x - s.pts[1].x) ** 2 + (s.pts[2].y - s.pts[1].y) ** 2)])"
+    note: "Nosing overhangs of the flight treads, hidden."
   label:
     op: "text"
     plane: "xy"
@@ -742,9 +767,14 @@ representations:
     derive:
       from: "model.low"
       method: "project"
+      exclude_parts:
+        - "Railing"
     overlay:
       - geometry: "treads_above"
         class: "overhead"
+      - geometry: "cut_slash"
+        class: "cut"
+        role: "break_line"
       - geometry: "walk_line"
         class: "annotation"
         role: "walking_line"
@@ -753,6 +783,9 @@ representations:
         role: "walking_line"
       - geometry: "label"
         class: "annotation"
+      - geometry: "plan_rails"
+        class: "projected"
+        role: "railing_line"
   plan.medium:
     context: "plan"
     lod: "medium"
@@ -770,6 +803,9 @@ representations:
     overlay:
       - geometry: "treads_above"
         class: "overhead"
+      - geometry: "cut_slash"
+        class: "cut"
+        role: "break_line"
       - geometry: "walk_line"
         class: "annotation"
         role: "walking_line"
@@ -778,6 +814,9 @@ representations:
         role: "walking_line"
       - geometry: "label"
         class: "annotation"
+      - geometry: "step_numbers"
+        class: "annotation"
+        role: "step_numbers"
   plan.high:
     context: "plan"
     lod: "high"
@@ -793,6 +832,9 @@ representations:
     overlay:
       - geometry: "treads_above"
         class: "overhead"
+      - geometry: "cut_slash"
+        class: "cut"
+        role: "break_line"
       - geometry: "walk_line"
         class: "annotation"
         role: "walking_line"
@@ -801,6 +843,11 @@ representations:
         role: "walking_line"
       - geometry: "label"
         class: "annotation"
+      - geometry: "step_numbers"
+        class: "annotation"
+        role: "step_numbers"
+      - geometry: "nosings"
+        class: "hidden"
 host:
   is_host: false
   level: "Base on a storey, top at the next storey (or a set rise)."
