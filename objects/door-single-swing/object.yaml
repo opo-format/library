@@ -933,11 +933,6 @@ host:
   seat:
     to: "axis"
     offset: "seat_y"
-  reveal:
-    - function: "finish"
-      rule: "return"
-      to: "frame"
-      frame_y: "lining_depth / 2"
   head: "[[-opening_width / 2, 0, opening_height], [opening_width / 2, 0, opening_height]]"
   void:
     geometry: "void"
