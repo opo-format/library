@@ -741,7 +741,7 @@ representations:
     source: "derived"
     derive:
       from: "model.low"
-      method: "cut"
+      method: "project"
     overlay:
       - geometry: "treads_above"
         class: "overhead"
@@ -766,7 +766,7 @@ representations:
     source: "derived"
     derive:
       from: "model.medium"
-      method: "cut_or_project"
+      method: "project"
     overlay:
       - geometry: "treads_above"
         class: "overhead"
@@ -789,7 +789,7 @@ representations:
     source: "derived"
     derive:
       from: "model.high"
-      method: "cut_or_project"
+      method: "project"
     overlay:
       - geometry: "treads_above"
         class: "overhead"
