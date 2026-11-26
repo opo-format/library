@@ -19,7 +19,7 @@ parameters:
         function: "finish"
     label: "Layers (left to right)"
     group: "Construction"
-    description: "Layer build-up: list of {material, thickness, function, core}. Each material carries its cut hatch (opo::materials, opo::hatches), so the type keeps its look when shared."
+    description: "Layer build-up from the front (left of the path) to the back: list of {material, thickness, function, core}. Each material carries its cut hatch (opo::materials, opo::hatches), so the type keeps its look when shared."
     limits:
       thickness:
         min: 0.001
@@ -84,6 +84,19 @@ parameters:
     default: false
     label: "External"
     group: "Data"
+  exterior_face:
+    type: "choice"
+    default: "front"
+    label: "Outside face"
+    group: "Data"
+    options:
+      - "front"
+      - "back"
+    option_labels:
+      front: "Left of the path (front)"
+      back: "Right of the path (back)"
+    visible: "is_external"
+    description: "Which face is outside, for hosted objects and elevations (proposal 0004, decision 0024)."
 slots:
   path:
     type: "polyline"
@@ -291,13 +304,21 @@ host:
     - "IfcShadingDevice"
   provides:
     thickness: "total_thickness"
+    face_front: "left_face"
+    face_back: "total_thickness - left_face"
+    exterior: "if is_external then exterior_face else \"none\""
+    layers: "layers"
+    core_front: "left_face - core_start"
+    core_back: "core_end - left_face"
+    base: "bottom"
+    height: "height"
     y_max: "left_face"
     y_min: "left_face - total_thickness"
     bottom: "bottom"
     top: "top"
   joins:
-    by: "material"
-    rule: "Where walls meet, layers of the same material join without a line; core joins core, finishes wrap. Done by the application."
+    by: "layer"
+    rule: "Where walls meet, the application finds the meeting and the OPO engine trims the layers (decision 0026): core joins core, finishes wrap; layers of the same material join without a line."
   level: "Placed on a storey; z = 0 is the storey elevation."
 handles:
   - slot: "path"
