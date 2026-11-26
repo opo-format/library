@@ -245,6 +245,39 @@ parameters:
     label: "Top rail is the handrail"
     group: "Top rail"
     description: "Then the handrails rule sets check its height."
+  top_rail:
+    type: "choice"
+    default: "auto"
+    label: "Top rail"
+    group: "Top rail"
+    options:
+      - "auto"
+      - "yes"
+      - "no"
+    option_labels:
+      auto: "Yes, except on glass"
+      yes: "Yes"
+      no: "No"
+    description: "A frameless glass guard has no rail by default: the glass panels reach the full height."
+  panel_width:
+    type: "length"
+    default: 1.2
+    label: "Maximum glass panel width"
+    group: "Infill"
+    visible: "infill = \"glass\" and glass_fixing = \"base_channel\""
+    limits:
+      min: 0.3
+      max: 3.0
+    description: "Glass in a base channel is split into panels no wider than this."
+  panel_gap:
+    type: "length"
+    default: 0.01
+    label: "Gap between glass panels"
+    group: "Infill"
+    visible: "infill = \"glass\" and glass_fixing = \"base_channel\""
+    limits:
+      min: 0.002
+      max: 0.05
   is_external:
     type: "boolean"
     default: false
@@ -261,6 +294,9 @@ slots:
     type: "polyline3"
     default: [[0.0, 0.0, 0.0], [3.0, 0.0, 0.0], [3.0, 2.0, 0.0]]
     description: "Path of the guard; on stairs the host stair supplies the pitch line."
+  ground:
+    type: "polyline3"
+    description: "Optional: the surface the guard stands on, as a line under the path (a stair passes its steps). Posts and balusters reach down to it; without it they stand on the path."
 rules:
   derived:
     n_seg: "count(path) - 1"
@@ -295,10 +331,29 @@ rules:
     bracket_points:
       expr: "if mount != \"wall\" then [] else concatenate(flatten(for i in 1..n_seg return for m in 0..max(1, ceiling(seg_len[i] / post_spacing)) - 1 return {x: gpath[i][1] + (gpath[i + 1][1] - gpath[i][1]) * m / max(1, ceiling(seg_len[i] / post_spacing)), y: gpath[i][2] + (gpath[i + 1][2] - gpath[i][2]) * m / max(1, ceiling(seg_len[i] / post_spacing)), z: gpath[i][3] + (gpath[i + 1][3] - gpath[i][3]) * m / max(1, ceiling(seg_len[i] / post_spacing)), s: i}), [{x: gpath[n_seg + 1][1], y: gpath[n_seg + 1][2], z: gpath[n_seg + 1][3], s: n_seg}])"
       note: "Wall brackets at the corners and evenly between them, no further apart than the post spacing."
-    infill_top: "height - top_rail_diameter"
+    rail_on:
+      expr: "mount = \"wall\" or (if top_rail = \"auto\" then infill != \"glass\" else top_rail = \"yes\")"
+      note: "Whether the guard has a top rail."
+    infill_top: "if rail_on then height - top_rail_diameter else height"
+    panel_pitch: "if has_posts then post_spacing else panel_width"
+    panel_end:
+      expr: "if has_posts then post_size / 2 + 0.005 else panel_gap / 2"
+      note: "How far each glass panel stops short of its division point."
+    panels:
+      expr: "flatten(for i in 1..n_seg return for m in 0..max(1, ceiling(seg_len[i] / panel_pitch)) - 1 return {i: i, a: m / max(1, ceiling(seg_len[i] / panel_pitch)), b: (m + 1) / max(1, ceiling(seg_len[i] / panel_pitch))})"
+      note: "Glass panels: each segment split evenly, no panel wider than the panel pitch."
+    panel_boxes:
+      expr: "for q in panels return {pa: for c in 1..3 return gpath[q.i][c] + (gpath[q.i + 1][c] - gpath[q.i][c]) * (q.a + panel_end / seg_len[q.i]), pb: for c in 1..3 return gpath[q.i][c] + (gpath[q.i + 1][c] - gpath[q.i][c]) * (q.b - panel_end / seg_len[q.i]), n: [-pd[q.i][2], pd[q.i][1]]}"
+      note: "Bottom ends of each panel along the gpath, shortened by the gap, and its plan normal."
     baluster_points:
       expr: "flatten(for i in 1..n_seg return for m in 0..max(1, ceiling(seg_len[i] / bal_pitch)) - 1 return {x: gpath[i][1] + (gpath[i + 1][1] - gpath[i][1]) * m / max(1, ceiling(seg_len[i] / bal_pitch)), y: gpath[i][2] + (gpath[i + 1][2] - gpath[i][2]) * m / max(1, ceiling(seg_len[i] / bal_pitch)), z: gpath[i][3] + (gpath[i + 1][3] - gpath[i][3]) * m / max(1, ceiling(seg_len[i] / bal_pitch))})"
       note: "Balusters at most the baluster spacing apart, centre to centre."
+    posts_g:
+      expr: "for q in post_points return {x: q.x, y: q.y, z: q.z, g: if (if ground = null or count(ground) < 2 then -1000000 else max(concatenate([-1000000], for k in 1..count(ground) - 1 return if ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) < 0.000001 then -1000000 else if (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) < -0.000001 or (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) > 1.000001 or ((ground[k][1] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][1] - ground[k][1]) - q.x) * (ground[k][1] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][1] - ground[k][1]) - q.x) + (ground[k][2] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][2] - ground[k][2]) - q.y) * (ground[k][2] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][2] - ground[k][2]) - q.y)) > 0.0225 then -1000000 else ground[k][3] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][3] - ground[k][3])))) > -1000 then (if ground = null or count(ground) < 2 then -1000000 else max(concatenate([-1000000], for k in 1..count(ground) - 1 return if ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) < 0.000001 then -1000000 else if (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) < -0.000001 or (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) > 1.000001 or ((ground[k][1] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][1] - ground[k][1]) - q.x) * (ground[k][1] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][1] - ground[k][1]) - q.x) + (ground[k][2] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][2] - ground[k][2]) - q.y) * (ground[k][2] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][2] - ground[k][2]) - q.y)) > 0.0225 then -1000000 else ground[k][3] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][3] - ground[k][3])))) else q.z}"
+      note: "Each post with the height of the surface under it (the ground input), or the gpath where there is none."
+    balusters_g:
+      expr: "for q in baluster_points return {x: q.x, y: q.y, z: q.z, g: if (if ground = null or count(ground) < 2 then -1000000 else max(concatenate([-1000000], for k in 1..count(ground) - 1 return if ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) < 0.000001 then -1000000 else if (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) < -0.000001 or (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) > 1.000001 or ((ground[k][1] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][1] - ground[k][1]) - q.x) * (ground[k][1] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][1] - ground[k][1]) - q.x) + (ground[k][2] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][2] - ground[k][2]) - q.y) * (ground[k][2] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][2] - ground[k][2]) - q.y)) > 0.0225 then -1000000 else ground[k][3] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][3] - ground[k][3])))) > -1000 then (if ground = null or count(ground) < 2 then -1000000 else max(concatenate([-1000000], for k in 1..count(ground) - 1 return if ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) < 0.000001 then -1000000 else if (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) < -0.000001 or (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) > 1.000001 or ((ground[k][1] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][1] - ground[k][1]) - q.x) * (ground[k][1] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][1] - ground[k][1]) - q.x) + (ground[k][2] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][2] - ground[k][2]) - q.y) * (ground[k][2] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][2] - ground[k][2]) - q.y)) > 0.0225 then -1000000 else ground[k][3] + (((q.x - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (q.y - ground[k][2]) * (ground[k + 1][2] - ground[k][2])) / ((ground[k + 1][1] - ground[k][1]) * (ground[k + 1][1] - ground[k][1]) + (ground[k + 1][2] - ground[k][2]) * (ground[k + 1][2] - ground[k][2]))) * (ground[k + 1][3] - ground[k][3])))) else q.z + bottom_gap}"
+      note: "Each baluster with the height it stands on: the surface under it, or the gap above the gpath."
     rail_levels: "for r in 0..max(0, floor((infill_top - bottom_gap) / (clear_gap + infill_diameter)) - 1) return bottom_gap + infill_diameter / 2 + r * (clear_gap + infill_diameter)"
     gap:
       expr: "if infill = \"balusters\" then (if count(baluster_points) > 0 then min(for i in 1..n_seg return seg_len[i] / max(1, ceiling(seg_len[i] / bal_pitch))) - infill_diameter else clear_gap) else if infill = \"rails\" then max(infill_top - bottom_gap - count(rail_levels) * infill_diameter - (count(rail_levels) - 1) * clear_gap, clear_gap) else 0"
@@ -344,9 +399,9 @@ recipe:
     op: "for_each"
     when: "has_posts"
     args:
-      items: "post_points"
+      items: "posts_g"
       as: "q"
-      do: "box([q.x - post_size / 2, q.y - post_size / 2, q.z + post_bottom], [q.x + post_size / 2, q.y + post_size / 2, q.z + infill_top])"
+      do: "box([q.x - post_size / 2, q.y - post_size / 2, q.g + post_bottom], [q.x + post_size / 2, q.y + post_size / 2, q.z + (if rail_on then infill_top else height)])"
   rail_profile:
     op: "circle"
     plane: "profile"
@@ -355,6 +410,7 @@ recipe:
       radius: "top_rail_diameter / 2"
   top_rail:
     op: "sweep"
+    when: "rail_on"
     args:
       profile: "rail_profile"
       path: "rail_path"
@@ -362,9 +418,9 @@ recipe:
     op: "for_each"
     when: "infill = \"balusters\" and has_infill"
     args:
-      items: "baluster_points"
+      items: "balusters_g"
       as: "q"
-      do: "cylinder([q.x, q.y, q.z + bottom_gap], [q.x, q.y, q.z + infill_top], infill_diameter / 2)"
+      do: "cylinder([q.x, q.y, q.g], [q.x, q.y, q.z + infill_top], infill_diameter / 2)"
   infill_profile:
     op: "circle"
     plane: "profile"
@@ -379,19 +435,14 @@ recipe:
       items: "rail_levels"
       as: "z"
       do: "sweep(infill_profile, for p in gpath return [p[1], p[2], p[3] + z])"
-  panel_profile:
-    op: "rectangle"
-    plane: "profile"
-    when: "infill = \"glass\" or infill = \"mesh\" and has_infill"
-    args:
-      min: "[-panel_thickness / 2, 0]"
-      max: "[panel_thickness / 2, infill_top - panel_bottom]"
   panel:
-    op: "sweep"
-    when: "infill = \"glass\" or infill = \"mesh\" and has_infill"
+    op: "for_each"
+    when: "(infill = \"glass\" or infill = \"mesh\") and has_infill"
     args:
-      profile: "panel_profile"
-      path: "for p in gpath return [p[1], p[2], p[3] + panel_bottom]"
+      items: "panel_boxes"
+      as: "q"
+      do: "loft([for e in [[-1, 0], [1, 0], [1, 1], [-1, 1]] return [q.pa[1] + e[1] * q.n[1] * panel_thickness / 2, q.pa[2] + e[1] * q.n[2] * panel_thickness / 2, q.pa[3] + panel_bottom + e[2] * (infill_top - panel_bottom)], for e in [[-1, 0], [1, 0], [1, 1], [-1, 1]] return [q.pb[1] + e[1] * q.n[1] * panel_thickness / 2, q.pb[2] + e[1] * q.n[2] * panel_thickness / 2, q.pb[3] + panel_bottom + e[2] * (infill_top - panel_bottom)]])"
+    note: "Each glass or mesh panel upright, its top and bottom following the gpath."
   channel_profile:
     op: "rectangle"
     plane: "profile"
@@ -511,37 +562,35 @@ representations:
     lod: "low"
     scale:
       min_scale: 200
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "plan_line"
-        class: "projected"
+    source: "derived"
+    derive:
+      from: "model.low"
+      method: "cut_or_project"
   plan.medium:
     context: "plan"
     lod: "medium"
     scale:
       min_scale: 50
       max_scale: 200
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "plan_line"
-        class: "projected"
-      - geometry: "plan_posts"
-        class: "projected"
+    source: "derived"
+    derive:
+      from: "model.medium"
+      method: "cut_or_project"
   plan.high:
     context: "plan"
     lod: "high"
     scale:
       max_scale: 50
-    source: "derived"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
+    source: "derived"
     derive:
       from: "model.high"
       method: "cut_or_project"
