@@ -707,6 +707,14 @@ recipe:
     plane: "xy"
     args:
       items: "[if railing_left then line([0, hw - 0.05], [run, hw - 0.05]) else null, if railing_right then line([0, -hw + 0.05], [run, -hw + 0.05]) else null]"
+  step_numbers:
+    op: "for_each"
+    plane: "xy"
+    args:
+      items: "for j in 1..treads return j"
+      as: "j"
+      do: "text([tread_x[j] + tread_d[j] / 2, -hw * 0.6], j, 0.002)"
+    note: "Tread numbers, counted up the stair."
   arrow_placed:
     op: "move"
     plane: "xy"
@@ -754,13 +762,6 @@ recipe:
     args:
       geometry: "outline_above"
       by: "[first_riser_offset, 0]"
-  outline_below_placed:
-    op: "move"
-    plane: "xy"
-    when: "outline_below != null"
-    args:
-      geometry: "outline_below"
-      by: "[first_riser_offset, 0]"
   plan_rails_placed:
     op: "move"
     plane: "xy"
@@ -786,6 +787,13 @@ recipe:
     args:
       geometry: "risers_boards"
       by: "[first_riser_offset, 0, 0]"
+  step_numbers_placed:
+    op: "move"
+    plane: "xy"
+    when: "step_numbers != null"
+    args:
+      geometry: "step_numbers"
+      by: "[first_riser_offset, 0]"
   stringers_placed:
     op: "move"
     when: "stringers != null"
@@ -804,13 +812,6 @@ recipe:
     when: "treads_above != null"
     args:
       geometry: "treads_above"
-      by: "[first_riser_offset, 0]"
-  treads_below_placed:
-    op: "move"
-    plane: "xy"
-    when: "treads_below != null"
-    args:
-      geometry: "treads_below"
       by: "[first_riser_offset, 0]"
   walk_line_placed:
     op: "move"
@@ -905,9 +906,16 @@ representations:
     derive:
       from: "model.low"
       method: "project"
+      exclude_parts:
+        - "Railing"
     overlay:
       - geometry: "outline_above_placed"
         class: "overhead"
+      - geometry: "treads_above_placed"
+        class: "overhead"
+      - geometry: "cut_line_placed"
+        class: "cut"
+        role: "break_line"
       - geometry: "walk_line_placed"
         class: "annotation"
         role: "walking_line"
@@ -916,6 +924,9 @@ representations:
         role: "walking_line"
       - geometry: "label_placed"
         class: "annotation"
+      - geometry: "plan_rails_placed"
+        class: "projected"
+        role: "railing_line"
   plan.medium:
     context: "plan"
     lod: "medium"
@@ -935,6 +946,9 @@ representations:
         class: "overhead"
       - geometry: "treads_above_placed"
         class: "overhead"
+      - geometry: "cut_line_placed"
+        class: "cut"
+        role: "break_line"
       - geometry: "walk_line_placed"
         class: "annotation"
         role: "walking_line"
@@ -943,6 +957,9 @@ representations:
         role: "walking_line"
       - geometry: "label_placed"
         class: "annotation"
+      - geometry: "step_numbers_placed"
+        class: "annotation"
+        role: "step_numbers"
   plan.high:
     context: "plan"
     lod: "high"
@@ -960,6 +977,9 @@ representations:
         class: "overhead"
       - geometry: "treads_above_placed"
         class: "overhead"
+      - geometry: "cut_line_placed"
+        class: "cut"
+        role: "break_line"
       - geometry: "walk_line_placed"
         class: "annotation"
         role: "walking_line"
@@ -968,6 +988,11 @@ representations:
         role: "walking_line"
       - geometry: "label_placed"
         class: "annotation"
+      - geometry: "step_numbers_placed"
+        class: "annotation"
+        role: "step_numbers"
+      - geometry: "nosings_placed"
+        class: "hidden"
   section:
     context: "section"
     lod: "all"
