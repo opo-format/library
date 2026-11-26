@@ -220,7 +220,7 @@ parameters:
     limits:
       min: 0.04
       max: 0.5
-    description: "Each step is a solid block this much deeper than one riser."
+    description: "Slab thickness under the flights and winders, square to the pitch; landings are this much deeper than one riser."
   material:
     type: "material"
     default: "reinforced_concrete"
@@ -500,6 +500,12 @@ rules:
     flight_slabs:
       expr: "for i in 1..nseg return if nf[i] < 1 then null else {pts: concatenate([{x: 0, z: fbase[i] * riser}], flatten(for t in 1..nf[i] return [{x: (t - 1) * fg[i], z: (fbase[i] + t) * riser}, {x: t * fg[i], z: (fbase[i] + t) * riser}]), [{x: fl[i], z: (fbase[i] + nf[i]) * riser - waist_v}], if i = 1 then [{x: waist_v * fg[i] / riser, z: 0}] else [{x: 0, z: fbase[i] * riser - waist_v}]), a: [walkline[i][1] + sd[i][1] * fe0[i] + sn[i][1] * left_width, walkline[i][2] + sd[i][2] * fe0[i] + sn[i][2] * left_width, 0], b: [walkline[i][1] + sd[i][1] * fe0[i] - sn[i][1] * right_width, walkline[i][2] + sd[i][2] * fe0[i] - sn[i][2] * right_width, 0]}"
       note: "Each straight flight as one sloping slab: the steps on top, the underside parallel to the pitch, waist_thickness below the inner corners."
+    winder_ns:
+      expr: "flatten(for c in cidx return if ckind[c] = \"winders\" then for j in 1..winders return cbase[c] + j else [])"
+      note: "Numbers of the winder treads."
+    winder_slabs:
+      expr: "for c in cidx return if ckind[c] != \"winders\" then null else for j in 0..winders return [[(if j = 0 then c_end_inner[c][1] else if j = winders then c_start_inner[c][1] else c_inner[c][1]), (if j = 0 then c_end_inner[c][2] else if j = winders then c_start_inner[c][2] else c_inner[c][2]), (cbase[c] + j) * riser], [(if (j * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][1] + (c_outer[c][1] - c_end_outer[c][1]) * (j * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][1] + (c_start_outer[c][1] - c_outer[c][1]) * ((j * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9)), (if (j * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][2] + (c_outer[c][2] - c_end_outer[c][2]) * (j * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][2] + (c_start_outer[c][2] - c_outer[c][2]) * ((j * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9)), (cbase[c] + j) * riser], [(if (j * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][1] + (c_outer[c][1] - c_end_outer[c][1]) * (j * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][1] + (c_start_outer[c][1] - c_outer[c][1]) * ((j * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9)), (if (j * (cl1[c] + cl2[c]) / winders) <= cl1[c] then c_end_outer[c][2] + (c_outer[c][2] - c_end_outer[c][2]) * (j * (cl1[c] + cl2[c]) / winders) / max(cl1[c], 1e-9) else c_outer[c][2] + (c_start_outer[c][2] - c_outer[c][2]) * ((j * (cl1[c] + cl2[c]) / winders) - cl1[c]) / max(cl2[c], 1e-9)), (cbase[c] + j) * riser - waist_v], [(if j = 0 then c_end_inner[c][1] else if j = winders then c_start_inner[c][1] else c_inner[c][1]), (if j = 0 then c_end_inner[c][2] else if j = winders then c_start_inner[c][2] else c_inner[c][2]), (cbase[c] + j) * riser - waist_v]]"
+      note: "Cross-sections of the slab under each run of winders, one on every winder line (from the inner corner to the outer edge), rising one riser per winder; the first and last match the ends of the flights."
     j_cut: "floor(view.cut_height / riser)"
     rail_path_right:
       expr: "concatenate(for q in flatten(for i in 1..nseg return concatenate(if nf[i] < 1 then [] else for t in 1..nf[i] return {p: [walkline[i][1] + sd[i][1] * (fe0[i] + (t - 1) * fg[i]) + sn[i][1] * (-(right_width - 0.05)), walkline[i][2] + sd[i][2] * (fe0[i] + (t - 1) * fg[i]) + sn[i][2] * (-(right_width - 0.05)), (fbase[i] + t) * riser + handrail_height]}, if i < nseg then [{p: [walkline[i + 1][1] + cbis[i][1] * (-(right_width - 0.05)), walkline[i + 1][2] + cbis[i][2] * (-(right_width - 0.05)), (cbase[i] + (cu[i] + 1) / 2) * riser + handrail_height]}] else [])) return q.p, [[walkline[nseg + 1][1] + sn[nseg][1] * (-(right_width - 0.05)), walkline[nseg + 1][2] + sn[nseg][2] * (-(right_width - 0.05)), total_rise + handrail_height]])"
@@ -582,8 +588,15 @@ recipe:
     args:
       items: "treads_xy"
       as: "s"
-      do: "if count(index_of(corner_ns, s.n)) > 0 then extrude(polygon(s.poly), max(0, s.z - riser - waist_v), s.z) else null"
-    note: "Corner treads (winders, landings) as blocks down to the waist line."
+      do: "if count(index_of(winder_ns, s.n)) > 0 then extrude(polygon(s.poly), s.z - riser, s.z) else if count(index_of(corner_ns, s.n)) > 0 then extrude(polygon(s.poly), max(0, s.z - riser - waist_v), s.z) else null"
+    note: "Winders as one-riser steps on the winder slab; landings as blocks down to the waist line."
+  winder_soffits:
+    op: "for_each"
+    args:
+      items: "winder_slabs"
+      as: "w"
+      do: "if w = null then null else loft(w)"
+    note: "A smooth slab under each run of winders, continuing the flight slabs on either side (proposal 0003)."
   flights:
     op: "for_each"
     plane: "profile"
@@ -667,6 +680,9 @@ representations:
       - geometry: "steps"
         material: "material"
         part: "Corner steps"
+      - geometry: "winder_soffits"
+        material: "material"
+        part: "Flights"
   model.medium:
     context: "model"
     lod: "medium"
@@ -684,6 +700,9 @@ representations:
       - geometry: "steps"
         material: "material"
         part: "Corner steps"
+      - geometry: "winder_soffits"
+        material: "material"
+        part: "Flights"
       - geometry: "railing_right_obj"
         part: "Railing"
       - geometry: "railing_left_obj"
@@ -704,6 +723,9 @@ representations:
       - geometry: "steps"
         material: "material"
         part: "Corner steps"
+      - geometry: "winder_soffits"
+        material: "material"
+        part: "Flights"
       - geometry: "railing_right_obj"
         part: "Railing"
       - geometry: "railing_left_obj"
