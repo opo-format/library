@@ -123,7 +123,7 @@ parameters:
       side_right: "Side-hung, hinges right"
       tilt_turn_left: "Tilt-turn, hinges left"
       tilt_turn_right: "Tilt-turn, hinges right"
-      tilt: "Bottom-hung, tilts in (basculante)"
+      tilt: "Bottom-hung, tilts in"
       top_hung: "Top-hung, projects out"
       sliding_left: "Sliding, opens to the left"
       sliding_right: "Sliding, opens to the right"
@@ -149,7 +149,7 @@ parameters:
       side_right: "Side-hung, hinges right"
       tilt_turn_left: "Tilt-turn, hinges left"
       tilt_turn_right: "Tilt-turn, hinges right"
-      tilt: "Bottom-hung, tilts in (basculante)"
+      tilt: "Bottom-hung, tilts in"
       top_hung: "Top-hung, projects out"
       sliding_left: "Sliding, opens to the left"
       sliding_right: "Sliding, opens to the right"
@@ -175,7 +175,7 @@ parameters:
       side_right: "Side-hung, hinges right"
       tilt_turn_left: "Tilt-turn, hinges left"
       tilt_turn_right: "Tilt-turn, hinges right"
-      tilt: "Bottom-hung, tilts in (basculante)"
+      tilt: "Bottom-hung, tilts in"
       top_hung: "Top-hung, projects out"
       sliding_left: "Sliding, opens to the left"
       sliding_right: "Sliding, opens to the right"
@@ -333,6 +333,75 @@ parameters:
     limits:
       min: 0.05
       max: 0.5
+  lintel_profile:
+    type: "choice"
+    default: "rectangle"
+    label: "Lintel profile"
+    group: "Lintel"
+    options:
+      - "rectangle"
+      - "angle"
+      - "channel"
+      - "i_section"
+    visible: "lintel"
+    option_labels:
+      rectangle: "Solid rectangle (concrete, timber, stone)"
+      angle: "Steel angle"
+      channel: "Steel channel"
+      i_section: "Steel I-section"
+  lintel_width:
+    type: "length"
+    default: 0.1
+    label: "Lintel width (steel profiles)"
+    group: "Lintel"
+    visible: "lintel and lintel_profile != \"rectangle\""
+    limits:
+      min: 0.03
+      max: 0.6
+    description: "A solid lintel takes the full wall thickness."
+  surround:
+    type: "boolean"
+    default: false
+    label: "Surround on the outside face"
+    group: "Surround"
+    description: "A frame round the opening on the outside of the wall (stone, render band, precast): its profile swept along the outline of the opening, so it follows arched and other outlines too."
+  surround_profile:
+    type: "choice"
+    default: "flat"
+    label: "Surround profile"
+    group: "Surround"
+    options:
+      - "flat"
+      - "stepped"
+    visible: "surround"
+    option_labels:
+      flat: "Flat band"
+      stepped: "Stepped (two bands)"
+  surround_width:
+    type: "length"
+    default: 0.15
+    label: "Surround width"
+    group: "Surround"
+    visible: "surround"
+    limits:
+      min: 0.02
+      max: 0.6
+  surround_depth:
+    type: "length"
+    default: 0.04
+    label: "Surround projection from the wall"
+    group: "Surround"
+    visible: "surround"
+    limits:
+      min: 0.005
+      max: 0.3
+  surround_material:
+    type: "material"
+    default: "render"
+    label: "Surround material"
+    group: "Surround"
+    options: "materials"
+    visible: "surround"
   lintel_material:
     type: "material"
     default: "reinforced_concrete"
@@ -597,6 +666,13 @@ rules:
       expr: "for i in 1..n return if sliding[i] then fy + (if modulo(i, 2) = 1 then -1 else 1) * sash_depth / 2 else sy"
       note: "Sash centre of each panel; sliding sashes run on two tracks."
     zm: "(z0 + frame_width + zi1) / 2"
+    slide_from:
+      expr: "for i in 1..n return if ops[i] = \"sliding_left\" then px[i] + pw * 0.8 else px[i] + pw * 0.2"
+      note: "Tail of each sliding arrow."
+    slide_to:
+      expr: "for i in 1..n return if ops[i] = \"sliding_left\" then px[i] + pw * 0.2 else px[i] + pw * 0.8"
+      note: "Head of each sliding arrow: the way the sash slides, the same in plan and elevation."
+    slide_dir: "for i in 1..n return if slide_to[i] > slide_from[i] then 1 else -1"
     opens: "for o in ops return o != \"fixed\""
     sash_inner_w: "pw - 2 * sash_width"
     sash_inner_h: "zi1 - (z0 + frame_width) - 2 * sash_width"
@@ -801,7 +877,7 @@ recipe:
     args:
       items: "for i in 1..n return i"
       as: "i"
-      do: "if not(opens[i]) then null else union([if side_hung[i] and hinge_left[i] then polyline([[px[i], z0 + frame_width], [px[i] + pw, zm], [px[i], zi1]]) else null, if side_hung[i] and not(hinge_left[i]) then polyline([[px[i] + pw, z0 + frame_width], [px[i], zm], [px[i] + pw, zi1]]) else null, if ops[i] = \"tilt\" or ops[i] = \"tilt_turn_left\" or ops[i] = \"tilt_turn_right\" then polyline([[px[i], z0 + frame_width], [px[i] + pw / 2, zi1], [px[i] + pw, z0 + frame_width]]) else null, if ops[i] = \"top_hung\" then polyline([[px[i], zi1], [px[i] + pw / 2, z0 + frame_width], [px[i] + pw, zi1]]) else null, if sliding[i] then union([line([px[i] + pw * 0.2, zm], [px[i] + pw * 0.8, zm]), if ops[i] = \"sliding_left\" then polyline([[px[i] + pw * 0.2 + 0.08, zm + 0.05], [px[i] + pw * 0.2, zm], [px[i] + pw * 0.2 + 0.08, zm - 0.05]]) else polyline([[px[i] + pw * 0.8 - 0.08, zm + 0.05], [px[i] + pw * 0.8, zm], [px[i] + pw * 0.8 - 0.08, zm - 0.05]])]) else null])"
+      do: "if not(opens[i]) then null else union([if side_hung[i] and hinge_left[i] then polyline([[px[i], z0 + frame_width], [px[i] + pw, zm], [px[i], zi1]]) else null, if side_hung[i] and not(hinge_left[i]) then polyline([[px[i] + pw, z0 + frame_width], [px[i], zm], [px[i] + pw, zi1]]) else null, if ops[i] = \"tilt\" or ops[i] = \"tilt_turn_left\" or ops[i] = \"tilt_turn_right\" then polyline([[px[i], z0 + frame_width], [px[i] + pw / 2, zi1], [px[i] + pw, z0 + frame_width]]) else null, if ops[i] = \"top_hung\" then polyline([[px[i], zi1], [px[i] + pw / 2, z0 + frame_width], [px[i] + pw, zi1]]) else null, if sliding[i] then union([line([slide_from[i], zm], [slide_to[i], zm]), polyline([[slide_to[i] - slide_dir[i] * 0.08, zm + 0.05], [slide_to[i], zm], [slide_to[i] - slide_dir[i] * 0.08, zm - 0.05]])]) else null])"
     note: "Dashed in drawings (role opening). Lines meet on the opening side; tilt draws the bottom hinge; sliding draws an arrow."
   plan_swings:
     op: "for_each"
@@ -819,13 +895,45 @@ recipe:
     args:
       items: "for i in 1..n return i"
       as: "i"
-      do: "if not(sliding[i]) then null else union([line([px[i] + pw * 0.2, sy_p[i] - 0.06], [px[i] + pw * 0.8, sy_p[i] - 0.06]), if ops[i] = \"sliding_left\" then polyline([[px[i] + pw * 0.2 + 0.06, sy_p[i] - 0.03], [px[i] + pw * 0.2, sy_p[i] - 0.06], [px[i] + pw * 0.2 + 0.06, sy_p[i] - 0.09]]) else polyline([[px[i] + pw * 0.8 - 0.06, sy_p[i] - 0.03], [px[i] + pw * 0.8, sy_p[i] - 0.06], [px[i] + pw * 0.8 - 0.06, sy_p[i] - 0.09]])])"
+      do: "if not(sliding[i]) then null else union([line([slide_from[i], sy_p[i] - 0.06], [slide_to[i], sy_p[i] - 0.06]), polyline([[slide_to[i] - slide_dir[i] * 0.06, sy_p[i] - 0.03], [slide_to[i], sy_p[i] - 0.06], [slide_to[i] - slide_dir[i] * 0.06, sy_p[i] - 0.09]])])"
+  surround_2d:
+    op: "band"
+    plane: "xz"
+    when: "surround"
+    args:
+      path: "band_path"
+      left: "if outline_ccw then 0 else surround_width"
+      right: "if outline_ccw then -surround_width else 0"
+  surround_outer_2d:
+    op: "band"
+    plane: "xz"
+    when: "surround and surround_profile = \"stepped\""
+    args:
+      path: "band_path"
+      left: "if outline_ccw then -surround_width / 2 else surround_width"
+      right: "if outline_ccw then -surround_width else surround_width / 2"
+  surround_body:
+    op: "extrude"
+    plane: "xz"
+    when: "surround"
+    args:
+      profile: "surround_2d"
+      from: "host.y_max"
+      to: "host.y_max + (if surround_profile = \"stepped\" then surround_depth / 2 else surround_depth)"
+  surround_step:
+    op: "extrude"
+    plane: "xz"
+    when: "surround and surround_profile = \"stepped\""
+    args:
+      profile: "surround_outer_2d"
+      from: "host.y_max"
+      to: "host.y_max + surround_depth"
   lintel_obj:
     op: "instance"
     when: "lintel"
     args:
       object: "\"opo-format.org/library/templates/IfcBeam\""
-      values: "{predefined_type: \"LINTEL\", ow: host.thickness, depth: lintel_height, justification_v: \"bottom\", material: lintel_material}"
+      values: "{predefined_type: \"LINTEL\", profile_kind: lintel_profile, ow: if lintel_profile = \"rectangle\" then host.thickness else lintel_width, depth: lintel_height, justification_v: \"bottom\", material: lintel_material}"
       inputs: "{path: [[x0 - fitting_gap - lintel_bearing, (host.y_min + host.y_max) / 2, z1 + fitting_gap], [x1 + fitting_gap + lintel_bearing, (host.y_min + host.y_max) / 2, z1 + fitting_gap]]}"
     note: "Optional: the lintel belongs to the wall, but placing it with the window keeps it sized to the opening."
 representations:
@@ -894,6 +1002,12 @@ representations:
         part: "Sill"
       - geometry: "lintel_obj"
         part: "Lintel"
+      - geometry: "surround_body"
+        material: "surround_material"
+        part: "Surround"
+      - geometry: "surround_step"
+        material: "surround_material"
+        part: "Surround"
   model.high:
     context: "model"
     lod: "high"
@@ -941,6 +1055,12 @@ representations:
         part: "Sill"
       - geometry: "lintel_obj"
         part: "Lintel"
+      - geometry: "surround_body"
+        material: "surround_material"
+        part: "Surround"
+      - geometry: "surround_step"
+        material: "surround_material"
+        part: "Surround"
       - geometry: "handles"
         material: "\"aluminium\""
         part: "Hardware"
@@ -949,19 +1069,14 @@ representations:
     lod: "low"
     scale:
       min_scale: 200
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "plan_frame"
-        class: "cut"
-      - geometry: "plan_mullions"
-        class: "cut"
-      - geometry: "plan_glass"
-        class: "cut"
-      - geometry: "plan_sills"
-        class: "projected"
+    source: "derived"
+    derive:
+      from: "model.low"
+      method: "cut_or_project"
+    overlay:
       - geometry: "plan_swings"
         class: "annotation"
         role: "opening"
@@ -974,44 +1089,34 @@ representations:
     scale:
       min_scale: 50
       max_scale: 200
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "plan_frame"
-        class: "cut"
-      - geometry: "plan_mullions"
-        class: "cut"
-      - geometry: "plan_glass"
-        class: "cut"
-      - geometry: "plan_sills"
-        class: "projected"
+    note: "Wall openings below the cut show as a gap in the host's cut; openings above the cut are drawn dashed with a cross. Slab openings: outline with a cross."
+    source: "derived"
+    derive:
+      from: "model.medium"
+      method: "cut_or_project"
+    overlay:
       - geometry: "plan_swings"
         class: "annotation"
         role: "opening"
       - geometry: "plan_slides"
         class: "annotation"
         role: "opening"
-    note: "Wall openings below the cut show as a gap in the host's cut; openings above the cut are drawn dashed with a cross. Slab openings: outline with a cross."
   plan.high:
     context: "plan"
     lod: "high"
     scale:
       max_scale: 50
-    source: "authored"
     ifc:
       context: "Plan"
       targetView: "PLAN_VIEW"
-    items:
-      - geometry: "plan_frame"
-        class: "cut"
-      - geometry: "plan_mullions"
-        class: "cut"
-      - geometry: "plan_glass"
-        class: "cut"
-      - geometry: "plan_sills"
-        class: "projected"
+    source: "derived"
+    derive:
+      from: "model.high"
+      method: "cut_or_project"
+    overlay:
       - geometry: "plan_swings"
         class: "annotation"
         role: "opening"
@@ -1085,6 +1190,9 @@ materials:
   - "painted_timber"
   - "glass"
   - "aluminium"
+  - "reinforced_concrete"
+  - "steel"
+  - "render"
 ifc:
   class: "IfcWindow"
   predefinedType: "\"WINDOW\""
